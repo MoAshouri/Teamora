@@ -1,0 +1,53 @@
+{
+  "brand": "تیمورا",
+  "tagline": "مدیریت آرام سرمایه انسانی",
+  "landing": {
+    "headline": "ساعات کار، مرخصی و تقویم تیم را یک‌جا مدیریت کنید",
+    "sub": "سامانه چندشرکتی برای مدیر و کارمند — فارسی، ارمنی و انگلیسی.",
+    "ctaLogin": "ورود",
+    "ctaJoin": "پیوستن با کد دعوت",
+    "ctaRegister": "ساخت شرکت"
+  },
+  "nav": {
+    "dashboard": "داشبورد",
+    "people": "افراد",
+    "workTime": "ساعات کاری",
+    "leaves": "مرخصی‌ها",
+    "calendar": "تقویم",
+    "logout": "خروج"
+  },
+  "auth": {
+    "loginTitle": "ورود",
+    "registerTitle": "ساخت شرکت",
+    "joinTitle": "پیوستن به شرکت",
+    "identifier": "ایمیل یا نام کاربری",
+    "password": "رمز عبور",
+    "email": "ایمیل",
+    "username": "نام کاربری",
+    "fullName": "نام کامل",
+    "companyName": "نام شرکت",
+    "inviteCode": "کد دعوت ۶ رقمی",
+    "submit": "ادامه",
+    "otpRequest": "ارسال کد ایمیل",
+    "otpVerify": "تأیید کد",
+    "otpCode": "کد یکبارمصرف",
+    "google": "ورود با گوگل"
+  },
+  "dashboard": {
+    "greeting": "خوش آمدید، {name}",
+    "pendingLeaves": "مرخصی در انتظار",
+    "presentNow": "الان سر کار",
+    "weeklyHours": "ساعات این هفته",
+    "startDay": "شروع روز",
+    "endDay": "پایان روز",
+    "remainingLeave": "مانده مرخصی"
+  },
+  "common": {
+    "loading": "در حال بارگذاری…",
+    "save": "ذخیره",
+    "create": "ایجاد",
+    "approve": "تأیید",
+    "reject": "رد",
+    "empty": "هنوز موردی نیست"
+  }
+}

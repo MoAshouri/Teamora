@@ -1,0 +1,26 @@
+﻿{
+  "name": "teamora",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Teamora Human Resource Management System",
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter @teamora/web --filter @teamora/api dev",
+    "dev:web": "pnpm --filter @teamora/web dev",
+    "dev:api": "pnpm --filter @teamora/api dev",
+    "build": "pnpm --filter @teamora/shared build && pnpm --filter @teamora/api build && pnpm --filter @teamora/web build",
+    "lint": "pnpm -r lint",
+    "db:generate": "pnpm --filter @teamora/api prisma:generate",
+    "db:migrate": "pnpm --filter @teamora/api prisma:migrate",
+    "db:seed": "pnpm --filter @teamora/api prisma:seed",
+    "optimize-pics": "node scripts/optimize-pics.js",
+    "inspect-pics": "node scripts/inspect-pics.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "devDependencies": {
+    "pngjs": "^7.0.0",
+    "sharp": "^0.35.4"
+  }
+}

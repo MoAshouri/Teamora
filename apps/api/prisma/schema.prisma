@@ -1,0 +1,220 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
+
+enum TimeEntryStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  UNPAID
+  OTHER
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CalendarType {
+  JALALI
+  GREGORIAN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String?
+  fullName     String
+  role         Role
+  googleId     String?  @unique
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ownedCompany     Company?            @relation("CompanyAdmin")
+  membership       CompanyMembership?
+  timeEntries      TimeEntry[]
+  activeSession    ActiveWorkSession?
+  leaveRequests    LeaveRequest[]
+  createdEvents    CalendarEvent[]     @relation("EventCreator")
+  eventAttendances CalendarAttendee[]
+  reviewedLeaves   LeaveRequest[]      @relation("LeaveReviewer")
+  reviewedEntries  TimeEntry[]         @relation("TimeEntryReviewer")
+  createdInvites   InviteCode[]
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  adminId   String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  admin        User                 @relation("CompanyAdmin", fields: [adminId], references: [id], onDelete: Cascade)
+  memberships  CompanyMembership[]
+  inviteCodes  InviteCode[]
+  workPolicy   WorkPolicy?
+  timeEntries  TimeEntry[]
+  activeSessions ActiveWorkSession[]
+  leaveRequests LeaveRequest[]
+  events       CalendarEvent[]
+}
+
+model CompanyMembership {
+  id        String   @id @default(cuid())
+  companyId String
+  userId    String   @unique
+  joinedAt  DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+model InviteCode {
+  id        String    @id @default(cuid())
+  companyId String
+  code      String    @unique
+  createdBy String
+  maxUses   Int       @default(1)
+  usedCount Int       @default(0)
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  creator User    @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+model WorkPolicy {
+  id        String   @id @default(cuid())
+  companyId String   @unique
+  workStart String
+  workEnd   String
+  workDays  Int[]
+  timezone  String   @default("Asia/Tehran")
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model TimeEntry {
+  id         String          @id @default(cuid())
+  companyId  String
+  userId     String
+  date       DateTime        @db.Date
+  startedAt  DateTime
+  endedAt    DateTime
+  note       String?
+  status     TimeEntryStatus @default(PENDING)
+  reviewedBy String?
+  reviewedAt DateTime?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  company  Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewer User?   @relation("TimeEntryReviewer", fields: [reviewedBy], references: [id])
+
+  @@index([companyId, date])
+  @@index([userId, date])
+}
+
+model ActiveWorkSession {
+  id        String   @id @default(cuid())
+  companyId String
+  userId    String   @unique
+  startedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+model LeaveRequest {
+  id         String      @id @default(cuid())
+  companyId  String
+  userId     String
+  type       LeaveType
+  startDate  DateTime    @db.Date
+  endDate    DateTime    @db.Date
+  reason     String?
+  status     LeaveStatus @default(PENDING)
+  reviewedBy String?
+  reviewNote String?
+  reviewedAt DateTime?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  company  Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewer User?   @relation("LeaveReviewer", fields: [reviewedBy], references: [id])
+
+  @@index([companyId, status])
+  @@index([userId])
+}
+
+model CalendarEvent {
+  id          String   @id @default(cuid())
+  companyId   String
+  creatorId   String
+  title       String
+  description String?
+  location    String?
+  startsAt    DateTime
+  endsAt      DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company   Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  creator   User               @relation("EventCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  attendees CalendarAttendee[]
+
+  @@index([companyId, startsAt])
+}
+
+model CalendarAttendee {
+  id      String @id @default(cuid())
+  eventId String
+  userId  String
+
+  event CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+
+model Holiday {
+  id           String       @id @default(cuid())
+  name         String
+  nameFa       String?
+  nameHy       String?
+  date         DateTime     @db.Date
+  calendarType CalendarType
+  countryCode  String
+  recurring    Boolean      @default(true)
+
+  @@index([calendarType, countryCode])
+  @@index([date])
+}

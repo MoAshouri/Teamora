@@ -1,0 +1,53 @@
+﻿{
+  "brand": "Teamora",
+  "tagline": "Human capital, calmly managed",
+  "landing": {
+    "headline": "Run your team hours, leave, and calendar in one place",
+    "sub": "Multi-company HR for admins and employees â€” Persian, Armenian, and English.",
+    "ctaLogin": "Sign in",
+    "ctaJoin": "Join with invite code",
+    "ctaRegister": "Create company"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "people": "People",
+    "workTime": "Work time",
+    "leaves": "Leaves",
+    "calendar": "Calendar",
+    "logout": "Log out"
+  },
+  "auth": {
+    "loginTitle": "Sign in",
+    "registerTitle": "Create your company",
+    "joinTitle": "Join a company",
+    "identifier": "Email or username",
+    "password": "Password",
+    "email": "Email",
+    "username": "Username",
+    "fullName": "Full name",
+    "companyName": "Company name",
+    "inviteCode": "6-digit invite code",
+    "submit": "Continue",
+    "otpRequest": "Send email code",
+    "otpVerify": "Verify code",
+    "otpCode": "OTP code",
+    "google": "Continue with Google"
+  },
+  "dashboard": {
+    "greeting": "Welcome, {name}",
+    "pendingLeaves": "Pending leaves",
+    "presentNow": "Present now",
+    "weeklyHours": "Hours this week",
+    "startDay": "Start day",
+    "endDay": "End day",
+    "remainingLeave": "Leave remaining"
+  },
+  "common": {
+    "loading": "Loadingâ€¦",
+    "save": "Save",
+    "create": "Create",
+    "approve": "Approve",
+    "reject": "Reject",
+    "empty": "Nothing here yet"
+  }
+}

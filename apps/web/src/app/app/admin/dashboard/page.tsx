@@ -1,0 +1,100 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { api, authApi, type AuthUser } from '@/lib/api';
+import { usePresence } from '@/hooks/use-presence';
+
+type Leave = {
+  id: string;
+  type: string;
+  startDate: string;
+  endDate: string;
+  user: { fullName: string };
+};
+
+export default function AdminDashboardPage() {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [pending, setPending] = useState<Leave[]>([]);
+  const [activeCount, setActiveCount] = useState(0);
+  const [weekly, setWeekly] = useState<Record<string, number>>({});
+  const { connected, events } = usePresence(true);
+
+  async function load() {
+    const me = await authApi.me();
+    setUser(me);
+    const [leaves, sessions, hours] = await Promise.all([
+      api.get<Leave[]>('/leaves/pending'),
+      api.get<unknown[]>('/work-time/sessions/active'),
+      api.get<{ hoursByDay: Record<string, number> }>(`/work-time/weekly?userId=${me.id}`),
+    ]);
+    setPending(leaves);
+    setActiveCount(sessions.length);
+    setWeekly(hours.hoursByDay);
+  }
+
+  useEffect(() => {
+    load().catch(console.error);
+  }, [events.length]);
+
+  async function review(id: string, status: 'APPROVED' | 'REJECTED') {
+    await api.patch(`/leaves/${id}`, { status });
+    await load();
+  }
+
+  const bars = Object.entries(weekly);
+
+  return (
+    <div className="stack">
+      <header>
+        <h1 style={{ marginBottom: 0 }}>صبح بخیر{user ? `، ${user.fullName}` : ''}</h1>
+        <p className="muted">Presence {connected ? 'live' : 'offline'} · pending {pending.length}</p>
+      </header>
+
+      <div className="grid-2">
+        <div className="card">
+          <p className="muted">الان سر کار</p>
+          <div className="stat">{activeCount}</div>
+        </div>
+        <div className="card">
+          <p className="muted">مرخصی در انتظار</p>
+          <div className="stat">{pending.length}</div>
+        </div>
+      </div>
+
+      <div className="card">
+        <h2>ساعات این هفته</h2>
+        <div className="brick-chart">
+          {bars.map(([day, h]) => (
+            <div key={day}>
+              <div className="brick" style={{ height: `${Math.min(120, h * 12)}px` }} />
+              <div className="brick-label">{h.toFixed(1)}h</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="card">
+        <h2>در انتظار تأیید</h2>
+        {pending.length === 0 ? <p className="muted">موردی نیست</p> : null}
+        {pending.map((l) => (
+          <div className="list-row" key={l.id}>
+            <div>
+              <strong>{l.user.fullName}</strong>
+              <div className="muted">
+                {l.type} · {l.startDate.slice(0, 10)} → {l.endDate.slice(0, 10)}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '0.4rem' }}>
+              <button className="btn btn-primary" onClick={() => review(l.id, 'APPROVED')}>
+                تأیید
+              </button>
+              <button className="btn btn-ghost" onClick={() => review(l.id, 'REJECTED')}>
+                رد
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
