@@ -3,10 +3,28 @@
   "tagline": "Human capital, calmly managed",
   "landing": {
     "headline": "Run your team hours, leave, and calendar in one place",
-    "sub": "Multi-company HR for admins and employees â€” Persian, Armenian, and English.",
+    "sub": "Multi-company HR for admins and employees — Persian, Armenian, and English.",
     "ctaLogin": "Sign in",
     "ctaJoin": "Join with invite code",
-    "ctaRegister": "Create company"
+    "ctaRegister": "Create company",
+    "skip": "Skip to story",
+    "hoursTitle": "Hours",
+    "hoursBody": "The week stacks like bricks. Every hour has weight.",
+    "leaveTitle": "Leave",
+    "leaveBody": "Approvals land like a seal. Rest is part of the building.",
+    "calendarTitle": "Calendar",
+    "calendarBody": "Seven niches. One of them is for rest.",
+    "companyTitle": "Company",
+    "companyBody": "Each company is its own courtyard. People enter with a six-digit token.",
+    "adminTitle": "For admins",
+    "adminBody": "Presence, pending leave, and the week — in one hall.",
+    "employeeTitle": "For employees",
+    "employeeBody": "Start the day. Pause. End it. Your hours stay in the niche.",
+    "trustTitle": "One house, three languages",
+    "trustBody": "Persian, Armenian, and English. Multi-company, without noise.",
+    "sealTitle": "Begin",
+    "sealBody": "Sign in, join with an invite, or raise a new company.",
+    "progressLabel": "Story chapters"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -43,7 +61,7 @@
     "remainingLeave": "Leave remaining"
   },
   "common": {
-    "loading": "Loadingâ€¦",
+    "loading": "Loading…",
     "save": "Save",
     "create": "Create",
     "approve": "Approve",

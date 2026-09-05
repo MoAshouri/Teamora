@@ -7,6 +7,7 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
+/** Login/join only. Landing lives at /en /fa /hy so those routes do not load this layout's CSS. */
 export default async function LocaleLayout({
   children,
   params,
@@ -21,8 +22,10 @@ export default async function LocaleLayout({
   const dir = localeDirection[locale as Locale];
 
   return (
-    <div lang={locale} dir={dir} data-theme="light">
-      <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
-    </div>
+    <html lang={locale} dir={dir} data-font={locale} suppressHydrationWarning>
+      <body data-theme="light" style={{ fontFamily: 'Tahoma, Arial, sans-serif' }}>
+        <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+      </body>
+    </html>
   );
 }

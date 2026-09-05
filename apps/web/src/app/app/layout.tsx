@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { estedad } from '@/lib/fonts/fa';
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -10,5 +11,9 @@ export default function AuthenticatedRootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <html lang="fa" dir="rtl" className={estedad.className} suppressHydrationWarning>
+      <body>{children}</body>
+    </html>
+  );
 }
