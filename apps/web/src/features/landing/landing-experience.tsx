@@ -149,7 +149,7 @@ export function LandingExperience({ locale, rtl, copy }: { locale: string; rtl: 
     <main className="landing-root" data-mode={mode}>
       <div className="landing-track" aria-hidden="true" style={{ height: `${STORY_HEIGHT_VH}vh` }} />
       {mode === 'story' ? (
-        <LandingCanvas rtl={rtl} compact={compact} lowGpu={lowGpu} ready={ready} onReady={onReady} />
+        <LandingCanvas rtl={rtl} compact={compact} lowGpu={lowGpu} ready={ready} locale={locale} onReady={onReady} />
       ) : null}
       <div className="landing-grain" aria-hidden="true" />
       <div className="landing-vignette" aria-hidden="true" />

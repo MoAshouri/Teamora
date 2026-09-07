@@ -49,10 +49,10 @@ export const WINDOWS = {
   hours: [0.245, 0.325],
   leave: [0.335, 0.415],
   calendar: [0.425, 0.505],
-  company: [0.515, 0.595],
-  roles: [0.635, 0.705],
-  trust: [0.745, 0.845],
-  seal: [0.885, 1.05],
+  company: [0.515, 0.68],
+  roles: [0.7, 0.78],
+  trust: [0.8, 0.89],
+  seal: [0.91, 1.05],
 } as const satisfies Record<string, readonly [number, number]>;
 
 export type WindowId = keyof typeof WINDOWS;
@@ -64,8 +64,8 @@ export const CHAPTERS = [
   { id: 'leave', at: 0.375, copyKey: 'leaveTitle' },
   { id: 'calendar', at: 0.465, copyKey: 'calendarTitle' },
   { id: 'company', at: 0.555, copyKey: 'companyTitle' },
-  { id: 'roles', at: 0.67, copyKey: 'adminTitle' },
-  { id: 'trust', at: 0.795, copyKey: 'trustTitle' },
+  { id: 'roles', at: 0.74, copyKey: 'adminTitle' },
+  { id: 'trust', at: 0.84, copyKey: 'trustTitle' },
   { id: 'seal', at: 0.95, copyKey: 'sealTitle' },
 ] as const satisfies ReadonlyArray<{ id: string; at: number; copyKey: keyof LandingCopy }>;
 

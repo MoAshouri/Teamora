@@ -138,6 +138,61 @@ export function Slab({
   );
 }
 
+/** Side colours that match each brand brick face. */
+const BRICK_SIDE: Partial<Record<BrandKey, string>> = {
+  brickBeige: '#d2c4ae',
+  brickTerracotta: '#c45c26',
+  brickSlate: '#3a4044',
+  stoneBeige: '#cbb89a',
+  stoneRed: '#b04a2a',
+  stoneSlate: '#3a4044',
+};
+
+/** Uniform brick block height — same for every floor brick. */
+const BRICK_HEIGHT = 0.15;
+
+/**
+ * A real brick on the floor: solid body (same height/depth family) + brand face on top
+ * so the silhouette and colour match the artwork instead of a stretched weird box.
+ */
+export function FloorBrick({
+  tex,
+  aspectKey,
+  length = 0.88,
+  position,
+  rotationY = 0,
+}: {
+  tex: THREE.Texture;
+  aspectKey: BrandKey;
+  length?: number;
+  position: [number, number, number];
+  rotationY?: number;
+}) {
+  const depth = length / ASPECT[aspectKey];
+  const side = BRICK_SIDE[aspectKey] ?? '#c4b6a2';
+  const bodyScale = 0.9;
+
+  return (
+    <group position={position} rotation={[0, rotationY, 0]}>
+      <mesh position={[0, BRICK_HEIGHT / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[length * bodyScale, BRICK_HEIGHT, depth * bodyScale]} />
+        <meshStandardMaterial color={side} roughness={0.88} />
+      </mesh>
+      <Cutout
+        tex={tex}
+        aspectKey={aspectKey}
+        width={length}
+        position={[0, BRICK_HEIGHT + 0.002, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        soft
+        castShadow={false}
+        receiveShadow
+        roughness={0.82}
+      />
+    </group>
+  );
+}
+
 /** Flat wall or floor with a tiled banner material. */
 export function Surface({
   tex,

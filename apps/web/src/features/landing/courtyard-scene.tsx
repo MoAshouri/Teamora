@@ -13,11 +13,13 @@ export function CourtyardScene({
   rtl,
   compact,
   shadows,
+  locale,
   onReady,
 }: {
   rtl: boolean;
   compact: boolean;
   shadows: boolean;
+  locale: string;
   onReady?: () => void;
 }) {
   const tex = useBrandTextures();
@@ -33,10 +35,10 @@ export function CourtyardScene({
       <group scale={[rtl ? -1 : 1, 1, 1]}>
         <Courtyard tex={tex} />
         <Hero tex={tex} />
-        <HoursNiche tex={tex} />
+        <HoursNiche tex={tex} locale={locale} rtl={rtl} />
         <LeaveNiche tex={tex} />
         <CalendarNiche tex={tex} />
-        <CompanyNiche tex={tex} />
+        <CompanyNiche tex={tex} locale={locale} rtl={rtl} />
         <Doorways tex={tex} />
         <Hall tex={tex} />
         <FinalSeal tex={tex} />

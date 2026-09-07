@@ -11,12 +11,14 @@ export function LandingCanvas({
   compact,
   lowGpu,
   ready,
+  locale,
   onReady,
 }: {
   rtl: boolean;
   compact: boolean;
   lowGpu: boolean;
   ready: boolean;
+  locale: string;
   onReady: () => void;
 }) {
   const [visible, setVisible] = useState(true);
@@ -52,7 +54,7 @@ export function LandingCanvas({
           flipflops={3}
         />
         <Suspense fallback={null}>
-          <CourtyardScene rtl={rtl} compact={compact} shadows={!lowGpu} onReady={onReady} />
+          <CourtyardScene rtl={rtl} compact={compact} shadows={!lowGpu} locale={locale} onReady={onReady} />
         </Suspense>
       </Canvas>
     </div>
