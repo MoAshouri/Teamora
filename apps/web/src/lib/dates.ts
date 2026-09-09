@@ -59,6 +59,14 @@ export function formatPanelDate(value: Date, locale: Locale) {
   }).format(value);
 }
 
+export function formatDayNumber(value: Date, locale: Locale) {
+  return new Intl.DateTimeFormat(localeTag(locale), {
+    day: 'numeric',
+    calendar: calendarFor(locale),
+    timeZone: timeZoneFor(locale),
+  }).format(value);
+}
+
 export function formatPanelDay(value: Date, locale: Locale) {
   return {
     weekday: formatWeekday(value, locale),

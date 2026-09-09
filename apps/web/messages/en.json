@@ -135,6 +135,9 @@
     "hours": {
       "restDay": "Rest",
       "hoursShort": "{n}h"
+    },
+    "calendar": {
+      "rest": "Rest"
     }
   }
 }

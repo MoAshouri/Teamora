@@ -135,6 +135,9 @@
     "hours": {
       "restDay": "تعطیل",
       "hoursShort": "{n}س"
+    },
+    "calendar": {
+      "rest": "تعطیل"
     }
   }
 }

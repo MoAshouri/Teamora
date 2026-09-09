@@ -135,6 +135,9 @@
     "hours": {
       "restDay": "Հանգիստ",
       "hoursShort": "{n}ժ"
+    },
+    "calendar": {
+      "rest": "Հանգիստ"
     }
   }
 }

@@ -5,6 +5,7 @@ import { api, authApi, type AuthUser } from '@/lib/api';
 import { usePresence } from '@/hooks/use-presence';
 import { WaxSeal } from '@/features/ui/wax-seal';
 import { BrickWeekChart } from '@/features/ui/brick-week-chart';
+import { GunbadWeekRow } from '@/features/ui/gunbad-day';
 import { useTranslations } from 'next-intl';
 
 type Leave = {
@@ -66,6 +67,10 @@ export default function AdminDashboardPage() {
       <div className="card">
         <h2>ساعات این هفته</h2>
         <BrickWeekChart hoursByDay={weekly} />
+      </div>
+
+      <div className="card">
+        <GunbadWeekRow />
       </div>
 
       <div className="card">
