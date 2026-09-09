@@ -184,7 +184,14 @@
       "kindDaily": "Daily",
       "kindHourly": "Hourly",
       "amount": "Amount",
-      "grant": "Grant"
+      "grant": "Grant",
+      "request": "Request leave",
+      "kind": "Kind",
+      "hours": "Hours",
+      "from": "From",
+      "to": "To",
+      "reason": "Reason",
+      "type": "Type"
     },
     "workTime": {
       "title": "Hours",

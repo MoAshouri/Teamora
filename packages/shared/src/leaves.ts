@@ -16,26 +16,34 @@ export const CreateLeaveRequestSchema = z
   .object({
     type: LeaveTypeSchema,
     kind: LeaveKindSchema.optional().default('DAILY'),
-    hours: z.number().positive().optional(),
+    hours: z.number().min(0.5).max(12).optional(),
     startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     reason: z.string().max(500).optional(),
   })
   .superRefine((value, ctx) => {
-    if (value.kind !== 'HOURLY') return;
-    if (value.hours == null) {
+    if (value.endDate < value.startDate) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'hours is required for hourly leave',
-        path: ['hours'],
-      });
-    }
-    if (value.startDate !== value.endDate) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'hourly leave must start and end on the same day',
+        message: 'endDate must be on/after startDate',
         path: ['endDate'],
       });
+    }
+    if (value.kind === 'HOURLY') {
+      if (value.hours == null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'hours is required for hourly leave',
+          path: ['hours'],
+        });
+      }
+      if (value.startDate !== value.endDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'hourly leave must start and end on the same day',
+          path: ['endDate'],
+        });
+      }
     }
   });
 export type CreateLeaveRequestInput = z.infer<typeof CreateLeaveRequestSchema>;

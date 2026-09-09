@@ -184,7 +184,14 @@
       "kindDaily": "روزانه",
       "kindHourly": "ساعتی",
       "amount": "مقدار",
-      "grant": "اعطا"
+      "grant": "اعطا",
+      "request": "درخواست مرخصی",
+      "kind": "گونه",
+      "hours": "ساعات",
+      "from": "از",
+      "to": "تا",
+      "reason": "دلیل",
+      "type": "نوع"
     },
     "workTime": {
       "title": "ساعات کاری",

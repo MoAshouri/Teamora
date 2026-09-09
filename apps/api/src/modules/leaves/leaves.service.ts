@@ -7,17 +7,38 @@ import type { AuthUser } from '../../common/auth/auth-user';
 export class LeavesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(companyId: string, userId: string, input: CreateLeaveRequestInput) {
-    const startDate = new Date(input.startDate);
-    const endDate = new Date(input.endDate);
+  async create(companyId: string, userId: string, input: CreateLeaveRequestInput) {
+    const startDate = new Date(`${input.startDate}T00:00:00.000Z`);
+    const endDate = new Date(`${input.endDate}T00:00:00.000Z`);
     if (endDate < startDate) {
       throw new BadRequestException('endDate must be on/after startDate');
+    }
+    const kind = input.kind ?? 'DAILY';
+    const hours = kind === 'HOURLY' ? input.hours : null;
+    if (input.type === 'ANNUAL' && kind === 'DAILY') {
+      const [pool, pending] = await Promise.all([
+        this.balance(companyId, userId),
+        this.prisma.leaveRequest.findMany({
+          where: { companyId, userId, status: 'PENDING', type: 'ANNUAL', source: 'REQUEST', kind: 'DAILY' },
+        }),
+      ]);
+      const days = Math.floor((endDate.getTime() - startDate.getTime()) / 86_400_000) + 1;
+      const pendingDays = pending.reduce((sum, row) => {
+        return (
+          sum + Math.floor((row.endDate.getTime() - row.startDate.getTime()) / 86_400_000) + 1
+        );
+      }, 0);
+      if (days > pool.remainingDays - pendingDays) {
+        throw new BadRequestException('Insufficient leave days');
+      }
     }
     return this.prisma.leaveRequest.create({
       data: {
         companyId,
         userId,
         type: input.type,
+        kind,
+        hours,
         startDate,
         endDate,
         reason: input.reason,

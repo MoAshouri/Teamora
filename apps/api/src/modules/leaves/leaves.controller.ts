@@ -30,8 +30,11 @@ export class LeavesController {
   @Post()
   @Roles('EMPLOYEE')
   create(@CurrentUser() user: AuthUser, @Body() body: unknown) {
-    const input = CreateLeaveRequestSchema.parse(body);
-    return this.leaves.create(user.companyId!, user.id, input);
+    const parsed = CreateLeaveRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return this.leaves.create(user.companyId!, user.id, parsed.data);
   }
 
   @Get()
