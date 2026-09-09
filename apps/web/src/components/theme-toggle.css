@@ -1,0 +1,65 @@
+.theme-toggle {
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--card) 80%, transparent);
+  color: var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, color 0.3s ease;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-1px);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.theme-toggle__icon {
+  width: 1.22rem;
+  height: 1.22rem;
+  overflow: visible;
+}
+
+.theme-toggle__core {
+  fill: currentColor;
+  transform-origin: 12px 12px;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.theme-toggle__cut {
+  transform-origin: 12px 12px;
+  transform: translate(11px, -11px);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.theme-toggle__rays {
+  transform-origin: 12px 12px;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  fill: none;
+  transition:
+    opacity 0.4s ease,
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.theme-toggle[data-mode='dark'] .theme-toggle__cut {
+  transform: translate(5.4px, -3.6px);
+}
+
+.theme-toggle[data-mode='dark'] .theme-toggle__core {
+  transform: scale(1.12);
+}
+
+.theme-toggle[data-mode='dark'] .theme-toggle__rays {
+  opacity: 0;
+  transform: rotate(80deg) scale(0.35);
+}

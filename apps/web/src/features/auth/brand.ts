@@ -81,9 +81,13 @@ const GAVIT: AuthKit = {
   },
 };
 
+export function familyFromLocale(locale: string): AuthFamily {
+  return locale === 'fa' ? 'hayat' : 'gavit';
+}
+
 export function authBrand(locale: string): AuthBrand {
   return {
-    accent: locale === 'fa' ? 'hayat' : 'gavit',
+    accent: familyFromLocale(locale),
     hayat: HAYAT,
     gavit: GAVIT,
   };

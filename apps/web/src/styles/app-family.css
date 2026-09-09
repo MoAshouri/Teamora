@@ -1,0 +1,33 @@
+html[data-family='hayat'] {
+  --bg: #f4efe4;
+  --bg-deep: #eadfcf;
+}
+
+html[data-family='hayat'][data-theme='dark'] {
+  --bg: #14120f;
+  --bg-deep: #0e0c0a;
+}
+
+html[data-family='gavit'] {
+  --bg: #eceee8;
+  --bg-deep: #dfe4dc;
+}
+
+html[data-family='gavit'][data-theme='dark'] {
+  --bg: #101614;
+  --bg-deep: #0a100e;
+}
+
+html[data-family='hayat'] body {
+  background:
+    radial-gradient(1200px 600px at 8% -8%, rgba(196, 92, 38, 0.2), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(42, 82, 78, 0.12), transparent 50%),
+    linear-gradient(180deg, var(--bg), var(--bg-deep));
+}
+
+html[data-family='gavit'] body {
+  background:
+    radial-gradient(1100px 560px at 12% -12%, rgba(31, 61, 58, 0.16), transparent 55%),
+    radial-gradient(800px 480px at 100% 8%, rgba(90, 108, 118, 0.18), transparent 50%),
+    linear-gradient(180deg, var(--bg), var(--bg-deep));
+}

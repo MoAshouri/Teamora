@@ -1,4 +1,4 @@
-{
+﻿{
   "brand": "Teamora",
   "tagline": "Human capital, calmly managed",
   "landing": {
@@ -103,6 +103,10 @@
       "language": "Language",
       "logout": "Logout",
       "today": "Today"
+    },
+    "theme": {
+      "light": "Switch to light",
+      "dark": "Switch to dark"
     },
     "people": {
       "inviteCreate": "Create 6-digit invite",

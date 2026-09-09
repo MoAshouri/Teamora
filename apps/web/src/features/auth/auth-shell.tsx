@@ -14,11 +14,11 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { locales } from '@/lib/i18n/config';
+import { persistAppTheme, readClientTheme } from '@/lib/theme';
 import { authBrand, type AuthBrand, type AuthTheme } from './brand';
 import { ThemeToggle } from './theme-toggle';
 import './auth.css';
 
-const THEME_KEY = 'teamora-auth-theme';
 const LOCALE_LABEL: Record<string, string> = { en: 'EN', fa: 'فا', hy: 'ՀՀ' };
 
 type AuthUiContextValue = {
@@ -31,9 +31,7 @@ const AuthUiContext = createContext<AuthUiContextValue | null>(null);
 
 function readTheme(): AuthTheme {
   if (typeof window === 'undefined') return 'light';
-  const stored = window.localStorage.getItem(THEME_KEY);
-  if (stored === 'dark' || stored === 'light') return stored;
-  return 'light';
+  return readClientTheme();
 }
 
 export function useAuthUi() {
@@ -110,9 +108,8 @@ export function AuthShell({
 
   useEffect(() => {
     document.documentElement.classList.add('auth-lock');
+    persistAppTheme(theme);
     document.body.dataset.theme = theme;
-    document.documentElement.dataset.theme = theme;
-    window.localStorage.setItem(THEME_KEY, theme);
     return () => {
       document.documentElement.classList.remove('auth-lock');
     };

@@ -104,6 +104,10 @@
       "logout": "خروج",
       "today": "امروز"
     },
+    "theme": {
+      "light": "رفتن به روز",
+      "dark": "رفتن به شب"
+    },
     "people": {
       "inviteCreate": "ساخت کد دعوت ۶ رقمی",
       "expiresIn": "انقضا"
