@@ -75,6 +75,9 @@ model User {
   grantedLeaveAdjustments   LeaveBalanceAdjustment[] @relation("LeaveGrantActor")
   lettersAuthored           Letter[]               @relation("LetterAuthor")
   lettersReceived           Letter[]              @relation("LetterRecipient")
+  tasksCreated              Task[]               @relation("TaskCreator")
+  tasksAssigned             Task[]               @relation("TaskAssignee")
+  notesCreated              Note[]                @relation("NoteCreator")
 }
 
 model Company {
@@ -94,6 +97,8 @@ model Company {
   events       CalendarEvent[]
   leaveBalanceAdjustments LeaveBalanceAdjustment[]
   letters      Letter[]
+  tasks        Task[]
+  notes        Note[]
 }
 
 model CompanyMembership {
@@ -235,6 +240,43 @@ model Letter {
 
   @@index([companyId, recipientId])
   @@index([recipientId, readAt])
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  companyId   String
+  creatorId   String
+  assigneeId  String?
+  title       String
+  description String?
+  dueAt       DateTime?
+  starred     Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  company  Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  creator  User    @relation("TaskCreator", fields: [creatorId], references: [id])
+  assignee User?   @relation("TaskAssignee", fields: [assigneeId], references: [id])
+
+  @@index([companyId, dueAt])
+  @@index([companyId, starred])
+  @@index([assigneeId])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  companyId String
+  creatorId String
+  title     String
+  body      String
+  date      DateTime @db.Date
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  creator User    @relation("NoteCreator", fields: [creatorId], references: [id])
+
+  @@index([companyId, date])
 }
 
 model CalendarEvent {
