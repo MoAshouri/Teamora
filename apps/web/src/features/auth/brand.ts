@@ -122,3 +122,8 @@ export function brandPlaque(family: AuthFamily, theme: AuthTheme) {
   const kit = family === 'hayat' ? HAYAT : GAVIT;
   return kit.plaque[theme];
 }
+
+export function brandIwan(family: AuthFamily, theme: AuthTheme) {
+  const kit = family === 'hayat' ? HAYAT : GAVIT;
+  return kit.iwan[theme];
+}

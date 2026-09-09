@@ -1,0 +1,91 @@
+.iwan-frame {
+  width: min(28rem, 100%);
+  margin-inline: auto;
+}
+
+.iwan-frame__vault {
+  position: relative;
+  min-height: 18rem;
+}
+
+.iwan-frame__stone {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  filter: drop-shadow(0 16px 28px rgba(26, 43, 42, 0.22));
+  clip-path: polygon(8% 100%, 8% 42%, 50% 6%, 92% 42%, 92% 100%);
+}
+
+.iwan-frame[data-family='gavit'] .iwan-frame__stone {
+  clip-path: polygon(
+    6% 100%,
+    6% 46%,
+    14% 28%,
+    30% 14%,
+    50% 8%,
+    70% 14%,
+    86% 28%,
+    94% 46%,
+    94% 100%
+  );
+}
+
+.iwan-frame__well {
+  position: absolute;
+  inset: 18% 16% 12%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 1.1rem 0.7rem 0.8rem;
+  text-align: center;
+}
+
+.iwan-frame[data-family='gavit'] .iwan-frame__well {
+  inset: 22% 14% 14%;
+}
+
+.iwan-frame__ring {
+  position: absolute;
+  width: min(11.5rem, 72%);
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+
+.iwan-frame__ring circle {
+  fill: none;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+}
+
+.iwan-frame__track {
+  stroke: color-mix(in srgb, var(--line) 80%, transparent);
+}
+
+.iwan-frame__progress {
+  stroke: var(--accent);
+  transform-origin: 50% 50%;
+  transform: rotate(-90deg);
+}
+
+.iwan-frame__body {
+  position: relative;
+  z-index: 1;
+}
+
+.iwan-frame__footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.85rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iwan-frame__progress {
+    transition: none;
+  }
+}

@@ -11,6 +11,9 @@ import { AppHeaderActions } from '@/features/app-shell/header-actions';
 import { LanguageSwitch } from '@/features/app-shell/language-switch';
 import { EmployeeChrome } from '@/features/app-shell/employee-chrome';
 import { appLoginPath } from '@/lib/i18n/app-locale';
+import { Modal } from '@/features/ui/modal';
+
+function noop() {}
 
 function SetPasswordModal({ onDone }: { onDone: () => void }) {
   const [password, setPassword] = useState('');
@@ -36,11 +39,8 @@ function SetPasswordModal({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="set-password-title">
-      <form className="card modal-panel" onSubmit={onSubmit}>
-        <h2 id="set-password-title" style={{ marginTop: 0 }}>
-          گذاشتن رمز
-        </h2>
+    <Modal open onClose={noop} title="گذاشتن رمز" dismissible={false}>
+      <form onSubmit={onSubmit}>
         <p className="muted">برای ورودهای بعد، یک رمز روی در بگذارید.</p>
         <label className="field">
           <span>رمز عبور</span>
@@ -58,7 +58,7 @@ function SetPasswordModal({ onDone }: { onDone: () => void }) {
           مهر کردن
         </button>
       </form>
-    </div>
+    </Modal>
   );
 }
 

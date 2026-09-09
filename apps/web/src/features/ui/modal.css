@@ -1,0 +1,19 @@
+.ui-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1.2rem;
+  background: rgba(12, 16, 15, 0.62);
+}
+
+.ui-modal-panel {
+  width: min(24rem, 100%);
+  border-radius: var(--radius);
+  outline: none;
+}
+
+.ui-modal-title {
+  margin: 0 0 0.65rem;
+}

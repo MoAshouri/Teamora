@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { api, authApi, type AuthUser } from '@/lib/api';
 import { BrickWeekChart } from '@/features/ui/brick-week-chart';
+import { IwanFrame } from '@/features/ui/iwan-frame';
 
 export default function EmployeeDashboardPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -55,13 +56,10 @@ export default function EmployeeDashboardPage() {
         <p className="muted">{session ? 'الان سر کار' : 'خارج از شیفت'}</p>
       </header>
 
-      <div className="card" style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-        <div className="stat" style={{ fontVariantNumeric: 'tabular-nums' }}>
-          {now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}
-        </div>
-        <p className="muted">{session ? `گذشته ${hh}:${mm}:${ss}` : 'ساعت ثبت نمی‌شود'}</p>
-        <div className="cta-row" style={{ justifyContent: 'center' }}>
-          {!session ? (
+      <IwanFrame
+        progress={1}
+        footer={
+          !session ? (
             <button className="btn btn-primary" onClick={startDay}>
               شروع روز
             </button>
@@ -69,9 +67,14 @@ export default function EmployeeDashboardPage() {
             <button className="btn btn-primary" onClick={endDay}>
               پایان روز
             </button>
-          )}
+          )
+        }
+      >
+        <div className="stat" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          {now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}
         </div>
-      </div>
+        <p className="muted">{session ? `گذشته ${hh}:${mm}:${ss}` : 'ساعت ثبت نمی‌شود'}</p>
+      </IwanFrame>
 
       <div className="grid-2">
         <div className="card">
