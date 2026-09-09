@@ -1,6 +1,7 @@
 ﻿import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Param,
   Patch,
@@ -89,8 +90,13 @@ export class WorkTimeController {
 
   @Get('weekly')
   weekly(@CurrentUser() user: AuthUser, @Query('userId') userId?: string) {
-    const target =
-      user.role === 'ADMIN' && userId ? userId : user.id;
-    return this.workTime.weeklyHours(user.companyId!, target);
+    const requested = userId?.trim() || undefined;
+    if (user.role === 'EMPLOYEE') {
+      if (requested && requested !== user.id) {
+        throw new ForbiddenException('Cannot read another person\'s hours');
+      }
+      return this.workTime.weeklyHours(user.companyId!, user.id);
+    }
+    return this.workTime.weeklyHours(user.companyId!, requested);
   }
 }

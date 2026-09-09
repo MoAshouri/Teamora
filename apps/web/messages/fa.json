@@ -138,6 +138,14 @@
     },
     "calendar": {
       "rest": "تعطیل"
+    },
+    "dashboard": {
+      "presentNow": "الان سر کار",
+      "weekHours": "ساعات این هفته",
+      "pendingLeaves": "مرخصی در انتظار"
+    },
+    "greet": {
+      "morning": "صبح بخیر، {name}"
     }
   }
 }

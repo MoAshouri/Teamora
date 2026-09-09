@@ -121,7 +121,7 @@ export class WorkTimeService {
     });
   }
 
-  async weeklyHours(companyId: string, userId: string) {
+  async weeklyHours(companyId: string, userId?: string) {
     const now = new Date();
     const day = now.getUTCDay();
     // Week starts Saturday (6) for FA locale default
@@ -133,20 +133,22 @@ export class WorkTimeService {
     end.setUTCDate(start.getUTCDate() + 6);
     end.setUTCHours(23, 59, 59, 999);
 
-    const membership = await this.prisma.companyMembership.findFirst({
-      where: { companyId, userId },
-    });
-    const admin = await this.prisma.company.findFirst({
-      where: { id: companyId, adminId: userId },
-    });
-    if (!membership && !admin) {
-      throw new ForbiddenException('User not in company');
+    if (userId) {
+      const membership = await this.prisma.companyMembership.findFirst({
+        where: { companyId, userId },
+      });
+      const admin = await this.prisma.company.findFirst({
+        where: { id: companyId, adminId: userId },
+      });
+      if (!membership && !admin) {
+        throw new ForbiddenException('User not in company');
+      }
     }
 
     const entries = await this.prisma.timeEntry.findMany({
       where: {
         companyId,
-        userId,
+        ...(userId ? { userId } : {}),
         date: { gte: start, lte: end },
         status: { in: ['PENDING', 'APPROVED'] },
       },

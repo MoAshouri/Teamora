@@ -138,6 +138,14 @@
     },
     "calendar": {
       "rest": "Rest"
+    },
+    "dashboard": {
+      "presentNow": "At work now",
+      "weekHours": "Hours this week",
+      "pendingLeaves": "Pending leave"
+    },
+    "greet": {
+      "morning": "Good morning, {name}"
     }
   }
 }
