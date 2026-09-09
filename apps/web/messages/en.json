@@ -178,7 +178,9 @@
       "newNote": "New note",
       "editNote": "Edit note",
       "noteBody": "Note",
-      "saveNote": "Save note"
+      "saveNote": "Save note",
+      "leaveChip": "Leave — {name}",
+      "hourlyLeave": "{hours}h"
     },
     "dashboard": {
       "presentNow": "At work now",

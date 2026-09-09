@@ -178,7 +178,9 @@
       "newNote": "Նոր նշում",
       "editNote": "Խմբագրել նշումը",
       "noteBody": "Տեքստ",
-      "saveNote": "Պահել նշումը"
+      "saveNote": "Պահել նշումը",
+      "leaveChip": "Արձակուրդ — {name}",
+      "hourlyLeave": "{hours}ժ"
     },
     "dashboard": {
       "presentNow": "Հիմա աշխատում են",

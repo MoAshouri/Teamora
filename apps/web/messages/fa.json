@@ -178,7 +178,9 @@
       "newNote": "یادداشت تازه",
       "editNote": "ویرایش یادداشت",
       "noteBody": "متن",
-      "saveNote": "ذخیره یادداشت"
+      "saveNote": "ذخیره یادداشت",
+      "leaveChip": "مرخصی — {name}",
+      "hourlyLeave": "{hours} ساعت"
     },
     "dashboard": {
       "presentNow": "الان سر کار",

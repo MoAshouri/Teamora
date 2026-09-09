@@ -8,6 +8,7 @@ import { Modal } from '@/features/ui/modal';
 import { MeetingModal, type CalendarMeeting } from './meeting-modal';
 import { TaskModal, type CalendarTask } from './task-modal';
 import { NoteModal, type CalendarNote } from './note-modal';
+import { LeavePreview, overlayLeaves, leaveOnDay, type CalendarLeave } from './leave-chip';
 import {
   calendarYearMonth,
   formatMonthTitle,
@@ -44,6 +45,8 @@ export function CalendarMonthGrid() {
   const [taskDraft, setTaskDraft] = useState<{ dayIso: string; task: CalendarTask | null } | null>(null);
   const [noteDraft, setNoteDraft] = useState<{ dayIso: string; note: CalendarNote | null } | null>(null);
   const [notes, setNotes] = useState<CalendarNote[]>([]);
+  const [leaves, setLeaves] = useState<CalendarLeave[]>([]);
+  const [leaveDraft, setLeaveDraft] = useState<CalendarLeave | null>(null);
   const [composer, setComposer] = useState<string | null>(null);
 
   const { year, month } = useMemo(() => calendarYearMonth(anchor, locale), [anchor, locale]);
@@ -71,7 +74,9 @@ export function CalendarMonthGrid() {
   }, [cells]);
 
   async function load() {
-    const [monthEvents, monthTasks, monthNotes, holidayRows, policy] = await Promise.all([
+    const dayFrom = range?.from.slice(0, 10);
+    const dayTo = range?.to.slice(0, 10);
+    const [monthEvents, monthTasks, monthNotes, monthLeaves, holidayRows, policy] = await Promise.all([
       range
         ? api.get<CalendarMeeting[]>(
             `/calendar/events?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`,
@@ -84,7 +89,12 @@ export function CalendarMonthGrid() {
         : Promise.resolve([]),
       range
         ? api.get<CalendarNote[]>(
-            `/notes?from=${encodeURIComponent(range.from.slice(0, 10))}&to=${encodeURIComponent(range.to.slice(0, 10))}`,
+            `/notes?from=${encodeURIComponent(dayFrom!)}&to=${encodeURIComponent(dayTo!)}`,
+          )
+        : Promise.resolve([]),
+      range
+        ? api.get<CalendarLeave[]>(
+            `/leaves?from=${encodeURIComponent(dayFrom!)}&to=${encodeURIComponent(dayTo!)}`,
           )
         : Promise.resolve([]),
       api.get<Holiday[]>('/holidays'),
@@ -93,6 +103,7 @@ export function CalendarMonthGrid() {
     setEvents(monthEvents);
     setTasks(monthTasks);
     setNotes(monthNotes);
+    setLeaves(overlayLeaves(monthLeaves));
     setHolidays(holidayRows);
     if (policy?.workDays?.length) setWorkDays(policy.workDays);
   }
@@ -133,6 +144,7 @@ export function CalendarMonthGrid() {
           const dayEvents = events.filter((item) => eventIso(item.startsAt) === iso);
           const dayTasks = tasks.filter((item) => item.dueAt && eventIso(item.dueAt) === iso);
           const dayNotes = notes.filter((item) => eventIso(item.date) === iso);
+          const dayLeaves = leaves.filter((item) => leaveOnDay(item, iso));
           const holiday = holidays.find((item) => eventIso(item.date) === iso);
           return (
             <div
@@ -146,6 +158,23 @@ export function CalendarMonthGrid() {
                 {holiday ? (
                   <span className="cal-month__holiday">{holiday.nameFa || holiday.name}</span>
                 ) : null}
+                {dayLeaves.map((item) => (
+                  <button
+                    className="cal-month__chip cal-month__chip--leave"
+                    data-status={item.status.toLowerCase()}
+                    type="button"
+                    key={item.id}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setLeaveDraft(item);
+                    }}
+                  >
+                    {t('calendar.leaveChip', { name: item.user.fullName })}
+                    {item.kind === 'HOURLY'
+                      ? ` · ${t('calendar.hourlyLeave', { hours: String(item.hours ?? 0) })}`
+                      : ''}
+                  </button>
+                ))}
                 {dayEvents.map((item) => (
                   <button
                     className="cal-month__chip cal-month__chip--meeting"
@@ -212,6 +241,7 @@ export function CalendarMonthGrid() {
         onClose={() => setNoteDraft(null)}
         onSaved={load}
       />
+      <LeavePreview open={!!leaveDraft} leave={leaveDraft} onClose={() => setLeaveDraft(null)} />
       <Modal
         open={!!composer}
         onClose={() => setComposer(null)}
