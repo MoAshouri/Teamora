@@ -31,6 +31,16 @@ enum LeaveStatus {
   REJECTED
 }
 
+enum LeaveKind {
+  DAILY
+  HOURLY
+}
+
+enum LeaveGrantSource {
+  REQUEST
+  BONUS
+}
+
 enum CalendarType {
   JALALI
   GREGORIAN
@@ -60,7 +70,9 @@ model User {
   eventAttendances CalendarAttendee[]
   reviewedLeaves   LeaveRequest[]      @relation("LeaveReviewer")
   reviewedEntries  TimeEntry[]         @relation("TimeEntryReviewer")
-  createdInvites   InviteCode[]
+  createdInvites            InviteCode[]
+  leaveBalanceAdjustments   LeaveBalanceAdjustment[]
+  grantedLeaveAdjustments   LeaveBalanceAdjustment[] @relation("LeaveGrantActor")
 }
 
 model Company {
@@ -78,6 +90,7 @@ model Company {
   activeSessions ActiveWorkSession[]
   leaveRequests LeaveRequest[]
   events       CalendarEvent[]
+  leaveBalanceAdjustments LeaveBalanceAdjustment[]
 }
 
 model CompanyMembership {
@@ -160,19 +173,22 @@ model ActiveWorkSession {
 }
 
 model LeaveRequest {
-  id         String      @id @default(cuid())
+  id         String           @id @default(cuid())
   companyId  String
   userId     String
   type       LeaveType
-  startDate  DateTime    @db.Date
-  endDate    DateTime    @db.Date
+  kind       LeaveKind        @default(DAILY)
+  hours      Decimal?         @db.Decimal(6, 2)
+  source     LeaveGrantSource @default(REQUEST)
+  startDate  DateTime         @db.Date
+  endDate    DateTime         @db.Date
   reason     String?
-  status     LeaveStatus @default(PENDING)
+  status     LeaveStatus      @default(PENDING)
   reviewedBy String?
   reviewNote String?
   reviewedAt DateTime?
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 
   company  Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -180,6 +196,23 @@ model LeaveRequest {
 
   @@index([companyId, status])
   @@index([userId])
+}
+
+model LeaveBalanceAdjustment {
+  id        String    @id @default(cuid())
+  companyId String
+  userId    String
+  kind      LeaveKind
+  amount    Decimal   @db.Decimal(8, 2)
+  note      String?
+  createdBy String
+  createdAt DateTime  @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actor   User    @relation("LeaveGrantActor", fields: [createdBy], references: [id])
+
+  @@index([companyId, userId])
 }
 
 model CalendarEvent {
