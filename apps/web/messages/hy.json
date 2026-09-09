@@ -125,7 +125,11 @@
     },
     "people": {
       "inviteCreate": "Ստեղծել 6 նիշ հրավեր",
-      "expiresIn": "Սպառվում է"
+      "expiresIn": "Սպառվում է",
+      "title": "Մարդիկ",
+      "weekHours": "Այս շաբաթվա ժամեր",
+      "present": "Աշխատում է",
+      "away": "Բացակա"
     },
     "status": {
       "pending": "Սպասում",

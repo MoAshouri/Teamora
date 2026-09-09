@@ -125,7 +125,11 @@
     },
     "people": {
       "inviteCreate": "Create 6-digit invite",
-      "expiresIn": "Expires"
+      "expiresIn": "Expires",
+      "title": "People",
+      "weekHours": "Hours this week",
+      "present": "At work",
+      "away": "Away"
     },
     "status": {
       "pending": "Pending",

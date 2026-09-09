@@ -60,11 +60,13 @@ export function BrickWeekChart({
   workDays = DEFAULT_WORK_DAYS,
   highlightDate,
   yMax = 8,
+  size = 'default',
 }: {
   hoursByDay: Record<string, number>;
   workDays?: number[];
   highlightDate?: string;
   yMax?: number;
+  size?: 'default' | 'compact';
 }) {
   const locale = useLocale() as Locale;
   const t = useTranslations('app');
@@ -97,7 +99,7 @@ export function BrickWeekChart({
   const today = highlightDate ?? isoFromUtcDate(new Date());
 
   return (
-    <div className="brick-chart brick-week">
+    <div className="brick-chart brick-week" data-size={size}>
       {days.map((iso) => {
         const date = dateFromIso(iso);
         const hours = hoursByDay[iso] ?? 0;

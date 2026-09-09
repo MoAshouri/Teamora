@@ -88,6 +88,12 @@ export class WorkTimeController {
     return this.workTime.reviewEntry(user.companyId!, user.id, id, body.status);
   }
 
+  @Get('weekly/company')
+  @Roles('ADMIN')
+  companyWeekly(@CurrentUser() user: AuthUser) {
+    return this.workTime.weeklyHoursByPerson(user.companyId!);
+  }
+
   @Get('weekly')
   weekly(@CurrentUser() user: AuthUser, @Query('userId') userId?: string) {
     const requested = userId?.trim() || undefined;

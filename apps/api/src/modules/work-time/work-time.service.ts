@@ -121,10 +121,8 @@ export class WorkTimeService {
     });
   }
 
-  async weeklyHours(companyId: string, userId?: string) {
-    const now = new Date();
+  private saturdayWeekWindow(now = new Date()) {
     const day = now.getUTCDay();
-    // Week starts Saturday (6) for FA locale default
     const diffToSat = (day + 1) % 7;
     const start = new Date(now);
     start.setUTCDate(now.getUTCDate() - diffToSat);
@@ -132,6 +130,17 @@ export class WorkTimeService {
     const end = new Date(start);
     end.setUTCDate(start.getUTCDate() + 6);
     end.setUTCHours(23, 59, 59, 999);
+    const emptyDay: Record<string, number> = {};
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start);
+      d.setUTCDate(start.getUTCDate() + i);
+      emptyDay[d.toISOString().slice(0, 10)] = 0;
+    }
+    return { start, end, emptyDay };
+  }
+
+  async weeklyHours(companyId: string, userId?: string) {
+    const { start, end, emptyDay } = this.saturdayWeekWindow();
 
     if (userId) {
       const membership = await this.prisma.companyMembership.findFirst({
@@ -154,12 +163,7 @@ export class WorkTimeService {
       },
     });
 
-    const byDay: Record<string, number> = {};
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(start);
-      d.setUTCDate(start.getUTCDate() + i);
-      byDay[d.toISOString().slice(0, 10)] = 0;
-    }
+    const byDay = { ...emptyDay };
     for (const e of entries) {
       const key = e.date.toISOString().slice(0, 10);
       const hours = (e.endedAt.getTime() - e.startedAt.getTime()) / 3_600_000;
@@ -167,5 +171,41 @@ export class WorkTimeService {
     }
 
     return { from: start, to: end, hoursByDay: byDay };
+  }
+
+  async weeklyHoursByPerson(companyId: string) {
+    const { start, end, emptyDay } = this.saturdayWeekWindow();
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+      include: { memberships: { select: { userId: true } } },
+    });
+    const userIds = new Set<string>([
+      ...(company?.memberships.map((row) => row.userId) ?? []),
+      ...(company?.adminId ? [company.adminId] : []),
+    ]);
+
+    const entries = await this.prisma.timeEntry.findMany({
+      where: {
+        companyId,
+        date: { gte: start, lte: end },
+        status: { in: ['PENDING', 'APPROVED'] },
+      },
+    });
+
+    const hours = new Map<string, Record<string, number>>();
+    for (const id of userIds) hours.set(id, { ...emptyDay });
+    for (const e of entries) {
+      if (!hours.has(e.userId)) hours.set(e.userId, { ...emptyDay });
+      const byDay = hours.get(e.userId)!;
+      const key = e.date.toISOString().slice(0, 10);
+      const value = (e.endedAt.getTime() - e.startedAt.getTime()) / 3_600_000;
+      byDay[key] = (byDay[key] ?? 0) + value;
+    }
+
+    return {
+      from: start,
+      to: end,
+      people: [...hours.entries()].map(([userId, hoursByDay]) => ({ userId, hoursByDay })),
+    };
   }
 }

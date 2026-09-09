@@ -125,7 +125,11 @@
     },
     "people": {
       "inviteCreate": "ساخت کد دعوت ۶ رقمی",
-      "expiresIn": "انقضا"
+      "expiresIn": "انقضا",
+      "title": "افراد",
+      "weekHours": "ساعات این هفته",
+      "present": "سر کار",
+      "away": "غایب"
     },
     "status": {
       "pending": "در انتظار",
