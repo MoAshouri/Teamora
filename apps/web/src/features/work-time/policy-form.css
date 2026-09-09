@@ -67,10 +67,15 @@ html[data-family='gavit'] .day-plaque__frame {
   font-size: 0.82rem;
 }
 
-.policy-form__times {
+.policy-form__times,
+.policy-form__extras {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
+}
+
+.policy-form__extras {
+  margin: 0.35rem 0 1rem;
 }
 
 @media (max-width: 640px) {
@@ -82,7 +87,8 @@ html[data-family='gavit'] .day-plaque__frame {
     font-size: 0.6rem;
   }
 
-  .policy-form__times {
+  .policy-form__times,
+  .policy-form__extras {
     grid-template-columns: 1fr;
   }
 }

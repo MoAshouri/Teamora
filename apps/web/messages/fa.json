@@ -183,7 +183,12 @@
       "timezone": "منطقه زمانی",
       "savePolicy": "ذخیره سیاست",
       "live": "حضور زنده",
-      "entries": "ارسال‌های کارکرد"
+      "entries": "ارسال‌های کارکرد",
+      "overtimeAfter": "شروع اضافه‌کاری",
+      "dailyMinutes": "دقایق روزانه",
+      "flexIn": "انعطاف ورود",
+      "flexOut": "انعطاف خروج",
+      "minutesHint": "۴۸۰ = ۸ ساعت"
     }
   }
 }

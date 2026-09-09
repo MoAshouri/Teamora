@@ -17,6 +17,10 @@ export type WorkPolicy = {
   workEnd: string;
   workDays: number[];
   timezone: string;
+  dailyMinutes?: number;
+  overtimeAfterMinutes?: number;
+  flexInMinutes?: number;
+  flexOutMinutes?: number;
 };
 
 const WEEK_ORDER = [6, 0, 1, 2, 3, 4, 5];
@@ -34,6 +38,11 @@ function dateForWeekday(day: number) {
 function toClock(value: string) {
   const match = value.match(/^(\d{2}:\d{2})/);
   return match ? match[1] : '09:00';
+}
+
+function clampMinutes(value: number, fallback: number, min: number, max: number) {
+  if (!Number.isFinite(value)) return fallback;
+  return Math.min(max, Math.max(min, Math.round(value)));
 }
 
 function familyFromDom(): AuthFamily {
@@ -57,6 +66,10 @@ export function PolicyForm({
   const [workStart, setWorkStart] = useState(toClock(policy?.workStart ?? '09:00'));
   const [workEnd, setWorkEnd] = useState(toClock(policy?.workEnd ?? '18:00'));
   const [timezone, setTimezone] = useState(policy?.timezone ?? 'Asia/Tehran');
+  const [dailyMinutes, setDailyMinutes] = useState(policy?.dailyMinutes ?? 480);
+  const [overtimeAfter, setOvertimeAfter] = useState(policy?.overtimeAfterMinutes ?? 480);
+  const [flexIn, setFlexIn] = useState(policy?.flexInMinutes ?? 0);
+  const [flexOut, setFlexOut] = useState(policy?.flexOutMinutes ?? 0);
   const [error, setError] = useState('');
   const [plaque, setPlaque] = useState(() => brandPlaque('gavit', 'light'));
 
@@ -65,6 +78,10 @@ export function PolicyForm({
     setWorkStart(toClock(policy?.workStart ?? '09:00'));
     setWorkEnd(toClock(policy?.workEnd ?? '18:00'));
     setTimezone(policy?.timezone ?? 'Asia/Tehran');
+    setDailyMinutes(policy?.dailyMinutes ?? 480);
+    setOvertimeAfter(policy?.overtimeAfterMinutes ?? 480);
+    setFlexIn(policy?.flexInMinutes ?? 0);
+    setFlexOut(policy?.flexOutMinutes ?? 0);
   }, [policy]);
 
   useEffect(() => {
@@ -113,12 +130,20 @@ export function PolicyForm({
       setError(t('workTime.workEnd'));
       return;
     }
+    const daily = clampMinutes(dailyMinutes, 480, 60, 1440);
+    const overtime = clampMinutes(overtimeAfter, 480, 0, 1440);
+    const flexInMinutes = clampMinutes(flexIn, 0, 0, 1440);
+    const flexOutMinutes = clampMinutes(flexOut, 0, 0, 1440);
     try {
       await api.put('/companies/work-policy', {
         workStart: start,
         workEnd: end,
         workDays,
         timezone,
+        dailyMinutes: daily,
+        overtimeAfterMinutes: overtime,
+        flexInMinutes,
+        flexOutMinutes,
       });
       setError('');
       onSaved();
@@ -176,6 +201,58 @@ export function PolicyForm({
           ))}
         </select>
       </label>
+      <h2>{t('workTime.overtimeAfter')}</h2>
+      <p className="muted">{t('workTime.minutesHint')}</p>
+      <div className="policy-form__extras">
+        <label className="field">
+          <span>{t('workTime.dailyMinutes')}</span>
+          <input
+            type="number"
+            min={60}
+            max={1440}
+            step={1}
+            value={dailyMinutes}
+            onChange={(event) => setDailyMinutes(Number(event.target.value))}
+            required
+          />
+        </label>
+        <label className="field">
+          <span>{t('workTime.overtimeAfter')}</span>
+          <input
+            type="number"
+            min={0}
+            max={1440}
+            step={1}
+            value={overtimeAfter}
+            onChange={(event) => setOvertimeAfter(Number(event.target.value))}
+            required
+          />
+        </label>
+        <label className="field">
+          <span>{t('workTime.flexIn')}</span>
+          <input
+            type="number"
+            min={0}
+            max={1440}
+            step={1}
+            value={flexIn}
+            onChange={(event) => setFlexIn(Number(event.target.value))}
+            required
+          />
+        </label>
+        <label className="field">
+          <span>{t('workTime.flexOut')}</span>
+          <input
+            type="number"
+            min={0}
+            max={1440}
+            step={1}
+            value={flexOut}
+            onChange={(event) => setFlexOut(Number(event.target.value))}
+            required
+          />
+        </label>
+      </div>
       {error ? <p className="policy-form__error">{error}</p> : null}
       <button className="btn btn-primary" type="submit">
         {t('workTime.savePolicy')}

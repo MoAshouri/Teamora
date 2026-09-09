@@ -1,4 +1,4 @@
-{
+﻿{
   "brand": "Teamora",
   "tagline": "Human capital, calmly managed",
   "landing": {
@@ -183,7 +183,12 @@
       "timezone": "Timezone",
       "savePolicy": "Save policy",
       "live": "At work now",
-      "entries": "Hour submissions"
+      "entries": "Hour submissions",
+      "overtimeAfter": "Overtime after",
+      "dailyMinutes": "Daily minutes",
+      "flexIn": "Flex in",
+      "flexOut": "Flex out",
+      "minutesHint": "480 = 8 hours"
     }
   }
 }
