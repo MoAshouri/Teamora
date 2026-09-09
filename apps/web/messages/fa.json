@@ -108,6 +108,11 @@
       "light": "رفتن به روز",
       "dark": "رفتن به شب"
     },
+    "header": {
+      "theme": "نما",
+      "reminders": "یادآورها",
+      "remindersEmpty": "یادآوری نیست"
+    },
     "people": {
       "inviteCreate": "ساخت کد دعوت ۶ رقمی",
       "expiresIn": "انقضا"

@@ -108,6 +108,11 @@
       "light": "Անցնել լուսավորին",
       "dark": "Անցնել մութին"
     },
+    "header": {
+      "theme": "Տեսք",
+      "reminders": "Հիշեցումներ",
+      "remindersEmpty": "Հիշեցում չկա"
+    },
     "people": {
       "inviteCreate": "Ստեղծել 6 նիշ հրավեր",
       "expiresIn": "Սպառվում է"

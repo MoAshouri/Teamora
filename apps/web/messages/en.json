@@ -108,6 +108,11 @@
       "light": "Switch to light",
       "dark": "Switch to dark"
     },
+    "header": {
+      "theme": "Theme",
+      "reminders": "Reminders",
+      "remindersEmpty": "No reminders"
+    },
     "people": {
       "inviteCreate": "Create 6-digit invite",
       "expiresIn": "Expires"

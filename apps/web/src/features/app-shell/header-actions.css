@@ -1,0 +1,59 @@
+.app-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.app-header-icon,
+.app-header-actions .theme-toggle {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  color: var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.app-header-icon {
+  position: relative;
+}
+
+.app-header-icon:hover,
+.app-header-actions .theme-toggle:hover {
+  transform: translateY(-1px);
+}
+
+.app-header-icon:focus-visible,
+.app-header-actions .theme-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.app-header-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.app-header-badge {
+  position: absolute;
+  top: 0.28rem;
+  inset-inline-end: 0.28rem;
+  min-width: 0.7rem;
+  height: 0.7rem;
+  padding: 0 0.15rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.58rem;
+  line-height: 0.7rem;
+  text-align: center;
+}
+
+.app-header-icon[data-due='true'] {
+  color: var(--accent);
+}

@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { authApi, type AuthUser } from '@/lib/api';
 import { VerifyEmailGate } from '@/features/auth/verify-email-gate';
-import { AppThemeToggle } from '@/components/app-theme-toggle';
 import { TodayHeading } from '@/features/app-shell/today-heading';
+import { AppHeaderActions } from '@/features/app-shell/header-actions';
 
 function SetPasswordModal({ onDone }: { onDone: () => void }) {
   const [password, setPassword] = useState('');
@@ -111,6 +111,7 @@ export function AppShell({
       <main className="container" style={{ padding: '3rem 0' }}>
         <header className="app-panel-header">
           <TodayHeading />
+          <AppHeaderActions />
         </header>
         Loading…
       </main>
@@ -138,17 +139,15 @@ export function AppShell({
               {t(`nav.${l.key}`)}
             </Link>
           ))}
-          <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <AppThemeToggle />
-            <button className="btn btn-ghost" style={{ color: '#fff' }} onClick={logout}>
-              {t('nav.logout')}
-            </button>
-          </div>
+          <button className="btn btn-ghost" style={{ marginTop: 'auto', color: '#fff' }} onClick={logout}>
+            {t('nav.logout')}
+          </button>
         </aside>
       ) : null}
       <div className="main-pane" style={{ order: 1 }}>
         <header className="app-panel-header">
           <TodayHeading />
+          <AppHeaderActions />
         </header>
         {children}
         {role === 'EMPLOYEE' ? (
@@ -158,7 +157,6 @@ export function AppShell({
                 {t(`nav.${l.key}`)}
               </Link>
             ))}
-            <AppThemeToggle />
             <button className="btn btn-ghost" onClick={logout} style={{ fontSize: '0.75rem' }}>
               {t('nav.logout')}
             </button>
