@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { BrickWeekChart } from '@/features/ui/brick-week-chart';
+import { ComposeLetter } from './compose-letter';
 import { formatDate, formatTime } from '@/lib/dates';
 import type { Locale } from '@/lib/i18n/config';
 import './people-page.css';
@@ -15,6 +16,7 @@ type Member = {
     email: string;
     avatarUrl: string | null;
     activeSession: { startedAt: string } | null;
+    role: 'ADMIN' | 'EMPLOYEE';
   };
 };
 
@@ -124,10 +126,15 @@ export default function PeoplePage() {
                     {t('people.weekHours')}: {t('hours.hoursShort', { n: total.toFixed(1) })}
                   </p>
                 </div>
-                <span className="people-row__status">
-                  <span className="people-pulse" data-on={present} />
-                  {present ? t('people.present') : t('people.away')}
-                </span>
+                <div className="people-row__actions">
+                  <span className="people-row__status">
+                    <span className="people-pulse" data-on={present} />
+                    {present ? t('people.present') : t('people.away')}
+                  </span>
+                  {m.user.role === 'EMPLOYEE' ? (
+                    <ComposeLetter recipientId={m.user.id} recipientName={m.user.fullName} />
+                  ) : null}
+                </div>
               </div>
               <BrickWeekChart hoursByDay={hoursByDay} yMax={8} size="compact" />
             </article>

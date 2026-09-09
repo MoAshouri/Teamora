@@ -129,7 +129,14 @@
       "title": "افراد",
       "weekHours": "ساعات این هفته",
       "present": "سر کار",
-      "away": "غایب"
+      "away": "غایب",
+      "writeLetter": "نوشتن نامه"
+    },
+    "letter": {
+      "subject": "موضوع",
+      "body": "نامه",
+      "send": "ارسال",
+      "sent": "نامه در طاق نشست."
     },
     "status": {
       "pending": "در انتظار",

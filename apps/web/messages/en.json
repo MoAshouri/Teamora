@@ -129,7 +129,14 @@
       "title": "People",
       "weekHours": "Hours this week",
       "present": "At work",
-      "away": "Away"
+      "away": "Away",
+      "writeLetter": "Write letter"
+    },
+    "letter": {
+      "subject": "Subject",
+      "body": "Letter",
+      "send": "Send",
+      "sent": "The letter is in their niche."
     },
     "status": {
       "pending": "Pending",

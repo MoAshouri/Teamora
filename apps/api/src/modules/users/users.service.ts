@@ -26,6 +26,7 @@ export class UsersService {
       fullName: true,
       avatarUrl: true,
       activeSession: true,
+      role: true,
     } as const;
 
     const [members, company] = await Promise.all([

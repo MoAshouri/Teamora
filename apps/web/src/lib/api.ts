@@ -66,3 +66,9 @@ export const authApi = {
   logout: () => api.post('/auth/logout'),
   googleUrl: `${API_URL}/auth/google`,
 };
+
+export const lettersApi = {
+  create: (body: { recipientId: string; subject: string; body: string }) =>
+    api.post('/letters', body),
+  inbox: () => api.get('/letters/inbox'),
+};
