@@ -199,7 +199,14 @@
       "approve": "تأیید",
       "reject": "رد",
       "reasonLabel": "دلیل",
-      "nonePending": "هیچ مرخصی در انتظار نیست"
+      "nonePending": "هیچ مرخصی در انتظار نیست",
+      "remainingDays": "روزهای مانده",
+      "remainingHours": "ساعات مانده",
+      "statusPending": "در انتظار",
+      "statusApproved": "تأیید شده",
+      "statusRejected": "رد شده",
+      "viewReason": "دیدن دلیل",
+      "waitingReview": "در انتظار — هنوز دلیلی نیست"
     },
     "workTime": {
       "title": "ساعات کاری",

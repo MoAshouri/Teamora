@@ -199,7 +199,14 @@
       "approve": "Approve",
       "reject": "Reject",
       "reasonLabel": "Reason",
-      "nonePending": "None pending"
+      "nonePending": "None pending",
+      "remainingDays": "Remaining days",
+      "remainingHours": "Remaining hours",
+      "statusPending": "Pending",
+      "statusApproved": "Approved",
+      "statusRejected": "Rejected",
+      "viewReason": "View reason",
+      "waitingReview": "Waiting — no reason yet"
     },
     "workTime": {
       "title": "Hours",

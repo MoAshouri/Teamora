@@ -199,7 +199,14 @@
       "approve": "Հաստատել",
       "reject": "Մերժել",
       "reasonLabel": "Պատճառ",
-      "nonePending": "Սպասող արձակուրդ չկա"
+      "nonePending": "Սպասող արձակուրդ չկա",
+      "remainingDays": "Մնացած օրեր",
+      "remainingHours": "Մնացած ժամեր",
+      "statusPending": "Սպասում",
+      "statusApproved": "Հաստատված",
+      "statusRejected": "Մերժված",
+      "viewReason": "Տեսնել պատճառը",
+      "waitingReview": "Սպասում է — դեռ պատճառ չկա"
     },
     "workTime": {
       "title": "Ժամեր",
