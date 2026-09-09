@@ -142,6 +142,7 @@
     "dashboard": {
       "presentNow": "At work now",
       "weekHours": "Hours this week",
+      "hoursThisWeek": "Hours this week",
       "pendingLeaves": "Pending leave"
     },
     "greet": {

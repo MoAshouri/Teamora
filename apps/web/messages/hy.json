@@ -142,6 +142,7 @@
     "dashboard": {
       "presentNow": "Հիմա աշխատում են",
       "weekHours": "Այս շաբաթվա ժամեր",
+      "hoursThisWeek": "Այս շաբաթվա ժամեր",
       "pendingLeaves": "Սպասող արձակուրդ"
     },
     "greet": {

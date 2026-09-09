@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import { api, authApi, type AuthUser } from '@/lib/api';
 import { usePresence } from '@/hooks/use-presence';
 import { WaxSeal } from '@/features/ui/wax-seal';
-import { BrickWeekChart } from '@/features/ui/brick-week-chart';
 import { GunbadWeekRow } from '@/features/ui/gunbad-day';
+import { AdminWeekHours } from './week-hours';
 import './admin-dashboard.css';
 
 type Leave = {
@@ -23,19 +23,22 @@ export default function AdminDashboard() {
   const [pending, setPending] = useState<Leave[]>([]);
   const [activeCount, setActiveCount] = useState(0);
   const [weekly, setWeekly] = useState<Record<string, number>>({});
+  const [workDays, setWorkDays] = useState<number[]>([6, 0, 1, 2, 3]);
   const { events } = usePresence(true);
 
   async function load() {
     const me = await authApi.me();
     setUser(me);
-    const [leaves, sessions, hours] = await Promise.all([
+    const [leaves, sessions, hours, policy] = await Promise.all([
       api.get<Leave[]>('/leaves/pending'),
       api.get<unknown[]>('/work-time/sessions/active'),
       api.get<{ hoursByDay: Record<string, number> }>('/work-time/weekly'),
+      api.get<{ workDays: number[] } | null>('/companies/work-policy'),
     ]);
     setPending(leaves);
     setActiveCount(sessions.length);
     setWeekly(hours.hoursByDay);
+    if (policy?.workDays?.length) setWorkDays(policy.workDays);
   }
 
   useEffect(() => {
@@ -75,10 +78,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="card">
-        <h2>{t('dashboard.weekHours')}</h2>
-        <BrickWeekChart hoursByDay={weekly} yMax={Math.max(8, ...Object.values(weekly), 1)} />
-      </div>
+      <AdminWeekHours hoursByDay={weekly} workDays={workDays} />
 
       <div className="card">
         <GunbadWeekRow />
