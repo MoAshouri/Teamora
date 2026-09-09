@@ -125,6 +125,13 @@
     },
     "people": {
       "inviteCreate": "ساخت کد دعوت ۶ رقمی",
+      "createInvite": "ساخت کد دعوت",
+      "inviteTitle": "ژتون دعوت",
+      "copyCode": "رونوشت کد",
+      "copied": "کپی شد",
+      "expired": "منقضی",
+      "used": "مصرف‌شده",
+      "remaining": "مانده",
       "expiresIn": "انقضا",
       "title": "افراد",
       "weekHours": "ساعات این هفته",

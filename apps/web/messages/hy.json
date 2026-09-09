@@ -125,6 +125,13 @@
     },
     "people": {
       "inviteCreate": "Ստեղծել 6 նիշ հրավեր",
+      "createInvite": "Ստեղծել հրավեր",
+      "inviteTitle": "Հրավերի նշան",
+      "copyCode": "Պատճենել կոդը",
+      "copied": "Պատճենվեց",
+      "expired": "Ժամկետանց",
+      "used": "Օգտագործված",
+      "remaining": "Մնաց",
       "expiresIn": "Սպառվում է",
       "title": "Մարդիկ",
       "weekHours": "Այս շաբաթվա ժամեր",

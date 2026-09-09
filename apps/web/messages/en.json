@@ -125,6 +125,13 @@
     },
     "people": {
       "inviteCreate": "Create 6-digit invite",
+      "createInvite": "Create invite code",
+      "inviteTitle": "Invite token",
+      "copyCode": "Copy code",
+      "copied": "Copied",
+      "expired": "Expired",
+      "used": "Used",
+      "remaining": "Remaining",
       "expiresIn": "Expires",
       "title": "People",
       "weekHours": "Hours this week",
