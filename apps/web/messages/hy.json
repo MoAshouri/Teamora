@@ -160,7 +160,16 @@
       "title": "Օրացույց",
       "prev": "Նախորդ ամիս",
       "next": "Հաջորդ ամիս",
-      "today": "Այսօր"
+      "today": "Այսօր",
+      "newMeeting": "Նոր հանդիպում",
+      "editMeeting": "Խմբագրել հանդիպումը",
+      "deleteMeeting": "Ջնջել հանդիպումը",
+      "meetingTitle": "Վերնագիր",
+      "attendees": "Մասնակիցներ",
+      "location": "Վայր",
+      "start": "Սկիզբ",
+      "end": "Ավարտ",
+      "leaveConflict": "{name} այս ժամանակահատվածում հաստատված արձակուրդ ունի"
     },
     "dashboard": {
       "presentNow": "Հիմա աշխատում են",

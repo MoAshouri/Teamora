@@ -1,0 +1,40 @@
+.meeting-form {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.meeting-form__people {
+  display: grid;
+  gap: 0.35rem;
+  max-height: 8.5rem;
+  overflow: auto;
+}
+
+.meeting-form__person {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+
+.meeting-form__warn,
+.meeting-form__error {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.meeting-form__warn {
+  color: var(--muted);
+}
+
+.meeting-form__error {
+  color: var(--accent);
+}
+
+.meeting-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}

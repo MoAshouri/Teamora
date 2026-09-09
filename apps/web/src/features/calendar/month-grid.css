@@ -37,6 +37,7 @@
 
 .cal-month__tile {
   min-width: 0;
+  cursor: pointer;
 }
 
 .cal-month__tile[data-in-month='false'] {
@@ -75,7 +76,15 @@
 }
 
 .cal-month__chip {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--ink);
+  cursor: pointer;
+  text-align: inherit;
 }
 
 @media (max-width: 900px) {

@@ -160,7 +160,16 @@
       "title": "Calendar",
       "prev": "Previous month",
       "next": "Next month",
-      "today": "Today"
+      "today": "Today",
+      "newMeeting": "New meeting",
+      "editMeeting": "Edit meeting",
+      "deleteMeeting": "Delete meeting",
+      "meetingTitle": "Title",
+      "attendees": "Attendees",
+      "location": "Location",
+      "start": "Start",
+      "end": "End",
+      "leaveConflict": "{name} has approved leave in this window"
     },
     "dashboard": {
       "presentNow": "At work now",

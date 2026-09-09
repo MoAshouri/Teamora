@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { GunbadDay } from '@/features/ui/gunbad-day';
+import { MeetingModal, type CalendarMeeting } from './meeting-modal';
 import {
   calendarYearMonth,
   formatMonthTitle,
@@ -16,12 +17,6 @@ import type { Locale } from '@/lib/i18n/config';
 import './month-grid.css';
 
 const DEFAULT_WORK_DAYS = [6, 0, 1, 2, 3];
-
-type EventItem = {
-  id: string;
-  title: string;
-  startsAt: string;
-};
 
 type Holiday = {
   id: string;
@@ -38,9 +33,10 @@ export function CalendarMonthGrid() {
   const t = useTranslations('app');
   const locale = useLocale() as Locale;
   const [anchor, setAnchor] = useState(() => new Date());
-  const [events, setEvents] = useState<EventItem[]>([]);
+  const [events, setEvents] = useState<CalendarMeeting[]>([]);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [workDays, setWorkDays] = useState<number[]>(DEFAULT_WORK_DAYS);
+  const [draft, setDraft] = useState<{ dayIso: string; meeting: CalendarMeeting | null } | null>(null);
 
   const { year, month } = useMemo(() => calendarYearMonth(anchor, locale), [anchor, locale]);
   const cells = useMemo(() => getMonthGrid(locale, year, month), [locale, year, month]);
@@ -69,7 +65,7 @@ export function CalendarMonthGrid() {
   async function load() {
     const [monthEvents, holidayRows, policy] = await Promise.all([
       range
-        ? api.get<EventItem[]>(
+        ? api.get<CalendarMeeting[]>(
             `/calendar/events?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`,
           )
         : Promise.resolve([]),
@@ -122,21 +118,37 @@ export function CalendarMonthGrid() {
               data-in-month={cell.inMonth}
               data-today={iso === todayIso}
               key={iso}
+              onClick={() => setDraft({ dayIso: iso, meeting: null })}
             >
               <GunbadDay date={cell.date} locale={locale} rest={!workDays.includes(cell.date.getUTCDay())} size="month">
                 {holiday ? (
                   <span className="cal-month__holiday">{holiday.nameFa || holiday.name}</span>
                 ) : null}
                 {dayEvents.map((item) => (
-                  <span className="cal-month__chip" key={item.id}>
+                  <button
+                    className="cal-month__chip"
+                    type="button"
+                    key={item.id}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setDraft({ dayIso: iso, meeting: item });
+                    }}
+                  >
                     {item.title}
-                  </span>
+                  </button>
                 ))}
               </GunbadDay>
             </div>
           );
         })}
       </div>
+      <MeetingModal
+        open={!!draft}
+        dayIso={draft?.dayIso ?? todayIso}
+        meeting={draft?.meeting ?? null}
+        onClose={() => setDraft(null)}
+        onSaved={load}
+      />
     </div>
   );
 }

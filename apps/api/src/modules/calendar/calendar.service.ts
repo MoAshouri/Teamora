@@ -1,5 +1,5 @@
-﻿import { BadRequestException, Injectable } from '@nestjs/common';
-import type { CreateCalendarEventInput } from '@teamora/shared';
+﻿import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import type { CreateCalendarEventInput, UpdateCalendarEventInput } from '@teamora/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -90,6 +90,55 @@ export class CalendarService {
         },
       },
     });
+  }
+
+  private eventInclude() {
+    return {
+      attendees: {
+        include: {
+          user: { select: { id: true, fullName: true, avatarUrl: true } },
+        },
+      },
+    } as const;
+  }
+
+  async updateEvent(companyId: string, id: string, input: UpdateCalendarEventInput) {
+    const existing = await this.prisma.calendarEvent.findFirst({
+      where: { id, companyId },
+    });
+    if (!existing) throw new NotFoundException('Event not found');
+    const startsAt = input.startsAt ? new Date(input.startsAt) : existing.startsAt;
+    const endsAt = input.endsAt ? new Date(input.endsAt) : existing.endsAt;
+    if (endsAt <= startsAt) {
+      throw new BadRequestException('endsAt must be after startsAt');
+    }
+    return this.prisma.calendarEvent.update({
+      where: { id },
+      data: {
+        ...(input.title != null ? { title: input.title } : {}),
+        ...(input.description !== undefined ? { description: input.description } : {}),
+        ...(input.location !== undefined ? { location: input.location } : {}),
+        startsAt,
+        endsAt,
+        ...(input.attendeeIds
+          ? {
+              attendees: {
+                deleteMany: {},
+                create: input.attendeeIds.map((userId) => ({ userId })),
+              },
+            }
+          : {}),
+      },
+      include: this.eventInclude(),
+    });
+  }
+
+  async deleteEvent(companyId: string, id: string) {
+    const existing = await this.prisma.calendarEvent.findFirst({
+      where: { id, companyId },
+    });
+    if (!existing) throw new NotFoundException('Event not found');
+    await this.prisma.calendarEvent.delete({ where: { id } });
   }
 
   async detectConflicts(companyId: string, from: string, to: string) {

@@ -160,7 +160,16 @@
       "title": "تقویم",
       "prev": "ماه قبل",
       "next": "ماه بعد",
-      "today": "امروز"
+      "today": "امروز",
+      "newMeeting": "جلسه تازه",
+      "editMeeting": "ویرایش جلسه",
+      "deleteMeeting": "حذف جلسه",
+      "meetingTitle": "عنوان",
+      "attendees": "حاضران",
+      "location": "مکان",
+      "start": "شروع",
+      "end": "پایان",
+      "leaveConflict": "{name} در این بازه مرخصی تأییدشده دارد"
     },
     "dashboard": {
       "presentNow": "الان سر کار",
