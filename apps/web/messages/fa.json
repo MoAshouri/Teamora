@@ -169,7 +169,12 @@
       "location": "مکان",
       "start": "شروع",
       "end": "پایان",
-      "leaveConflict": "{name} در این بازه مرخصی تأییدشده دارد"
+      "leaveConflict": "{name} در این بازه مرخصی تأییدشده دارد",
+      "newTask": "کار تازه",
+      "editTask": "ویرایش کار",
+      "star": "ستاره",
+      "assignee": "مسئول",
+      "due": "موعد"
     },
     "dashboard": {
       "presentNow": "الان سر کار",

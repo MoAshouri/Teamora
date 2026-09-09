@@ -169,7 +169,12 @@
       "location": "Location",
       "start": "Start",
       "end": "End",
-      "leaveConflict": "{name} has approved leave in this window"
+      "leaveConflict": "{name} has approved leave in this window",
+      "newTask": "New task",
+      "editTask": "Edit task",
+      "star": "Star",
+      "assignee": "Assignee",
+      "due": "Due"
     },
     "dashboard": {
       "presentNow": "At work now",

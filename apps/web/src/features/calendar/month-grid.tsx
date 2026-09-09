@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { GunbadDay } from '@/features/ui/gunbad-day';
+import { Modal } from '@/features/ui/modal';
 import { MeetingModal, type CalendarMeeting } from './meeting-modal';
+import { TaskModal, type CalendarTask } from './task-modal';
 import {
   calendarYearMonth,
   formatMonthTitle,
@@ -34,9 +36,12 @@ export function CalendarMonthGrid() {
   const locale = useLocale() as Locale;
   const [anchor, setAnchor] = useState(() => new Date());
   const [events, setEvents] = useState<CalendarMeeting[]>([]);
+  const [tasks, setTasks] = useState<CalendarTask[]>([]);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [workDays, setWorkDays] = useState<number[]>(DEFAULT_WORK_DAYS);
   const [draft, setDraft] = useState<{ dayIso: string; meeting: CalendarMeeting | null } | null>(null);
+  const [taskDraft, setTaskDraft] = useState<{ dayIso: string; task: CalendarTask | null } | null>(null);
+  const [composer, setComposer] = useState<string | null>(null);
 
   const { year, month } = useMemo(() => calendarYearMonth(anchor, locale), [anchor, locale]);
   const cells = useMemo(() => getMonthGrid(locale, year, month), [locale, year, month]);
@@ -63,16 +68,22 @@ export function CalendarMonthGrid() {
   }, [cells]);
 
   async function load() {
-    const [monthEvents, holidayRows, policy] = await Promise.all([
+    const [monthEvents, monthTasks, holidayRows, policy] = await Promise.all([
       range
         ? api.get<CalendarMeeting[]>(
             `/calendar/events?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`,
+          )
+        : Promise.resolve([]),
+      range
+        ? api.get<CalendarTask[]>(
+            `/tasks?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`,
           )
         : Promise.resolve([]),
       api.get<Holiday[]>('/holidays'),
       api.get<{ workDays?: number[] } | null>('/companies/work-policy'),
     ]);
     setEvents(monthEvents);
+    setTasks(monthTasks);
     setHolidays(holidayRows);
     if (policy?.workDays?.length) setWorkDays(policy.workDays);
   }
@@ -111,6 +122,7 @@ export function CalendarMonthGrid() {
         {cells.map((cell) => {
           const iso = isoDateUtc(cell.date);
           const dayEvents = events.filter((item) => eventIso(item.startsAt) === iso);
+          const dayTasks = tasks.filter((item) => item.dueAt && eventIso(item.dueAt) === iso);
           const holiday = holidays.find((item) => eventIso(item.date) === iso);
           return (
             <div
@@ -118,7 +130,7 @@ export function CalendarMonthGrid() {
               data-in-month={cell.inMonth}
               data-today={iso === todayIso}
               key={iso}
-              onClick={() => setDraft({ dayIso: iso, meeting: null })}
+              onClick={() => setComposer(iso)}
             >
               <GunbadDay date={cell.date} locale={locale} rest={!workDays.includes(cell.date.getUTCDay())} size="month">
                 {holiday ? (
@@ -126,12 +138,26 @@ export function CalendarMonthGrid() {
                 ) : null}
                 {dayEvents.map((item) => (
                   <button
-                    className="cal-month__chip"
+                    className="cal-month__chip cal-month__chip--meeting"
                     type="button"
                     key={item.id}
                     onClick={(event) => {
                       event.stopPropagation();
                       setDraft({ dayIso: iso, meeting: item });
+                    }}
+                  >
+                    {item.title}
+                  </button>
+                ))}
+                {dayTasks.map((item) => (
+                  <button
+                    className="cal-month__chip cal-month__chip--task"
+                    data-starred={item.starred}
+                    type="button"
+                    key={item.id}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setTaskDraft({ dayIso: iso, task: item });
                     }}
                   >
                     {item.title}
@@ -149,6 +175,43 @@ export function CalendarMonthGrid() {
         onClose={() => setDraft(null)}
         onSaved={load}
       />
+      <TaskModal
+        open={!!taskDraft}
+        dayIso={taskDraft?.dayIso ?? todayIso}
+        task={taskDraft?.task ?? null}
+        onClose={() => setTaskDraft(null)}
+        onSaved={load}
+      />
+      <Modal
+        open={!!composer}
+        onClose={() => setComposer(null)}
+        title={t('calendar.title')}
+      >
+        <div className="cal-month__compose">
+          <button
+            className="btn btn-primary"
+            type="button"
+            onClick={() => {
+              if (!composer) return;
+              setDraft({ dayIso: composer, meeting: null });
+              setComposer(null);
+            }}
+          >
+            {t('calendar.newMeeting')}
+          </button>
+          <button
+            className="btn btn-ghost"
+            type="button"
+            onClick={() => {
+              if (!composer) return;
+              setTaskDraft({ dayIso: composer, task: null });
+              setComposer(null);
+            }}
+          >
+            {t('calendar.newTask')}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

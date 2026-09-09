@@ -1,0 +1,28 @@
+.task-star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--card) 80%, var(--bg-deep));
+  cursor: pointer;
+}
+
+.task-star[data-on='true'] {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  background: color-mix(in srgb, var(--accent-soft) 28%, var(--card));
+}
+
+.task-star img {
+  width: 1.25rem;
+  height: 1.25rem;
+  object-fit: contain;
+}
+
+.task-star[data-on='false'] img {
+  opacity: 0.45;
+  filter: grayscale(0.4);
+}
