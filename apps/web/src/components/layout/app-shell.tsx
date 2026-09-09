@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { authApi, type AuthUser } from '@/lib/api';
 import { VerifyEmailGate } from '@/features/auth/verify-email-gate';
 import { AppThemeToggle } from '@/components/app-theme-toggle';
+import { TodayHeading } from '@/features/app-shell/today-heading';
 
 function SetPasswordModal({ onDone }: { onDone: () => void }) {
   const [password, setPassword] = useState('');
@@ -106,7 +107,14 @@ export function AppShell({
   }
 
   if (!user) {
-    return <main className="container" style={{ padding: '3rem 0' }}>Loading…</main>;
+    return (
+      <main className="container" style={{ padding: '3rem 0' }}>
+        <header className="app-panel-header">
+          <TodayHeading />
+        </header>
+        Loading…
+      </main>
+    );
   }
 
   if (user.role === 'ADMIN' && user.mustVerifyEmail) {
@@ -139,6 +147,9 @@ export function AppShell({
         </aside>
       ) : null}
       <div className="main-pane" style={{ order: 1 }}>
+        <header className="app-panel-header">
+          <TodayHeading />
+        </header>
         {children}
         {role === 'EMPLOYEE' ? (
           <nav className="bottom-nav">

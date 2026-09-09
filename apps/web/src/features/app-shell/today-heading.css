@@ -1,0 +1,27 @@
+.app-panel-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+}
+
+.today-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.today-heading__weekday {
+  color: var(--muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.01em;
+}
+
+.today-heading__date {
+  color: var(--ink);
+  font-size: 1.2rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
