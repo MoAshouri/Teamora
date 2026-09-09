@@ -169,6 +169,9 @@
     "greet": {
       "morning": "صبح بخیر، {name}"
     },
+    "employee": {
+      "dayLengthHours": "طول روز {hours} ساعت"
+    },
     "leave": {
       "kindDaily": "روزانه",
       "kindHourly": "ساعتی",

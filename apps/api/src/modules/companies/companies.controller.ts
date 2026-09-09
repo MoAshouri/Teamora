@@ -19,6 +19,7 @@ export class CompaniesController {
   }
 
   @Get('work-policy')
+  @Roles('ADMIN', 'EMPLOYEE')
   getPolicy(@CurrentUser() user: AuthUser) {
     return this.companies.getWorkPolicy(user.companyId!);
   }

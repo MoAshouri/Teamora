@@ -169,6 +169,9 @@
     "greet": {
       "morning": "Բարի լույս, {name}"
     },
+    "employee": {
+      "dayLengthHours": "Օրվա տևողությունը {hours}ժ"
+    },
     "leave": {
       "kindDaily": "Օրական",
       "kindHourly": "Ժամային",

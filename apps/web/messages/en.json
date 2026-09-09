@@ -169,6 +169,9 @@
     "greet": {
       "morning": "Good morning, {name}"
     },
+    "employee": {
+      "dayLengthHours": "Day length {hours}h"
+    },
     "leave": {
       "kindDaily": "Daily",
       "kindHourly": "Hourly",
