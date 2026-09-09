@@ -249,7 +249,12 @@
     },
     "reminders": {
       "remindAt": "یادآوری",
-      "extend": "تمدید"
+      "extend": "تمدید",
+      "ack": "دیدم",
+      "disable": "خاموش",
+      "extend1h": "+۱ ساعت",
+      "extend1d": "+۱ روز",
+      "dueTitle": "یادآورهای سررسید"
     }
   }
 }

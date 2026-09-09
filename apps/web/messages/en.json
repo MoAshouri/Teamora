@@ -249,7 +249,12 @@
     },
     "reminders": {
       "remindAt": "Remind at",
-      "extend": "Extend"
+      "extend": "Extend",
+      "ack": "Acknowledge",
+      "disable": "Disable",
+      "extend1h": "+1 hour",
+      "extend1d": "+1 day",
+      "dueTitle": "Due reminders"
     }
   }
 }

@@ -74,6 +74,21 @@ export const lettersApi = {
   inbox: () => api.get('/letters/inbox'),
 };
 
+export type DueReminder = {
+  id: string;
+  title: string;
+  fireAt: string;
+  status: string;
+  snoozeUntil: string | null;
+};
+
+export const remindersApi = {
+  due: () => api.get<DueReminder[]>('/reminders/due'),
+  ack: (id: string) => api.post(`/reminders/${id}/ack`),
+  disable: (id: string) => api.post(`/reminders/${id}/disable`),
+  extend: (id: string, minutes: number) => api.post(`/reminders/${id}/extend`, { minutes }),
+};
+
 export const leavesApi = {
   grant: (body: { userId: string; kind: 'DAILY' | 'HOURLY'; amount: number; note?: string }) =>
     api.post('/leaves/grants', body),
