@@ -109,13 +109,17 @@ model InviteCode {
 }
 
 model WorkPolicy {
-  id        String   @id @default(cuid())
-  companyId String   @unique
-  workStart String
-  workEnd   String
-  workDays  Int[]
-  timezone  String   @default("Asia/Tehran")
-  updatedAt DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  companyId             String   @unique
+  workStart             String
+  workEnd               String
+  workDays              Int[]
+  timezone              String   @default("Asia/Tehran")
+  dailyMinutes          Int      @default(480)
+  overtimeAfterMinutes  Int      @default(480)
+  flexInMinutes         Int      @default(0)
+  flexOutMinutes        Int      @default(0)
+  updatedAt             DateTime @updatedAt
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }

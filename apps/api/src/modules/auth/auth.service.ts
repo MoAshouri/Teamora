@@ -110,6 +110,10 @@ export class AuthService {
         workEnd: '18:00',
         workDays: [6, 0, 1, 2, 3],
         timezone: 'Asia/Tehran',
+        dailyMinutes: 480,
+        overtimeAfterMinutes: 480,
+        flexInMinutes: 0,
+        flexOutMinutes: 0,
       },
     });
 
