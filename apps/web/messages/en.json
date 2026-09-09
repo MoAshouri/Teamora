@@ -246,6 +246,10 @@
       "flexIn": "Flex in",
       "flexOut": "Flex out",
       "minutesHint": "480 = 8 hours"
+    },
+    "reminders": {
+      "remindAt": "Remind at",
+      "extend": "Extend"
     }
   }
 }

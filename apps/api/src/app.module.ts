@@ -12,6 +12,7 @@ import { HolidaysModule } from './modules/holidays/holidays.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { NotesModule } from './modules/notes/notes.module';
+import { RemindersModule } from './modules/reminders/reminders.module';
 import { LettersModule } from './modules/letters/letters.module';
 
 @Module({
@@ -32,6 +33,7 @@ import { LettersModule } from './modules/letters/letters.module';
     RealtimeModule,
     TasksModule,
     NotesModule,
+    RemindersModule,
     LettersModule,
   ],
 })

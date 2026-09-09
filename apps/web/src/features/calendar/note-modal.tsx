@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { Modal } from '@/features/ui/modal';
+import { RemindAtField, saveReminder } from './remind-at';
 import './meeting-modal.css';
 import './note-modal.css';
 
@@ -32,11 +33,13 @@ export function NoteModal({
   const [body, setBody] = useState('');
   const [error, setError] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [remindAt, setRemindAt] = useState('');
 
   useEffect(() => {
     if (!open) return;
     setError('');
     setConfirmDelete(false);
+    setRemindAt('');
     setTitle(note?.title ?? '');
     setBody(note?.body ?? '');
   }, [open, note]);
@@ -50,8 +53,15 @@ export function NoteModal({
     }
     const payload = { title: title.trim(), body: trimmed, date: note?.date.slice(0, 10) ?? dayIso };
     try {
-      if (note) await api.patch(`/notes/${note.id}`, payload);
-      else await api.post('/notes', payload);
+      const saved = note
+        ? await api.patch<CalendarNote>(`/notes/${note.id}`, payload)
+        : await api.post<CalendarNote>('/notes', payload);
+      await saveReminder({
+        targetKind: 'NOTE',
+        targetId: saved.id,
+        title: payload.title,
+        remindAt,
+      });
       await onSaved();
       onClose();
     } catch (err) {
@@ -85,6 +95,7 @@ export function NoteModal({
           <span>{t('calendar.noteBody')}</span>
           <textarea value={body} onChange={(event) => setBody(event.target.value)} required maxLength={8000} rows={5} />
         </label>
+        <RemindAtField value={remindAt} onChange={setRemindAt} />
         {error ? <p className="meeting-form__error">{error}</p> : null}
         <div className="meeting-form__actions">
           {note ? (

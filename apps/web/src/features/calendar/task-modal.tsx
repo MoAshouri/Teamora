@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { Modal } from '@/features/ui/modal';
 import { brandTatil, type AuthFamily, type AuthTheme } from '@/features/auth/brand';
+import { RemindAtField, saveReminder } from './remind-at';
 import './meeting-modal.css';
 import './task-modal.css';
 
@@ -63,6 +64,7 @@ export function TaskModal({
   const [people, setPeople] = useState<Person[]>([]);
   const [error, setError] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [remindAt, setRemindAt] = useState('');
   const [spark, setSpark] = useState(() => brandTatil('gavit', 'light'));
 
   useEffect(() => {
@@ -80,6 +82,7 @@ export function TaskModal({
     if (!open) return;
     setError('');
     setConfirmDelete(false);
+    setRemindAt('');
     if (task) {
       setTitle(task.title);
       setDueAt(task.dueAt ? isoToLocalInput(task.dueAt) : dayTimeLocal(dayIso, 12));
@@ -106,8 +109,15 @@ export function TaskModal({
       starred,
     };
     try {
-      if (task) await api.patch(`/tasks/${task.id}`, body);
-      else await api.post('/tasks', body);
+      const saved = task
+        ? await api.patch<CalendarTask>(`/tasks/${task.id}`, body)
+        : await api.post<CalendarTask>('/tasks', body);
+      await saveReminder({
+        targetKind: 'TASK',
+        targetId: saved.id,
+        title: body.title,
+        remindAt,
+      });
       await onSaved();
       onClose();
     } catch (err) {
@@ -162,6 +172,7 @@ export function TaskModal({
         >
           <img src={spark} alt="" />
         </button>
+        <RemindAtField value={remindAt} onChange={setRemindAt} />
         {error ? <p className="meeting-form__error">{error}</p> : null}
         <div className="meeting-form__actions">
           {task ? (

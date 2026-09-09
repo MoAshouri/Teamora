@@ -246,6 +246,10 @@
       "flexIn": "Ճկուն մուտք",
       "flexOut": "Ճկուն ելք",
       "minutesHint": "480 = 8 ժամ"
+    },
+    "reminders": {
+      "remindAt": "Հիշեցնել",
+      "extend": "Երկարաձգել"
     }
   }
 }

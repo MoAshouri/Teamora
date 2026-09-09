@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { Modal } from '@/features/ui/modal';
+import { RemindAtField, saveReminder } from './remind-at';
 import './meeting-modal.css';
 
 export type CalendarMeeting = {
@@ -68,12 +69,14 @@ export function MeetingModal({
   const [conflict, setConflict] = useState('');
   const [error, setError] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [remindAt, setRemindAt] = useState('');
 
   useEffect(() => {
     if (!open) return;
     setError('');
     setConflict('');
     setConfirmDelete(false);
+    setRemindAt('');
     if (meeting) {
       setTitle(meeting.title);
       setLocation(meeting.location ?? '');
@@ -127,11 +130,15 @@ export function MeetingModal({
       attendeeIds,
     };
     try {
-      if (meeting) {
-        await api.patch(`/calendar/events/${meeting.id}`, body);
-      } else {
-        await api.post('/calendar/events', body);
-      }
+      const saved = meeting
+        ? await api.patch<CalendarMeeting>(`/calendar/events/${meeting.id}`, body)
+        : await api.post<CalendarMeeting>('/calendar/events', body);
+      await saveReminder({
+        targetKind: 'MEETING',
+        targetId: saved.id,
+        title: body.title,
+        remindAt,
+      });
       await onSaved();
       onClose();
     } catch (err) {
@@ -199,6 +206,7 @@ export function MeetingModal({
           </div>
         </fieldset>
         {conflict ? <p className="meeting-form__warn">{conflict}</p> : null}
+        <RemindAtField value={remindAt} onChange={setRemindAt} />
         {error ? <p className="meeting-form__error">{error}</p> : null}
         <div className="meeting-form__actions">
           {meeting ? (

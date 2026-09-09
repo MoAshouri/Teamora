@@ -39,3 +39,8 @@ export const ReviewReminderSchema = z
     }
   });
 export type ReviewReminderInput = z.infer<typeof ReviewReminderSchema>;
+
+export const ExtendReminderSchema = z.object({
+  minutes: z.coerce.number().int().positive().max(20_160),
+});
+export type ExtendReminderInput = z.infer<typeof ExtendReminderSchema>;

@@ -246,6 +246,10 @@
       "flexIn": "انعطاف ورود",
       "flexOut": "انعطاف خروج",
       "minutesHint": "۴۸۰ = ۸ ساعت"
+    },
+    "reminders": {
+      "remindAt": "یادآوری",
+      "extend": "تمدید"
     }
   }
 }
