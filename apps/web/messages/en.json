@@ -1,4 +1,4 @@
-﻿{
+{
   "brand": "Teamora",
   "tagline": "Human capital, calmly managed",
   "landing": {
@@ -82,5 +82,16 @@
     "approve": "Approve",
     "reject": "Reject",
     "empty": "Nothing here yet"
+  },
+  "app": {
+    "verifyEmail": {
+      "title": "Confirm your email",
+      "lede": "A six-brick code will land on {email}. The hall stays closed until then.",
+      "send": "Send code",
+      "resend": "Resend",
+      "code": "Email code",
+      "submit": "Enter",
+      "logout": "Logout"
+    }
   }
 }

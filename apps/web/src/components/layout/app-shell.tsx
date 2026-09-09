@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authApi, type AuthUser } from '@/lib/api';
+import { VerifyEmailGate } from '@/features/auth/verify-email-gate';
 
 function SetPasswordModal({ onDone }: { onDone: () => void }) {
   const [password, setPassword] = useState('');
@@ -108,6 +109,16 @@ export function AppShell({
 
   if (!user) {
     return <main className="container" style={{ padding: '3rem 0' }}>Loading…</main>;
+  }
+
+  if (user.role === 'ADMIN' && user.mustVerifyEmail) {
+    return (
+      <VerifyEmailGate
+        email={user.email}
+        onVerified={setUser}
+        onLogout={logout}
+      />
+    );
   }
 
   return (
