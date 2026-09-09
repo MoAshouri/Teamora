@@ -46,10 +46,21 @@ export const ReviewLeaveSchema = z.object({
 });
 export type ReviewLeaveInput = z.infer<typeof ReviewLeaveSchema>;
 
-export const CreateBonusLeaveSchema = z.object({
-  userId: z.string().min(1),
-  kind: LeaveKindSchema,
-  amount: z.number().positive(),
-  note: z.string().max(500).optional(),
-});
+export const CreateBonusLeaveSchema = z
+  .object({
+    userId: z.string().min(1),
+    kind: LeaveKindSchema,
+    amount: z.number().positive(),
+    note: z.string().max(500).optional(),
+  })
+  .superRefine((value, ctx) => {
+    const max = value.kind === 'DAILY' ? 30 : 40;
+    if (value.amount > max) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `amount must be at most ${max}`,
+        path: ['amount'],
+      });
+    }
+  });
 export type CreateBonusLeaveInput = z.infer<typeof CreateBonusLeaveSchema>;

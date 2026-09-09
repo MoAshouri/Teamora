@@ -1,5 +1,5 @@
-﻿import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import type { CreateLeaveRequestInput, ReviewLeaveInput } from '@teamora/shared';
+﻿import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import type { CreateBonusLeaveInput, CreateLeaveRequestInput, ReviewLeaveInput } from '@teamora/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { AuthUser } from '../../common/auth/auth-user';
 
@@ -69,23 +69,71 @@ export class LeavesService {
     });
   }
 
-  async balance(companyId: string, userId: string) {
-    const annualAllowance = 12;
-    const approved = await this.prisma.leaveRequest.findMany({
-      where: {
+  async grant(companyId: string, adminId: string, input: CreateBonusLeaveInput) {
+    const membership = await this.prisma.companyMembership.findFirst({
+      where: { companyId, userId: input.userId },
+    });
+    if (!membership) {
+      throw new ForbiddenException('Recipient not in company');
+    }
+    return this.prisma.leaveBalanceAdjustment.create({
+      data: {
         companyId,
-        userId,
-        type: 'ANNUAL',
-        status: 'APPROVED',
+        userId: input.userId,
+        kind: input.kind,
+        amount: input.amount,
+        note: input.note,
+        createdBy: adminId,
       },
     });
-    const used = approved.reduce((sum, l) => {
-      const days =
-        Math.floor(
-          (l.endDate.getTime() - l.startDate.getTime()) / 86_400_000,
-        ) + 1;
-      return sum + days;
-    }, 0);
-    return { annualAllowance, used, remaining: Math.max(0, annualAllowance - used) };
+  }
+
+  async balance(companyId: string, userId: string) {
+    const annualAllowanceDays = 12;
+    const [approved, grants] = await Promise.all([
+      this.prisma.leaveRequest.findMany({
+        where: {
+          companyId,
+          userId,
+          status: 'APPROVED',
+          source: 'REQUEST',
+        },
+      }),
+      this.prisma.leaveBalanceAdjustment.findMany({
+        where: { companyId, userId },
+      }),
+    ]);
+
+    const usedDays = approved
+      .filter((leave) => leave.kind === 'DAILY' && leave.type === 'ANNUAL')
+      .reduce((sum, leave) => {
+        const days =
+          Math.floor((leave.endDate.getTime() - leave.startDate.getTime()) / 86_400_000) + 1;
+        return sum + days;
+      }, 0);
+    const usedHours = approved
+      .filter((leave) => leave.kind === 'HOURLY')
+      .reduce((sum, leave) => sum + Number(leave.hours ?? 0), 0);
+    const bonusDays = grants
+      .filter((row) => row.kind === 'DAILY')
+      .reduce((sum, row) => sum + Number(row.amount), 0);
+    const bonusHours = grants
+      .filter((row) => row.kind === 'HOURLY')
+      .reduce((sum, row) => sum + Number(row.amount), 0);
+    const remainingDays = annualAllowanceDays + bonusDays - usedDays;
+    const remainingHours = bonusHours - usedHours;
+
+    return {
+      annualAllowanceDays,
+      annualAllowance: annualAllowanceDays,
+      bonusDays,
+      usedDays,
+      remainingDays,
+      bonusHours,
+      usedHours,
+      remainingHours,
+      remaining: remainingDays,
+      used: usedDays,
+    };
   }
 }

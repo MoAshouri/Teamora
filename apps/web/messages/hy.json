@@ -130,7 +130,8 @@
       "weekHours": "Այս շաբաթվա ժամեր",
       "present": "Աշխատում է",
       "away": "Բացակա",
-      "writeLetter": "Նամակ գրել"
+      "writeLetter": "Նամակ գրել",
+      "grantLeave": "Արձակուրդ շնորհել"
     },
     "letter": {
       "subject": "Վերնագիր",
@@ -160,6 +161,12 @@
     },
     "greet": {
       "morning": "Բարի լույս, {name}"
+    },
+    "leave": {
+      "kindDaily": "Օրական",
+      "kindHourly": "Ժամային",
+      "amount": "Քանակ",
+      "grant": "Շնորհել"
     }
   }
 }

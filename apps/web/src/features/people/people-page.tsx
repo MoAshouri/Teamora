@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { BrickWeekChart } from '@/features/ui/brick-week-chart';
 import { ComposeLetter } from './compose-letter';
+import { GrantLeave } from './grant-leave';
 import { formatDate, formatTime } from '@/lib/dates';
 import type { Locale } from '@/lib/i18n/config';
 import './people-page.css';
@@ -132,7 +133,10 @@ export default function PeoplePage() {
                     {present ? t('people.present') : t('people.away')}
                   </span>
                   {m.user.role === 'EMPLOYEE' ? (
-                    <ComposeLetter recipientId={m.user.id} recipientName={m.user.fullName} />
+                    <>
+                      <ComposeLetter recipientId={m.user.id} recipientName={m.user.fullName} />
+                      <GrantLeave userId={m.user.id} recipientName={m.user.fullName} />
+                    </>
                   ) : null}
                 </div>
               </div>

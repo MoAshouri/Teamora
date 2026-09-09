@@ -130,7 +130,8 @@
       "weekHours": "ساعات این هفته",
       "present": "سر کار",
       "away": "غایب",
-      "writeLetter": "نوشتن نامه"
+      "writeLetter": "نوشتن نامه",
+      "grantLeave": "اعطای مرخصی"
     },
     "letter": {
       "subject": "موضوع",
@@ -160,6 +161,12 @@
     },
     "greet": {
       "morning": "صبح بخیر، {name}"
+    },
+    "leave": {
+      "kindDaily": "روزانه",
+      "kindHourly": "ساعتی",
+      "amount": "مقدار",
+      "grant": "اعطا"
     }
   }
 }

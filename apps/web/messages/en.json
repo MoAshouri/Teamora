@@ -130,7 +130,8 @@
       "weekHours": "Hours this week",
       "present": "At work",
       "away": "Away",
-      "writeLetter": "Write letter"
+      "writeLetter": "Write letter",
+      "grantLeave": "Grant leave"
     },
     "letter": {
       "subject": "Subject",
@@ -160,6 +161,12 @@
     },
     "greet": {
       "morning": "Good morning, {name}"
+    },
+    "leave": {
+      "kindDaily": "Daily",
+      "kindHourly": "Hourly",
+      "amount": "Amount",
+      "grant": "Grant"
     }
   }
 }

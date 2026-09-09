@@ -1,4 +1,5 @@
 ﻿import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -7,7 +8,11 @@
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { CreateLeaveRequestSchema, ReviewLeaveSchema } from '@teamora/shared';
+import {
+  CreateBonusLeaveSchema,
+  CreateLeaveRequestSchema,
+  ReviewLeaveSchema,
+} from '@teamora/shared';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../../common/auth/roles.decorator';
 import { RolesGuard } from '../../common/auth/roles.guard';
@@ -39,6 +44,31 @@ export class LeavesController {
     return this.leaves.pending(user.companyId!);
   }
 
+  @Post('grants')
+  @Roles('ADMIN')
+  grant(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    const parsed = CreateBonusLeaveSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException('Invalid bonus grant');
+    }
+    return this.leaves.grant(user.companyId!, user.id, parsed.data);
+  }
+
+  @Get('balance/me')
+  @Roles('EMPLOYEE')
+  myBalance(@CurrentUser() user: AuthUser) {
+    return this.leaves.balance(user.companyId!, user.id);
+  }
+
+  @Get('balance/:userId')
+  @Roles('ADMIN')
+  balanceFor(
+    @CurrentUser() user: AuthUser,
+    @Param('userId') userId: string,
+  ) {
+    return this.leaves.balance(user.companyId!, userId);
+  }
+
   @Patch(':id')
   @Roles('ADMIN')
   review(
@@ -48,11 +78,5 @@ export class LeavesController {
   ) {
     const input = ReviewLeaveSchema.parse(body);
     return this.leaves.review(user.companyId!, user.id, id, input);
-  }
-
-  @Get('balance/me')
-  @Roles('EMPLOYEE')
-  balance(@CurrentUser() user: AuthUser) {
-    return this.leaves.balance(user.companyId!, user.id);
   }
 }

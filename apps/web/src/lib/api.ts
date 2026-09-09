@@ -72,3 +72,9 @@ export const lettersApi = {
     api.post('/letters', body),
   inbox: () => api.get('/letters/inbox'),
 };
+
+export const leavesApi = {
+  grant: (body: { userId: string; kind: 'DAILY' | 'HOURLY'; amount: number; note?: string }) =>
+    api.post('/leaves/grants', body),
+  balance: (userId: string) => api.get(`/leaves/balance/${userId}`),
+};
