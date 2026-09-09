@@ -172,6 +172,14 @@
     "employee": {
       "dayLengthHours": "Day length {hours}h"
     },
+    "leaves": {
+      "monthTitle": "Leave month",
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "approvedDays": "Approved days {n}",
+      "approvedHours": "Approved hours {n}",
+      "pendingCount": "Pending {n}"
+    },
     "leave": {
       "kindDaily": "Daily",
       "kindHourly": "Hourly",

@@ -172,6 +172,14 @@
     "employee": {
       "dayLengthHours": "Օրվա տևողությունը {hours}ժ"
     },
+    "leaves": {
+      "monthTitle": "Արձակուրդի ամիս",
+      "prevMonth": "Նախորդ ամիս",
+      "nextMonth": "Հաջորդ ամիս",
+      "approvedDays": "Հաստատված օրեր {n}",
+      "approvedHours": "Հաստատված ժամեր {n}",
+      "pendingCount": "Սպասող {n}"
+    },
     "leave": {
       "kindDaily": "Օրական",
       "kindHourly": "Ժամային",

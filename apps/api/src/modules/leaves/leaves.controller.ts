@@ -6,6 +6,7 @@
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -34,8 +35,12 @@ export class LeavesController {
   }
 
   @Get()
-  list(@CurrentUser() user: AuthUser) {
-    return this.leaves.list(user);
+  list(
+    @CurrentUser() user: AuthUser,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.leaves.list(user, from, to);
   }
 
   @Get('pending')

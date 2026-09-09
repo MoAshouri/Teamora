@@ -1,0 +1,109 @@
+.leave-month__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.leave-month__nav h1 {
+  margin: 0;
+  text-align: center;
+}
+
+.leave-month__totals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.leave-month__stat {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.leave-month__weekdays,
+.leave-month__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.leave-month__weekdays {
+  margin-bottom: 0.35rem;
+}
+
+.leave-month__weekday {
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-align: center;
+}
+
+.leave-day {
+  min-height: 6.2rem;
+  padding: 0.4rem 0.35rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 18px 18px 8px 8px;
+  background: color-mix(in srgb, var(--bg-deep) 58%, var(--card));
+  box-shadow: inset 0 10px 16px rgba(26, 43, 42, 0.06);
+}
+
+.leave-day[data-empty='true'] {
+  opacity: 0.35;
+  min-height: 2.2rem;
+}
+
+.leave-day[data-rest='true'] {
+  background: color-mix(in srgb, var(--bg-deep) 72%, var(--card));
+}
+
+.leave-day__num {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.leave-day__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.leave-chip {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leave-chip[data-status='pending'] {
+  color: var(--accent);
+}
+
+.leave-chip[data-status='approved'] {
+  color: var(--teal);
+}
+
+.leave-chip[data-status='rejected'] {
+  color: var(--muted);
+}
+
+.leave-month__review {
+  margin-top: 1rem;
+}
+
+@media (max-width: 900px) {
+  .leave-month__totals {
+    grid-template-columns: 1fr;
+  }
+
+  .leave-day {
+    min-height: 4.4rem;
+  }
+}

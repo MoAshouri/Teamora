@@ -172,6 +172,14 @@
     "employee": {
       "dayLengthHours": "طول روز {hours} ساعت"
     },
+    "leaves": {
+      "monthTitle": "مرخصی ماه",
+      "prevMonth": "ماه قبل",
+      "nextMonth": "ماه بعد",
+      "approvedDays": "روزهای تأییدشده {n}",
+      "approvedHours": "ساعات تأییدشده {n}",
+      "pendingCount": "در انتظار {n}"
+    },
     "leave": {
       "kindDaily": "روزانه",
       "kindHourly": "ساعتی",

@@ -25,11 +25,31 @@ export class LeavesService {
     });
   }
 
-  list(user: AuthUser) {
+  list(user: AuthUser, from?: string | Date, to?: string | Date) {
+    const asDay = (value?: string | Date) => {
+      if (!value) return undefined;
+      if (value instanceof Date && !Number.isNaN(value.getTime())) {
+        return value.toISOString().slice(0, 10);
+      }
+      const text = String(value);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+      const parsed = new Date(text);
+      return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString().slice(0, 10);
+    };
+    const fromDay = asDay(from);
+    const toDay = asDay(to);
+    const range =
+      fromDay && toDay
+        ? {
+            startDate: { lte: new Date(`${toDay}T23:59:59.999Z`) },
+            endDate: { gte: new Date(`${fromDay}T00:00:00.000Z`) },
+          }
+        : {};
     return this.prisma.leaveRequest.findMany({
       where: {
         companyId: user.companyId!,
         ...(user.role === 'EMPLOYEE' ? { userId: user.id } : {}),
+        ...range,
       },
       include: {
         user: { select: { id: true, fullName: true, avatarUrl: true } },

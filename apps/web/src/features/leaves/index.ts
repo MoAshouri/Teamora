@@ -1,1 +1,1 @@
-export {};
+export { AdminLeaveMonth } from './admin-month';
