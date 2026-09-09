@@ -1,0 +1,12 @@
+.note-form textarea {
+  width: 100%;
+  min-height: 6.5rem;
+  resize: vertical;
+}
+
+.cal-month__chip--note {
+  color: color-mix(in srgb, var(--ink) 62%, var(--muted));
+  background: color-mix(in srgb, var(--card) 72%, var(--bg-deep));
+  clip-path: polygon(0 0, calc(100% - 0.55rem) 0, 100% 0.55rem, 100% 100%, 0 100%);
+  padding-inline: 0.2rem;
+}

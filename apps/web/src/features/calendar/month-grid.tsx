@@ -7,6 +7,7 @@ import { GunbadDay } from '@/features/ui/gunbad-day';
 import { Modal } from '@/features/ui/modal';
 import { MeetingModal, type CalendarMeeting } from './meeting-modal';
 import { TaskModal, type CalendarTask } from './task-modal';
+import { NoteModal, type CalendarNote } from './note-modal';
 import {
   calendarYearMonth,
   formatMonthTitle,
@@ -41,6 +42,8 @@ export function CalendarMonthGrid() {
   const [workDays, setWorkDays] = useState<number[]>(DEFAULT_WORK_DAYS);
   const [draft, setDraft] = useState<{ dayIso: string; meeting: CalendarMeeting | null } | null>(null);
   const [taskDraft, setTaskDraft] = useState<{ dayIso: string; task: CalendarTask | null } | null>(null);
+  const [noteDraft, setNoteDraft] = useState<{ dayIso: string; note: CalendarNote | null } | null>(null);
+  const [notes, setNotes] = useState<CalendarNote[]>([]);
   const [composer, setComposer] = useState<string | null>(null);
 
   const { year, month } = useMemo(() => calendarYearMonth(anchor, locale), [anchor, locale]);
@@ -68,7 +71,7 @@ export function CalendarMonthGrid() {
   }, [cells]);
 
   async function load() {
-    const [monthEvents, monthTasks, holidayRows, policy] = await Promise.all([
+    const [monthEvents, monthTasks, monthNotes, holidayRows, policy] = await Promise.all([
       range
         ? api.get<CalendarMeeting[]>(
             `/calendar/events?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`,
@@ -79,11 +82,17 @@ export function CalendarMonthGrid() {
             `/tasks?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`,
           )
         : Promise.resolve([]),
+      range
+        ? api.get<CalendarNote[]>(
+            `/notes?from=${encodeURIComponent(range.from.slice(0, 10))}&to=${encodeURIComponent(range.to.slice(0, 10))}`,
+          )
+        : Promise.resolve([]),
       api.get<Holiday[]>('/holidays'),
       api.get<{ workDays?: number[] } | null>('/companies/work-policy'),
     ]);
     setEvents(monthEvents);
     setTasks(monthTasks);
+    setNotes(monthNotes);
     setHolidays(holidayRows);
     if (policy?.workDays?.length) setWorkDays(policy.workDays);
   }
@@ -123,6 +132,7 @@ export function CalendarMonthGrid() {
           const iso = isoDateUtc(cell.date);
           const dayEvents = events.filter((item) => eventIso(item.startsAt) === iso);
           const dayTasks = tasks.filter((item) => item.dueAt && eventIso(item.dueAt) === iso);
+          const dayNotes = notes.filter((item) => eventIso(item.date) === iso);
           const holiday = holidays.find((item) => eventIso(item.date) === iso);
           return (
             <div
@@ -163,6 +173,19 @@ export function CalendarMonthGrid() {
                     {item.title}
                   </button>
                 ))}
+                {dayNotes.map((item) => (
+                  <button
+                    className="cal-month__chip cal-month__chip--note"
+                    type="button"
+                    key={item.id}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setNoteDraft({ dayIso: iso, note: item });
+                    }}
+                  >
+                    {item.title}
+                  </button>
+                ))}
               </GunbadDay>
             </div>
           );
@@ -180,6 +203,13 @@ export function CalendarMonthGrid() {
         dayIso={taskDraft?.dayIso ?? todayIso}
         task={taskDraft?.task ?? null}
         onClose={() => setTaskDraft(null)}
+        onSaved={load}
+      />
+      <NoteModal
+        open={!!noteDraft}
+        dayIso={noteDraft?.dayIso ?? todayIso}
+        note={noteDraft?.note ?? null}
+        onClose={() => setNoteDraft(null)}
         onSaved={load}
       />
       <Modal
@@ -209,6 +239,17 @@ export function CalendarMonthGrid() {
             }}
           >
             {t('calendar.newTask')}
+          </button>
+          <button
+            className="btn btn-ghost"
+            type="button"
+            onClick={() => {
+              if (!composer) return;
+              setNoteDraft({ dayIso: composer, note: null });
+              setComposer(null);
+            }}
+          >
+            {t('calendar.newNote')}
           </button>
         </div>
       </Modal>

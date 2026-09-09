@@ -174,7 +174,11 @@
       "editTask": "Edit task",
       "star": "Star",
       "assignee": "Assignee",
-      "due": "Due"
+      "due": "Due",
+      "newNote": "New note",
+      "editNote": "Edit note",
+      "noteBody": "Note",
+      "saveNote": "Save note"
     },
     "dashboard": {
       "presentNow": "At work now",

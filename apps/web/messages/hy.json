@@ -174,7 +174,11 @@
       "editTask": "Խմբագրել խնդիրը",
       "star": "Աստղ",
       "assignee": "Կատարող",
-      "due": "Ժամկետ"
+      "due": "Ժամկետ",
+      "newNote": "Նոր նշում",
+      "editNote": "Խմբագրել նշումը",
+      "noteBody": "Տեքստ",
+      "saveNote": "Պահել նշումը"
     },
     "dashboard": {
       "presentNow": "Հիմա աշխատում են",

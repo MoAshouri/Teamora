@@ -99,6 +99,13 @@
   color: var(--accent);
 }
 
+.cal-month__chip--note {
+  color: color-mix(in srgb, var(--ink) 62%, var(--muted));
+  background: color-mix(in srgb, var(--card) 78%, var(--bg-deep));
+  clip-path: polygon(0 0, calc(100% - 0.55rem) 0, 100% 0.55rem, 100% 100%, 0 100%);
+  padding-inline: 0.22rem;
+}
+
 .cal-month__compose {
   display: flex;
   justify-content: flex-end;
