@@ -156,7 +156,11 @@
       "hoursShort": "{n}س"
     },
     "calendar": {
-      "rest": "تعطیل"
+      "rest": "تعطیل",
+      "title": "تقویم",
+      "prev": "ماه قبل",
+      "next": "ماه بعد",
+      "today": "امروز"
     },
     "dashboard": {
       "presentNow": "الان سر کار",

@@ -175,3 +175,34 @@ export function monthQueryRange(anchor: Date, locale: Locale) {
   const end = endOfCalendarMonth(anchor, locale);
   return { from: isoDateUtc(start), to: isoDateUtc(end), start, end };
 }
+
+export function calendarYearMonth(date: Date, locale: Locale) {
+  return calendarYmd(utcNoon(date), locale);
+}
+
+export function getMonthGrid(locale: Locale, year: number, month: number) {
+  const origin =
+    calendarFor(locale) === 'persian'
+      ? new Date(Date.UTC(year + 621, Math.max(0, month - 1), 15, 12))
+      : new Date(Date.UTC(year, month - 1, 15, 12));
+  let cursor = utcNoon(origin);
+  for (let step = 0; step < 48; step += 1) {
+    const ymd = calendarYmd(cursor, locale);
+    const delta = (year - ymd.year) * 12 + (month - ymd.month);
+    if (delta === 0) break;
+    cursor = shiftCalendarMonth(cursor, locale, Math.max(-8, Math.min(8, delta)));
+  }
+  const start = startOfCalendarMonth(cursor, locale);
+  const inMonth = daysOfCalendarMonth(cursor, locale);
+  const pad = (start.getUTCDay() + 1) % 7;
+  const cells: Array<{ date: Date; inMonth: boolean }> = [];
+  for (let i = pad; i > 0; i -= 1) {
+    cells.push({ date: shiftUtcDays(start, -i), inMonth: false });
+  }
+  for (const date of inMonth) cells.push({ date, inMonth: true });
+  while (cells.length < 42) {
+    const last = cells[cells.length - 1]?.date ?? start;
+    cells.push({ date: shiftUtcDays(last, 1), inMonth: false });
+  }
+  return cells.slice(0, 42);
+}

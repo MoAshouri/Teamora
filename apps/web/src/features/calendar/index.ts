@@ -1,1 +1,1 @@
-export {};
+export { CalendarMonthGrid } from './month-grid';

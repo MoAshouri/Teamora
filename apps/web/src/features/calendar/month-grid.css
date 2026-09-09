@@ -1,0 +1,85 @@
+.cal-month__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.cal-month__nav h1 {
+  margin: 0;
+  text-align: center;
+}
+
+.cal-month__nav-end {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.cal-month__weekdays,
+.cal-month__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.cal-month__weekdays {
+  margin-bottom: 0.35rem;
+}
+
+.cal-month__weekday {
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-align: center;
+}
+
+.cal-month__tile {
+  min-width: 0;
+}
+
+.cal-month__tile[data-in-month='false'] {
+  opacity: 0.38;
+}
+
+.cal-month__tile[data-today='true'] .gunbad-day__num {
+  color: var(--accent);
+}
+
+.cal-month__tile[data-today='true'] .gunbad-day__well {
+  box-shadow:
+    inset 0 10px 18px rgba(26, 43, 42, 0.12),
+    inset 0 0 0 2px var(--accent);
+}
+
+.cal-month .gunbad-day[data-size='month'] {
+  min-height: 7.2rem;
+}
+
+.cal-month .gunbad-day__weekday {
+  display: none;
+}
+
+.cal-month__holiday,
+.cal-month__chip {
+  overflow: hidden;
+  font-size: 0.62rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cal-month__holiday {
+  color: var(--accent);
+}
+
+.cal-month__chip {
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .cal-month .gunbad-day[data-size='month'] {
+    min-height: 5.6rem;
+  }
+}

@@ -1,4 +1,4 @@
-{
+﻿{
   "brand": "Teamora",
   "tagline": "Human capital, calmly managed",
   "landing": {
@@ -156,7 +156,11 @@
       "hoursShort": "{n}h"
     },
     "calendar": {
-      "rest": "Rest"
+      "rest": "Rest",
+      "title": "Calendar",
+      "prev": "Previous month",
+      "next": "Next month",
+      "today": "Today"
     },
     "dashboard": {
       "presentNow": "At work now",

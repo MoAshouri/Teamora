@@ -156,7 +156,11 @@
       "hoursShort": "{n}ժ"
     },
     "calendar": {
-      "rest": "Հանգիստ"
+      "rest": "Հանգիստ",
+      "title": "Օրացույց",
+      "prev": "Նախորդ ամիս",
+      "next": "Հաջորդ ամիս",
+      "today": "Այսօր"
     },
     "dashboard": {
       "presentNow": "Հիմա աշխատում են",
