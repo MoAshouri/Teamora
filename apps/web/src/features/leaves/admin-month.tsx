@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
-import { ReviewLeaveModal } from './review-leave-modal';
+import { PendingLeaves } from '@/features/admin-dashboard/pending-leaves';
 import {
   daysOfCalendarMonth,
   formatDayNumber,
@@ -47,15 +47,6 @@ function weekdayPad(start: Date) {
   return (start.getUTCDay() + 1) % 7;
 }
 
-function statusCopy(
-  status: LeaveItem['status'],
-  t: ReturnType<typeof useTranslations>,
-) {
-  if (status === 'APPROVED') return t('status.approved');
-  if (status === 'REJECTED') return t('status.rejected');
-  return t('status.pending');
-}
-
 export function AdminLeaveMonth() {
   const t = useTranslations('app');
   const locale = useLocale() as Locale;
@@ -63,7 +54,6 @@ export function AdminLeaveMonth() {
   const [items, setItems] = useState<LeaveItem[]>([]);
   const [pending, setPending] = useState<LeaveItem[]>([]);
   const [workDays, setWorkDays] = useState<number[]>(DEFAULT_WORK_DAYS);
-  const [draft, setDraft] = useState<{ id: string; status: 'APPROVED' | 'REJECTED' } | null>(null);
 
   const range = useMemo(() => monthQueryRange(anchor, locale), [anchor, locale]);
   const days = useMemo(() => daysOfCalendarMonth(anchor, locale), [anchor, locale]);
@@ -94,13 +84,6 @@ export function AdminLeaveMonth() {
   useEffect(() => {
     load().catch(console.error);
   }, [range.from, range.to]);
-
-  async function confirmReview(note: string) {
-    if (!draft) return;
-    await api.patch(`/leaves/${draft.id}`, { status: draft.status, note });
-    setDraft(null);
-    await load();
-  }
 
   const pendingCount = items.filter((item) => item.status === 'PENDING').length;
   const approvedDays = items
@@ -174,35 +157,7 @@ export function AdminLeaveMonth() {
           );
         })}
       </div>
-      <div className="card leave-month__review">
-        {pending.map((item) => (
-          <div className="list-row" key={item.id}>
-            <div>
-              <strong>{item.user.fullName}</strong>
-              <div className="muted">
-                {item.type} · {statusCopy(item.status, t)} ·{' '}
-                {leaveIso(item.startDate)} → {leaveIso(item.endDate)}
-              </div>
-            </div>
-            {item.status === 'PENDING' ? (
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn btn-primary" type="button" onClick={() => setDraft({ id: item.id, status: 'APPROVED' })}>
-                  {t('status.approved')}
-                </button>
-                <button className="btn btn-ghost" type="button" onClick={() => setDraft({ id: item.id, status: 'REJECTED' })}>
-                  {t('status.rejected')}
-                </button>
-              </div>
-            ) : null}
-          </div>
-        ))}
-      </div>
-      <ReviewLeaveModal
-        open={!!draft}
-        title={draft?.status === 'REJECTED' ? t('status.rejected') : t('status.approved')}
-        onClose={() => setDraft(null)}
-        onConfirm={confirmReview}
-      />
+      <PendingLeaves items={pending} onReload={load} />
     </div>
   );
 }

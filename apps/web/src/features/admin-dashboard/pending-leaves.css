@@ -1,0 +1,46 @@
+.pending-leaves__legend {
+  margin-bottom: 0.85rem;
+}
+
+.pending-leaves__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+.pending-leaves__row:last-of-type {
+  border-bottom: 0;
+}
+
+.pending-leaves__meta {
+  min-width: 0;
+}
+
+.pending-leaves__name {
+  display: block;
+}
+
+.pending-leaves__detail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pending-leaves__actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+@media (max-width: 720px) {
+  .pending-leaves__row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .pending-leaves__actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}

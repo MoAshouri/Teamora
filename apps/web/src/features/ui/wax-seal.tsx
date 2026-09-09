@@ -71,7 +71,14 @@ export function WaxSeal({
   const [src, setSrc] = useState(() => brandSeal(family ?? 'gavit', theme ?? 'light'));
 
   useEffect(() => {
-    setSrc(brandSeal(family ?? familyFromDom(), theme ?? themeFromDom()));
+    const apply = () => setSrc(brandSeal(family ?? familyFromDom(), theme ?? themeFromDom()));
+    apply();
+    const observer = new MutationObserver(apply);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme', 'data-family'],
+    });
+    return () => observer.disconnect();
   }, [family, theme]);
 
   return (

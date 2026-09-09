@@ -192,7 +192,14 @@
       "to": "Ավարտ",
       "reason": "Պատճառ",
       "type": "Տեսակ",
-      "reasonRequired": "Պատճառը պարտադիր է"
+      "reasonRequired": "Պատճառը պարտադիր է",
+      "pendingTitle": "Սպասող արձակուրդներ",
+      "hourly": "Ժամային",
+      "daily": "Օրական",
+      "approve": "Հաստատել",
+      "reject": "Մերժել",
+      "reasonLabel": "Պատճառ",
+      "nonePending": "Սպասող արձակուրդ չկա"
     },
     "workTime": {
       "title": "Ժամեր",

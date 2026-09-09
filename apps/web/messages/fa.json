@@ -192,7 +192,14 @@
       "to": "تا",
       "reason": "دلیل",
       "type": "نوع",
-      "reasonRequired": "دلیل لازم است"
+      "reasonRequired": "دلیل لازم است",
+      "pendingTitle": "مرخصی‌های در انتظار",
+      "hourly": "ساعتی",
+      "daily": "روزانه",
+      "approve": "تأیید",
+      "reject": "رد",
+      "reasonLabel": "دلیل",
+      "nonePending": "هیچ مرخصی در انتظار نیست"
     },
     "workTime": {
       "title": "ساعات کاری",

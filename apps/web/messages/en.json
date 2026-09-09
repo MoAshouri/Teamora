@@ -1,4 +1,4 @@
-﻿{
+{
   "brand": "Teamora",
   "tagline": "Human capital, calmly managed",
   "landing": {
@@ -192,7 +192,14 @@
       "to": "To",
       "reason": "Reason",
       "type": "Type",
-      "reasonRequired": "A reason is required"
+      "reasonRequired": "A reason is required",
+      "pendingTitle": "Pending leaves",
+      "hourly": "Hourly",
+      "daily": "Daily",
+      "approve": "Approve",
+      "reject": "Reject",
+      "reasonLabel": "Reason",
+      "nonePending": "None pending"
     },
     "workTime": {
       "title": "Hours",

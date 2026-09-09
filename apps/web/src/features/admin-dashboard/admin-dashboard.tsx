@@ -4,36 +4,26 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api, authApi, type AuthUser } from '@/lib/api';
 import { usePresence } from '@/hooks/use-presence';
-import { WaxSeal } from '@/features/ui/wax-seal';
-import { ReviewLeaveModal } from '@/features/leaves';
+import { PendingLeaves, type PendingLeave } from './pending-leaves';
 import { AdminWeekHours } from './week-hours';
 import { AdminStarredWeek } from './starred-week';
 import './admin-dashboard.css';
 
-type Leave = {
-  id: string;
-  type: string;
-  startDate: string;
-  endDate: string;
-  user: { fullName: string };
-};
-
 export default function AdminDashboard() {
   const t = useTranslations('app');
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [pending, setPending] = useState<Leave[]>([]);
+  const [pending, setPending] = useState<PendingLeave[]>([]);
   const [activeCount, setActiveCount] = useState(0);
   const [weekly, setWeekly] = useState<Record<string, number>>({});
   const [workDays, setWorkDays] = useState<number[]>([6, 0, 1, 2, 3]);
   const [timezone, setTimezone] = useState('Asia/Tehran');
   const { events } = usePresence(true);
-  const [draft, setDraft] = useState<{ id: string; status: 'APPROVED' | 'REJECTED' } | null>(null);
 
   async function load() {
     const me = await authApi.me();
     setUser(me);
     const [leaves, sessions, hours, policy] = await Promise.all([
-      api.get<Leave[]>('/leaves/pending'),
+      api.get<PendingLeave[]>('/leaves/pending'),
       api.get<unknown[]>('/work-time/sessions/active'),
       api.get<{ hoursByDay: Record<string, number> }>('/work-time/weekly'),
       api.get<{ workDays: number[]; timezone?: string } | null>('/companies/work-policy'),
@@ -48,13 +38,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     load().catch(console.error);
   }, [events.length]);
-
-  async function confirmReview(note: string) {
-    if (!draft) return;
-    await api.patch(`/leaves/${draft.id}`, { status: draft.status, note });
-    setDraft(null);
-    await load();
-  }
 
   const weekHours = useMemo(
     () => Object.values(weekly).reduce((sum, hours) => sum + hours, 0),
@@ -88,39 +71,7 @@ export default function AdminDashboard() {
 
       <AdminStarredWeek workDays={workDays} timezone={timezone} />
 
-      <div className="card">
-        <h2>{t('dashboard.pendingLeaves')}</h2>
-        <div className="wax-legend">
-          <WaxSeal status="pending" label={t('status.pending')} />
-          <WaxSeal status="approved" label={t('status.approved')} />
-          <WaxSeal status="rejected" label={t('status.rejected')} />
-        </div>
-        {pending.length === 0 ? <p className="muted">—</p> : null}
-        {pending.map((l) => (
-          <div className="list-row" key={l.id}>
-            <div>
-              <strong>{l.user.fullName}</strong>
-              <div className="muted">
-                {l.type} · {l.startDate.slice(0, 10)} → {l.endDate.slice(0, 10)}
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '0.4rem' }}>
-              <button className="btn btn-primary" onClick={() => setDraft({ id: l.id, status: 'APPROVED' })}>
-                {t('status.approved')}
-              </button>
-              <button className="btn btn-ghost" onClick={() => setDraft({ id: l.id, status: 'REJECTED' })}>
-                {t('status.rejected')}
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-      <ReviewLeaveModal
-        open={!!draft}
-        title={draft?.status === 'REJECTED' ? t('status.rejected') : t('status.approved')}
-        onClose={() => setDraft(null)}
-        onConfirm={confirmReview}
-      />
+      <PendingLeaves items={pending} onReload={load} />
     </div>
   );
 }

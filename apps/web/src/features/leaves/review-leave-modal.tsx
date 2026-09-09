@@ -47,7 +47,7 @@ export function ReviewLeaveModal({
     <Modal open={open} onClose={onClose} title={title}>
       <form className="leave-review" onSubmit={onSubmit}>
         <label className="field">
-          <span>{t('leave.reason')}</span>
+          <span>{t('leave.reasonLabel')}</span>
           <textarea
             value={note}
             onChange={(event) => setNote(event.target.value)}
