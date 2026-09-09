@@ -1,0 +1,41 @@
+.starred-week__chips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.star-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.02rem;
+  padding: 0.18rem 0.28rem;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-deep) 70%, var(--accent) 8%);
+  border: 1px solid var(--line);
+  min-width: 0;
+}
+
+.star-chip__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+  font-size: 0.62rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.star-chip__time {
+  color: var(--muted);
+  font-size: 0.58rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.starred-week__more {
+  color: var(--accent);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-align: center;
+}

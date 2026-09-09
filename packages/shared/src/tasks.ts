@@ -11,3 +11,13 @@ export type CreateTaskInput = z.infer<typeof CreateTaskSchema>;
 
 export const UpdateTaskSchema = CreateTaskSchema.partial();
 export type UpdateTaskInput = z.infer<typeof UpdateTaskSchema>;
+
+export const ListTasksQuerySchema = z.object({
+  starred: z
+    .enum(['true', 'false', '1', '0'])
+    .optional()
+    .transform((value) => value === 'true' || value === '1'),
+  from: z.string().min(1),
+  to: z.string().min(1),
+});
+export type ListTasksQuery = z.infer<typeof ListTasksQuerySchema>;

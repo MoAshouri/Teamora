@@ -143,6 +143,8 @@
       "presentNow": "At work now",
       "weekHours": "Hours this week",
       "hoursThisWeek": "Hours this week",
+      "starredWeek": "Starred this week",
+      "moreCount": "+{n}",
       "pendingLeaves": "Pending leave"
     },
     "greet": {

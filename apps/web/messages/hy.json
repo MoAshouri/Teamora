@@ -143,6 +143,8 @@
       "presentNow": "Հիմա աշխատում են",
       "weekHours": "Այս շաբաթվա ժամեր",
       "hoursThisWeek": "Այս շաբաթվա ժամեր",
+      "starredWeek": "Աստղանշված այս շաբաթ",
+      "moreCount": "+{n}",
       "pendingLeaves": "Սպասող արձակուրդ"
     },
     "greet": {

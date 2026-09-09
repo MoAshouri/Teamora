@@ -10,6 +10,7 @@ import { LeavesModule } from './modules/leaves/leaves.module';
 import { CalendarModule } from './modules/calendar/calendar.module';
 import { HolidaysModule } from './modules/holidays/holidays.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
     CalendarModule,
     HolidaysModule,
     RealtimeModule,
+    TasksModule,
   ],
 })
 export class AppModule {}

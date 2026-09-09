@@ -100,8 +100,11 @@
 
 .gunbad-day__slot {
   flex: 1;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.2rem;
   width: 100%;
   min-height: 2.4rem;
   color: var(--muted);

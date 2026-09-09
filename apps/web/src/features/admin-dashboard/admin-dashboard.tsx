@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import { api, authApi, type AuthUser } from '@/lib/api';
 import { usePresence } from '@/hooks/use-presence';
 import { WaxSeal } from '@/features/ui/wax-seal';
-import { GunbadWeekRow } from '@/features/ui/gunbad-day';
 import { AdminWeekHours } from './week-hours';
+import { AdminStarredWeek } from './starred-week';
 import './admin-dashboard.css';
 
 type Leave = {
@@ -24,6 +24,7 @@ export default function AdminDashboard() {
   const [activeCount, setActiveCount] = useState(0);
   const [weekly, setWeekly] = useState<Record<string, number>>({});
   const [workDays, setWorkDays] = useState<number[]>([6, 0, 1, 2, 3]);
+  const [timezone, setTimezone] = useState('Asia/Tehran');
   const { events } = usePresence(true);
 
   async function load() {
@@ -33,12 +34,13 @@ export default function AdminDashboard() {
       api.get<Leave[]>('/leaves/pending'),
       api.get<unknown[]>('/work-time/sessions/active'),
       api.get<{ hoursByDay: Record<string, number> }>('/work-time/weekly'),
-      api.get<{ workDays: number[] } | null>('/companies/work-policy'),
+      api.get<{ workDays: number[]; timezone?: string } | null>('/companies/work-policy'),
     ]);
     setPending(leaves);
     setActiveCount(sessions.length);
     setWeekly(hours.hoursByDay);
     if (policy?.workDays?.length) setWorkDays(policy.workDays);
+    if (policy?.timezone) setTimezone(policy.timezone);
   }
 
   useEffect(() => {
@@ -80,9 +82,7 @@ export default function AdminDashboard() {
 
       <AdminWeekHours hoursByDay={weekly} workDays={workDays} />
 
-      <div className="card">
-        <GunbadWeekRow />
-      </div>
+      <AdminStarredWeek workDays={workDays} timezone={timezone} />
 
       <div className="card">
         <h2>{t('dashboard.pendingLeaves')}</h2>

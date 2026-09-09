@@ -143,6 +143,8 @@
       "presentNow": "الان سر کار",
       "weekHours": "ساعات این هفته",
       "hoursThisWeek": "ساعات این هفته",
+      "starredWeek": "ستاره‌های این هفته",
+      "moreCount": "+{n}",
       "pendingLeaves": "مرخصی در انتظار"
     },
     "greet": {

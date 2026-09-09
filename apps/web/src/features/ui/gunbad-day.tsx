@@ -78,7 +78,8 @@ export function GunbadDay({
           <span className="gunbad-day__num">{day}</span>
         </header>
         <div className="gunbad-day__slot">
-          {rest ? <img className="gunbad-day__tatil" src={kit.tatil} alt="" /> : (children ?? '—')}
+          {rest ? <img className="gunbad-day__tatil" src={kit.tatil} alt="" /> : null}
+          {children}
         </div>
       </div>
     </article>
@@ -104,9 +105,7 @@ export function GunbadWeekRow({
           date={date}
           locale={locale}
           rest={!workDays.includes(date.getUTCDay())}
-        >
-          —
-        </GunbadDay>
+        />
       ))}
     </div>
   );
