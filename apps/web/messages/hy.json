@@ -93,6 +93,17 @@
       "submit": "Մտնել",
       "logout": "Ելք"
     },
+    "nav": {
+      "dashboard": "Վահանակ",
+      "people": "Մարդիկ",
+      "workTime": "Ժամեր",
+      "leaves": "Արձակուրդ",
+      "calendar": "Օրացույց",
+      "settings": "Կարգավորումներ",
+      "language": "Լեզու",
+      "logout": "Ելք",
+      "today": "Այսօր"
+    },
     "people": {
       "inviteCreate": "Ստեղծել 6 նիշ հրավեր",
       "expiresIn": "Սպառվում է"

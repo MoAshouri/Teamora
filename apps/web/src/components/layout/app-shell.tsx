@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { authApi, type AuthUser } from '@/lib/api';
 import { VerifyEmailGate } from '@/features/auth/verify-email-gate';
 
@@ -57,18 +58,18 @@ function SetPasswordModal({ onDone }: { onDone: () => void }) {
 }
 
 const adminLinks = [
-  { href: '/app/admin/dashboard', key: 'dashboard', label: 'داشبورد' },
-  { href: '/app/admin/people', key: 'people', label: 'افراد' },
-  { href: '/app/admin/work-time', key: 'workTime', label: 'ساعات کاری' },
-  { href: '/app/admin/leaves', key: 'leaves', label: 'مرخصی‌ها' },
-  { href: '/app/admin/calendar', key: 'calendar', label: 'تقویم' },
+  { href: '/app/admin/dashboard', key: 'dashboard' },
+  { href: '/app/admin/people', key: 'people' },
+  { href: '/app/admin/work-time', key: 'workTime' },
+  { href: '/app/admin/leaves', key: 'leaves' },
+  { href: '/app/admin/calendar', key: 'calendar' },
 ] as const;
 
 const employeeLinks = [
-  { href: '/app/employee/dashboard', key: 'dashboard', label: 'امروز' },
-  { href: '/app/employee/work-time', key: 'workTime', label: 'ساعات' },
-  { href: '/app/employee/leaves', key: 'leaves', label: 'مرخصی' },
-  { href: '/app/employee/calendar', key: 'calendar', label: 'جلسات' },
+  { href: '/app/employee/dashboard', key: 'today' },
+  { href: '/app/employee/work-time', key: 'workTime' },
+  { href: '/app/employee/leaves', key: 'leaves' },
+  { href: '/app/employee/calendar', key: 'calendar' },
 ] as const;
 
 export function AppShell({
@@ -81,11 +82,11 @@ export function AppShell({
   const [user, setUser] = useState<AuthUser | null>(null);
   const pathname = usePathname();
   const router = useRouter();
+  const t = useTranslations('app');
+  const tRoot = useTranslations();
   const links = role === 'ADMIN' ? adminLinks : employeeLinks;
 
   useEffect(() => {
-    document.documentElement.lang = 'fa';
-    document.documentElement.dir = 'rtl';
     document.documentElement.dataset.theme = role === 'EMPLOYEE' ? 'dark' : 'light';
   }, [role]);
 
@@ -126,14 +127,14 @@ export function AppShell({
       {user.mustSetPassword ? <SetPasswordModal onDone={() => setUser({ ...user, mustSetPassword: false })} /> : null}
       {role === 'ADMIN' ? (
         <aside className="side-nav" style={{ order: 2 }}>
-          <strong style={{ padding: '0.5rem 0.9rem', marginBottom: '0.5rem' }}>تیمورا</strong>
+          <strong style={{ padding: '0.5rem 0.9rem', marginBottom: '0.5rem' }}>{tRoot('brand')}</strong>
           {links.map((l) => (
             <Link key={l.href} href={l.href} data-active={pathname === l.href}>
-              {l.label}
+              {t(`nav.${l.key}`)}
             </Link>
           ))}
           <button className="btn btn-ghost" style={{ marginTop: 'auto', color: '#fff' }} onClick={logout}>
-            خروج
+            {t('nav.logout')}
           </button>
         </aside>
       ) : null}
@@ -143,11 +144,11 @@ export function AppShell({
           <nav className="bottom-nav">
             {links.map((l) => (
               <Link key={l.href} href={l.href} data-active={pathname === l.href}>
-                {l.label}
+                {t(`nav.${l.key}`)}
               </Link>
             ))}
             <button className="btn btn-ghost" onClick={logout} style={{ fontSize: '0.75rem' }}>
-              خروج
+              {t('nav.logout')}
             </button>
           </nav>
         ) : null}

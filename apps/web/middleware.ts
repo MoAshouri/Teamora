@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { defaultLocale, locales, type Locale } from './src/lib/i18n/config';
+import { APP_LOCALE_COOKIE, parseAppLocale } from './src/lib/i18n/app-locale';
 
 const intlMiddleware = createMiddleware({
   locales: [...locales],
@@ -17,15 +18,16 @@ function localeFromPath(pathname: string): Locale {
 }
 
 export default function middleware(request: NextRequest) {
-  const locale = localeFromPath(request.nextUrl.pathname);
-  request.headers.set('x-teamora-locale', locale);
-
   if (request.nextUrl.pathname.startsWith('/app')) {
+    const headers = new Headers(request.headers);
+    headers.set('x-teamora-locale', parseAppLocale(request.cookies.get(APP_LOCALE_COOKIE)?.value));
     return NextResponse.next({
-      request: { headers: request.headers },
+      request: { headers },
     });
   }
 
+  const locale = localeFromPath(request.nextUrl.pathname);
+  request.headers.set('x-teamora-locale', locale);
   return intlMiddleware(request);
 }
 

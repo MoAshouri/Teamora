@@ -93,6 +93,17 @@
       "submit": "Enter",
       "logout": "Logout"
     },
+    "nav": {
+      "dashboard": "Dashboard",
+      "people": "People",
+      "workTime": "Hours",
+      "leaves": "Leave",
+      "calendar": "Calendar",
+      "settings": "Settings",
+      "language": "Language",
+      "logout": "Logout",
+      "today": "Today"
+    },
     "people": {
       "inviteCreate": "Create 6-digit invite",
       "expiresIn": "Expires"

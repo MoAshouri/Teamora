@@ -93,6 +93,17 @@
       "submit": "ورود",
       "logout": "خروج"
     },
+    "nav": {
+      "dashboard": "داشبورد",
+      "people": "افراد",
+      "workTime": "ساعات کاری",
+      "leaves": "مرخصی‌ها",
+      "calendar": "تقویم",
+      "settings": "تنظیمات",
+      "language": "زبان",
+      "logout": "خروج",
+      "today": "امروز"
+    },
     "people": {
       "inviteCreate": "ساخت کد دعوت ۶ رقمی",
       "expiresIn": "انقضا"
