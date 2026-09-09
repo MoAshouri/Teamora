@@ -80,6 +80,30 @@ export class AuthController {
     return res.redirect(`${web}/app/${rolePath}/dashboard`);
   }
 
+  @Post('email/verify/request')
+  @UseGuards(JwtAuthGuard)
+  requestEmailVerify(@CurrentUser() user: AuthUser) {
+    return this.auth.requestEmailVerify(user.id);
+  }
+
+  @Post('email/verify/confirm')
+  @UseGuards(JwtAuthGuard)
+  confirmEmailVerify(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    return this.auth.confirmEmailVerify(user.id, body);
+  }
+
+  @Post('email/change/request')
+  @UseGuards(JwtAuthGuard)
+  requestEmailChange(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    return this.auth.requestEmailChange(user.id, body);
+  }
+
+  @Post('email/change/confirm')
+  @UseGuards(JwtAuthGuard)
+  confirmEmailChange(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    return this.auth.confirmEmailChange(user.id, body);
+  }
+
   @Get('me')
   @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: AuthUser) {

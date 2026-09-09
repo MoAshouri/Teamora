@@ -57,6 +57,12 @@ export const authApi = {
   verifyOtp: (email: string, code: string) =>
     api.post<{ token: string; user: AuthUser }>('/auth/otp/verify', { email, code }),
   setPassword: (password: string) => api.post<AuthUser>('/auth/password', { password }),
+  requestEmailVerify: () => api.post('/auth/email/verify/request'),
+  confirmEmailVerify: (code: string) => api.post<AuthUser>('/auth/email/verify/confirm', { code }),
+  requestEmailChange: (newEmail: string) =>
+    api.post('/auth/email/change/request', { newEmail }),
+  confirmEmailChange: (newEmail: string, code: string) =>
+    api.post<AuthUser>('/auth/email/change/confirm', { newEmail, code }),
   logout: () => api.post('/auth/logout'),
   googleUrl: `${API_URL}/auth/google`,
 };

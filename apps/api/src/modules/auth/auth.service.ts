@@ -12,6 +12,9 @@ import {
   RequestOtpSchema,
   SetPasswordSchema,
   VerifyOtpSchema,
+  ChangeEmailSchema,
+  ConfirmEmailVerifySchema,
+  ConfirmEmailChangeSchema,
 } from '@teamora/shared';
 import type { Profile } from 'passport-google-oauth20';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -121,6 +124,7 @@ export class AuthService {
     });
 
     const token = this.signToken(user.id);
+    await this.sendEmailVerificationCode(user.id, user.email);
     return { token, user: this.toUser(user) };
   }
 
@@ -144,44 +148,17 @@ export class AuthService {
 
   async requestOtp(raw: unknown) {
     const input = RequestOtpSchema.parse(raw);
-    await this.redis.connect();
+    const email = input.email.toLowerCase();
     const code = this.crypto.generateOtpCode();
-    const key = `otp:${input.email.toLowerCase()}`;
-    await this.redis.client.set(key, code, 'EX', 600);
-
-    if (!process.env.SMTP_HOST) {
-      // eslint-disable-next-line no-console
-      console.log(`[OTP] ${input.email} => ${code}`);
-    } else {
-      const nodemailer = await import('nodemailer');
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT ?? 587),
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-      await transporter.sendMail({
-        from: process.env.SMTP_FROM ?? 'noreply@teamora.app',
-        to: input.email,
-        subject: 'Teamora login code',
-        text: `Your code is ${code}`,
-      });
-    }
-
+    await this.storeOtp(`otp:${email}`, code);
+    await this.sendOtpMail(email, code, 'Teamora login code');
     return { ok: true };
   }
 
   async verifyOtp(raw: unknown) {
     const input = VerifyOtpSchema.parse(raw);
-    await this.redis.connect();
-    const key = `otp:${input.email.toLowerCase()}`;
-    const stored = await this.redis.client.get(key);
-    if (!stored || stored !== input.code) {
-      throw new UnauthorizedException('Invalid or expired OTP');
-    }
-    await this.redis.client.del(key);
+    const email = input.email.toLowerCase();
+    await this.assertOtp(`otp:${email}`, input.code);
 
     const user = await this.prisma.user.findUnique({
       where: { email: input.email },
@@ -282,6 +259,9 @@ export class AuthService {
         data: {
           googleId: profile.id,
           avatarUrl: profile.photos?.[0]?.value,
+          ...(!user.emailVerifiedAt && email.toLowerCase() === user.email.toLowerCase()
+            ? { emailVerifiedAt: new Date() }
+            : {}),
         },
         include: { ownedCompany: true, membership: true },
       });
@@ -293,7 +273,127 @@ export class AuthService {
     };
   }
 
+  async requestEmailVerify(userId: string) {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    await this.sendEmailVerificationCode(user.id, user.email);
+    return { ok: true };
+  }
+
+  async confirmEmailVerify(userId: string, raw: unknown) {
+    const input = ConfirmEmailVerifySchema.parse(raw);
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      include: { ownedCompany: true, membership: true },
+    });
+    await this.assertOtp(`otp:verify:${user.id}:${user.email.toLowerCase()}`, input.code);
+    const updated = await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerifiedAt: new Date(),
+        pendingEmail: null,
+        pendingEmailRequestedAt: null,
+      },
+      include: { ownedCompany: true, membership: true },
+    });
+    return this.toUser(updated);
+  }
+
+  async requestEmailChange(userId: string, raw: unknown) {
+    const input = ChangeEmailSchema.parse(raw);
+    const newEmail = input.newEmail.toLowerCase();
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    if (newEmail === user.email.toLowerCase()) {
+      throw new BadRequestException('Email is already current');
+    }
+    const taken = await this.prisma.user.findUnique({ where: { email: newEmail } });
+    if (taken) throw new ConflictException('Email already used');
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        pendingEmail: newEmail,
+        pendingEmailRequestedAt: new Date(),
+      },
+    });
+
+    const code = this.crypto.generateOtpCode();
+    await this.storeOtp(`otp:change:${userId}:${newEmail}`, code);
+    await this.sendOtpMail(newEmail, code, 'Teamora email change code');
+    return { ok: true };
+  }
+
+  async confirmEmailChange(userId: string, raw: unknown) {
+    const input = ConfirmEmailChangeSchema.parse(raw);
+    const newEmail = input.newEmail.toLowerCase();
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      include: { ownedCompany: true, membership: true },
+    });
+    if (!user.pendingEmail || user.pendingEmail.toLowerCase() !== newEmail) {
+      throw new BadRequestException('No matching pending email change');
+    }
+    await this.assertOtp(`otp:change:${userId}:${newEmail}`, input.code);
+
+    const taken = await this.prisma.user.findUnique({ where: { email: newEmail } });
+    if (taken && taken.id !== userId) throw new ConflictException('Email already used');
+
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        email: newEmail,
+        emailVerifiedAt: new Date(),
+        pendingEmail: null,
+        pendingEmailRequestedAt: null,
+      },
+      include: { ownedCompany: true, membership: true },
+    });
+    return this.toUser(updated);
+  }
+
   async me(userId: string) {
     return this.toAuthUser(userId);
+  }
+
+  private async sendEmailVerificationCode(userId: string, email: string) {
+    const code = this.crypto.generateOtpCode();
+    await this.storeOtp(`otp:verify:${userId}:${email.toLowerCase()}`, code);
+    await this.sendOtpMail(email, code, 'Teamora email verification');
+  }
+
+  private async storeOtp(key: string, code: string) {
+    await this.redis.connect();
+    await this.redis.client.set(key, code, 'EX', 600);
+  }
+
+  private async assertOtp(key: string, code: string) {
+    await this.redis.connect();
+    const stored = await this.redis.client.get(key);
+    if (!stored || stored !== code) {
+      throw new UnauthorizedException('Invalid or expired OTP');
+    }
+    await this.redis.client.del(key);
+  }
+
+  private async sendOtpMail(to: string, code: string, subject: string) {
+    if (!process.env.SMTP_HOST) {
+      // eslint-disable-next-line no-console
+      console.log(`[OTP] ${to} => ${code}`);
+      return;
+    }
+    const nodemailer = await import('nodemailer');
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT ?? 587),
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM ?? 'noreply@teamora.app',
+      to,
+      subject,
+      text: `Your code is ${code}`,
+    });
   }
 }

@@ -44,3 +44,14 @@ export const ChangeEmailSchema = z.object({
   newEmail: z.string().email(),
 });
 export type ChangeEmailInput = z.infer<typeof ChangeEmailSchema>;
+
+export const ConfirmEmailVerifySchema = z.object({
+  code: z.string().length(6),
+});
+export type ConfirmEmailVerifyInput = z.infer<typeof ConfirmEmailVerifySchema>;
+
+export const ConfirmEmailChangeSchema = z.object({
+  newEmail: z.string().email(),
+  code: z.string().length(6),
+});
+export type ConfirmEmailChangeInput = z.infer<typeof ConfirmEmailChangeSchema>;
