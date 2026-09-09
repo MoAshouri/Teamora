@@ -6,3 +6,4 @@ export * from './letters';
 export * from './tasks';
 export * from './notes';
 export * from './reminders';
+export * from './invites';

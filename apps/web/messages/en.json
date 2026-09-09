@@ -92,6 +92,10 @@
       "code": "Email code",
       "submit": "Enter",
       "logout": "Logout"
+    },
+    "people": {
+      "inviteCreate": "Create 6-digit invite",
+      "expiresIn": "Expires"
     }
   }
 }

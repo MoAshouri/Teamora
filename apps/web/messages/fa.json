@@ -92,6 +92,10 @@
       "code": "کد ایمیل",
       "submit": "ورود",
       "logout": "خروج"
+    },
+    "people": {
+      "inviteCreate": "ساخت کد دعوت ۶ رقمی",
+      "expiresIn": "انقضا"
     }
   }
 }

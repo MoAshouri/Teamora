@@ -92,6 +92,10 @@
       "code": "Էլ․ կոդ",
       "submit": "Մտնել",
       "logout": "Ելք"
+    },
+    "people": {
+      "inviteCreate": "Ստեղծել 6 նիշ հրավեր",
+      "expiresIn": "Սպառվում է"
     }
   }
 }

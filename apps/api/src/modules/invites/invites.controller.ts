@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards, BadRequestException } from '@nestjs/common';
+import { CreateInviteSchema } from '@teamora/shared';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../../common/auth/roles.decorator';
 import { RolesGuard } from '../../common/auth/roles.guard';
@@ -20,10 +21,11 @@ export class InvitesController {
 
   @Post()
   @Roles('ADMIN')
-  create(
-    @CurrentUser() user: AuthUser,
-    @Body() body: { maxUses?: number; expiresInHours?: number },
-  ) {
-    return this.invites.create(user.companyId!, user.id, body);
+  create(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    const parsed = CreateInviteSchema.safeParse(body ?? {});
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return this.invites.create(user.companyId!, user.id, parsed.data);
   }
 }

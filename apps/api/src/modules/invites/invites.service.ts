@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { CreateInviteInput } from '@teamora/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CryptoService } from '../../common/crypto/crypto.service';
 
@@ -16,11 +17,7 @@ export class InvitesService {
     });
   }
 
-  async create(
-    companyId: string,
-    createdBy: string,
-    opts: { maxUses?: number; expiresInHours?: number },
-  ) {
+  async create(companyId: string, createdBy: string, opts: CreateInviteInput) {
     let code = this.crypto.generateInviteCode();
     for (let i = 0; i < 5; i++) {
       const exists = await this.prisma.inviteCode.findUnique({ where: { code } });
@@ -28,17 +25,13 @@ export class InvitesService {
       code = this.crypto.generateInviteCode();
     }
 
-    const expiresAt = opts.expiresInHours
-      ? new Date(Date.now() + opts.expiresInHours * 3600_000)
-      : null;
-
     return this.prisma.inviteCode.create({
       data: {
         companyId,
         createdBy,
         code,
-        maxUses: opts.maxUses ?? 1,
-        expiresAt,
+        maxUses: opts.maxUses,
+        expiresAt: new Date(Date.now() + opts.expiresInHours * 3600_000),
       },
     });
   }
