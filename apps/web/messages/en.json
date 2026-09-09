@@ -40,7 +40,7 @@
     "joinTitle": "Employee join",
     "password": "Password",
     "email": "Email",
-    "fullName": "Full name",
+    "fullName": "Your name",
     "companyName": "Company name",
     "inviteCode": "6-digit invite code",
     "submit": "Continue",
@@ -60,6 +60,8 @@
     "ledeLogin": "Arrive in the courtyard. The hall opens for an email.",
     "ledeJoin": "Six bricks and an email — then the hall knows you.",
     "ledeCreate": "A company is a courtyard. People enter through the hall.",
+    "verifyEmailAfterCreate": "After you create the space, confirm this email with a code before the dashboard opens.",
+    "passwordMin": "Use at least 8 characters.",
     "setPasswordTitle": "Set a password",
     "setPasswordBody": "Seal a password for the next time you enter.",
     "setPasswordSubmit": "Seal it"

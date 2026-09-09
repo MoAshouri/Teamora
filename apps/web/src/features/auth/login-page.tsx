@@ -180,12 +180,17 @@ function CreateFields() {
   async function onRegister(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError('');
-    setBusy(true);
     const fd = new FormData(e.currentTarget);
+    const password = String(fd.get('password') ?? '');
+    if (password.length < 8) {
+      setError(t('passwordMin'));
+      return;
+    }
+    setBusy(true);
     try {
       const result = await authApi.registerAdmin({
         email: String(fd.get('email') ?? ''),
-        password: String(fd.get('password') ?? ''),
+        password,
         fullName: String(fd.get('fullName') ?? ''),
         companyName: String(fd.get('companyName') ?? ''),
       });
@@ -217,6 +222,7 @@ function CreateFields() {
           <span>{t('password')}</span>
           <input name="password" type="password" minLength={8} autoComplete="new-password" required />
         </label>
+        <p className="auth-hint">{t('verifyEmailAfterCreate')}</p>
         <button className="auth-submit" type="submit" disabled={busy}>
           {t('submit')}
         </button>
