@@ -46,6 +46,20 @@ enum CalendarType {
   GREGORIAN
 }
 
+enum ReminderStatus {
+  ACTIVE
+  SNOOZED
+  ACKED
+  DISABLED
+}
+
+enum ReminderTargetKind {
+  TASK
+  NOTE
+  MEETING
+  CUSTOM
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -78,6 +92,7 @@ model User {
   tasksCreated              Task[]               @relation("TaskCreator")
   tasksAssigned             Task[]               @relation("TaskAssignee")
   notesCreated              Note[]                @relation("NoteCreator")
+  remindersCreated          Reminder[]           @relation("ReminderCreator")
 }
 
 model Company {
@@ -99,6 +114,7 @@ model Company {
   letters      Letter[]
   tasks        Task[]
   notes        Note[]
+  reminders    Reminder[]
 }
 
 model CompanyMembership {
@@ -277,6 +293,25 @@ model Note {
   creator User    @relation("NoteCreator", fields: [creatorId], references: [id])
 
   @@index([companyId, date])
+}
+
+model Reminder {
+  id          String             @id @default(cuid())
+  companyId   String
+  creatorId   String
+  targetKind  ReminderTargetKind
+  targetId    String?
+  title       String
+  fireAt      DateTime
+  status      ReminderStatus     @default(ACTIVE)
+  snoozeUntil DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  creator User    @relation("ReminderCreator", fields: [creatorId], references: [id])
+
+  @@index([companyId, fireAt, status])
 }
 
 model CalendarEvent {
