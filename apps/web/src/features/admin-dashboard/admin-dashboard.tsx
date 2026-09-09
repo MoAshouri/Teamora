@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { api, authApi, type AuthUser } from '@/lib/api';
 import { usePresence } from '@/hooks/use-presence';
 import { WaxSeal } from '@/features/ui/wax-seal';
+import { ReviewLeaveModal } from '@/features/leaves';
 import { AdminWeekHours } from './week-hours';
 import { AdminStarredWeek } from './starred-week';
 import './admin-dashboard.css';
@@ -26,6 +27,7 @@ export default function AdminDashboard() {
   const [workDays, setWorkDays] = useState<number[]>([6, 0, 1, 2, 3]);
   const [timezone, setTimezone] = useState('Asia/Tehran');
   const { events } = usePresence(true);
+  const [draft, setDraft] = useState<{ id: string; status: 'APPROVED' | 'REJECTED' } | null>(null);
 
   async function load() {
     const me = await authApi.me();
@@ -47,8 +49,10 @@ export default function AdminDashboard() {
     load().catch(console.error);
   }, [events.length]);
 
-  async function review(id: string, status: 'APPROVED' | 'REJECTED') {
-    await api.patch(`/leaves/${id}`, { status });
+  async function confirmReview(note: string) {
+    if (!draft) return;
+    await api.patch(`/leaves/${draft.id}`, { status: draft.status, note });
+    setDraft(null);
     await load();
   }
 
@@ -101,16 +105,22 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: '0.4rem' }}>
-              <button className="btn btn-primary" onClick={() => review(l.id, 'APPROVED')}>
+              <button className="btn btn-primary" onClick={() => setDraft({ id: l.id, status: 'APPROVED' })}>
                 {t('status.approved')}
               </button>
-              <button className="btn btn-ghost" onClick={() => review(l.id, 'REJECTED')}>
+              <button className="btn btn-ghost" onClick={() => setDraft({ id: l.id, status: 'REJECTED' })}>
                 {t('status.rejected')}
               </button>
             </div>
           </div>
         ))}
       </div>
+      <ReviewLeaveModal
+        open={!!draft}
+        title={draft?.status === 'REJECTED' ? t('status.rejected') : t('status.approved')}
+        onClose={() => setDraft(null)}
+        onConfirm={confirmReview}
+      />
     </div>
   );
 }

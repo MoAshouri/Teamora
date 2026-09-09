@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
+import { ReviewLeaveModal } from './review-leave-modal';
 import {
   daysOfCalendarMonth,
   formatDayNumber,
@@ -62,6 +63,7 @@ export function AdminLeaveMonth() {
   const [items, setItems] = useState<LeaveItem[]>([]);
   const [pending, setPending] = useState<LeaveItem[]>([]);
   const [workDays, setWorkDays] = useState<number[]>(DEFAULT_WORK_DAYS);
+  const [draft, setDraft] = useState<{ id: string; status: 'APPROVED' | 'REJECTED' } | null>(null);
 
   const range = useMemo(() => monthQueryRange(anchor, locale), [anchor, locale]);
   const days = useMemo(() => daysOfCalendarMonth(anchor, locale), [anchor, locale]);
@@ -93,8 +95,10 @@ export function AdminLeaveMonth() {
     load().catch(console.error);
   }, [range.from, range.to]);
 
-  async function review(id: string, status: 'APPROVED' | 'REJECTED') {
-    await api.patch(`/leaves/${id}`, { status });
+  async function confirmReview(note: string) {
+    if (!draft) return;
+    await api.patch(`/leaves/${draft.id}`, { status: draft.status, note });
+    setDraft(null);
     await load();
   }
 
@@ -182,10 +186,10 @@ export function AdminLeaveMonth() {
             </div>
             {item.status === 'PENDING' ? (
               <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn btn-primary" type="button" onClick={() => review(item.id, 'APPROVED')}>
+                <button className="btn btn-primary" type="button" onClick={() => setDraft({ id: item.id, status: 'APPROVED' })}>
                   {t('status.approved')}
                 </button>
-                <button className="btn btn-ghost" type="button" onClick={() => review(item.id, 'REJECTED')}>
+                <button className="btn btn-ghost" type="button" onClick={() => setDraft({ id: item.id, status: 'REJECTED' })}>
                   {t('status.rejected')}
                 </button>
               </div>
@@ -193,6 +197,12 @@ export function AdminLeaveMonth() {
           </div>
         ))}
       </div>
+      <ReviewLeaveModal
+        open={!!draft}
+        title={draft?.status === 'REJECTED' ? t('status.rejected') : t('status.approved')}
+        onClose={() => setDraft(null)}
+        onConfirm={confirmReview}
+      />
     </div>
   );
 }

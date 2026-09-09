@@ -191,7 +191,8 @@
       "from": "از",
       "to": "تا",
       "reason": "دلیل",
-      "type": "نوع"
+      "type": "نوع",
+      "reasonRequired": "دلیل لازم است"
     },
     "workTime": {
       "title": "ساعات کاری",

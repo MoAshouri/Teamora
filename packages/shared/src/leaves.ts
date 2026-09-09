@@ -50,7 +50,7 @@ export type CreateLeaveRequestInput = z.infer<typeof CreateLeaveRequestSchema>;
 
 export const ReviewLeaveSchema = z.object({
   status: z.enum(['APPROVED', 'REJECTED']),
-  note: z.string().max(500).optional(),
+  note: z.string().trim().min(1).max(500),
 });
 export type ReviewLeaveInput = z.infer<typeof ReviewLeaveSchema>;
 

@@ -84,7 +84,10 @@ export class LeavesController {
     @Param('id') id: string,
     @Body() body: unknown,
   ) {
-    const input = ReviewLeaveSchema.parse(body);
-    return this.leaves.review(user.companyId!, user.id, id, input);
+    const parsed = ReviewLeaveSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return this.leaves.review(user.companyId!, user.id, id, parsed.data);
   }
 }

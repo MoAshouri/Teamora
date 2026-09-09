@@ -99,11 +99,13 @@ export class LeavesService {
       where: { id, companyId },
     });
     if (!leave) throw new NotFoundException('Leave not found');
+    const note = input.note.trim();
+    if (!note) throw new BadRequestException('Review note is required');
     return this.prisma.leaveRequest.update({
       where: { id },
       data: {
         status: input.status,
-        reviewNote: input.note,
+        reviewNote: note,
         reviewedBy: adminId,
         reviewedAt: new Date(),
       },

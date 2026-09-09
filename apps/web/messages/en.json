@@ -191,7 +191,8 @@
       "from": "From",
       "to": "To",
       "reason": "Reason",
-      "type": "Type"
+      "type": "Type",
+      "reasonRequired": "A reason is required"
     },
     "workTime": {
       "title": "Hours",
