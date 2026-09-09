@@ -9,6 +9,7 @@ import { VerifyEmailGate } from '@/features/auth/verify-email-gate';
 import { TodayHeading } from '@/features/app-shell/today-heading';
 import { AppHeaderActions } from '@/features/app-shell/header-actions';
 import { LanguageSwitch } from '@/features/app-shell/language-switch';
+import { EmployeeChrome } from '@/features/app-shell/employee-chrome';
 import { appLoginPath } from '@/lib/i18n/app-locale';
 
 function SetPasswordModal({ onDone }: { onDone: () => void }) {
@@ -69,13 +70,6 @@ const adminLinks = [
   { href: '/app/admin/calendar', key: 'calendar' },
 ] as const;
 
-const employeeLinks = [
-  { href: '/app/employee/dashboard', key: 'today' },
-  { href: '/app/employee/work-time', key: 'workTime' },
-  { href: '/app/employee/leaves', key: 'leaves' },
-  { href: '/app/employee/calendar', key: 'calendar' },
-] as const;
-
 export function AppShell({
   role,
   children,
@@ -88,7 +82,6 @@ export function AppShell({
   const router = useRouter();
   const t = useTranslations('app');
   const tRoot = useTranslations();
-  const links = role === 'ADMIN' ? adminLinks : employeeLinks;
 
   useEffect(() => {
     authApi
@@ -109,6 +102,9 @@ export function AppShell({
   }
 
   if (!user) {
+    if (role === 'EMPLOYEE') {
+      return <EmployeeChrome onLogout={logout}>Loading…</EmployeeChrome>;
+    }
     return (
       <main className="container" style={{ padding: '3rem 0' }}>
         <header className="app-panel-header">
@@ -130,46 +126,41 @@ export function AppShell({
     );
   }
 
+  if (role === 'EMPLOYEE') {
+    return (
+      <>
+        {user.mustSetPassword ? <SetPasswordModal onDone={() => setUser({ ...user, mustSetPassword: false })} /> : null}
+        <EmployeeChrome onLogout={logout}>{children}</EmployeeChrome>
+      </>
+    );
+  }
+
   return (
     <div className="sidebar-layout">
       {user.mustSetPassword ? <SetPasswordModal onDone={() => setUser({ ...user, mustSetPassword: false })} /> : null}
-      {role === 'ADMIN' ? (
-        <aside className="side-nav" style={{ order: 2 }}>
-          <strong style={{ padding: '0.5rem 0.9rem', marginBottom: '0.5rem' }}>{tRoot('brand')}</strong>
-          {links.map((l) => (
-            <Link key={l.href} href={l.href} data-active={pathname === l.href}>
-              {t(`nav.${l.key}`)}
-            </Link>
-          ))}
-          <div className="side-nav-foot">
-            <Link href="/app/admin/settings" data-active={pathname === '/app/admin/settings'}>
-              {t('nav.settings')}
-            </Link>
-            <LanguageSwitch />
-            <button className="btn btn-ghost" type="button" onClick={logout}>
-              {t('nav.logout')}
-            </button>
-          </div>
-        </aside>
-      ) : null}
+      <aside className="side-nav" style={{ order: 2 }}>
+        <strong style={{ padding: '0.5rem 0.9rem', marginBottom: '0.5rem' }}>{tRoot('brand')}</strong>
+        {adminLinks.map((l) => (
+          <Link key={l.href} href={l.href} data-active={pathname === l.href}>
+            {t(`nav.${l.key}`)}
+          </Link>
+        ))}
+        <div className="side-nav-foot">
+          <Link href="/app/admin/settings" data-active={pathname === '/app/admin/settings'}>
+            {t('nav.settings')}
+          </Link>
+          <LanguageSwitch />
+          <button className="btn btn-ghost" type="button" onClick={logout}>
+            {t('nav.logout')}
+          </button>
+        </div>
+      </aside>
       <div className="main-pane" style={{ order: 1 }}>
         <header className="app-panel-header">
           <TodayHeading />
           <AppHeaderActions />
         </header>
         {children}
-        {role === 'EMPLOYEE' ? (
-          <nav className="bottom-nav">
-            {links.map((l) => (
-              <Link key={l.href} href={l.href} data-active={pathname === l.href}>
-                {t(`nav.${l.key}`)}
-              </Link>
-            ))}
-            <button className="btn btn-ghost" onClick={logout} style={{ fontSize: '0.75rem' }}>
-              {t('nav.logout')}
-            </button>
-          </nav>
-        ) : null}
       </div>
     </div>
   );

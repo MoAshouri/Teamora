@@ -1,0 +1,62 @@
+.employee-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.employee-chrome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  padding: calc(0.7rem + env(safe-area-inset-top, 0px)) 1rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--card) 82%, transparent);
+}
+
+.employee-chrome__brand {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.employee-chrome .today-heading {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+.employee-chrome__end {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-inline-start: auto;
+}
+
+.employee-main {
+  flex: 1;
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.employee-more {
+  position: relative;
+}
+
+.employee-more__panel {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + 0.4rem);
+  z-index: 40;
+  width: min(16.5rem, calc(100vw - 2rem));
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 0.9rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.employee-more__panel a,
+.employee-more__panel .btn {
+  text-align: start;
+}

@@ -5,7 +5,7 @@ import { locales, type Locale } from '@/lib/i18n/config';
 import { setAppLocale } from '@/lib/i18n/app-locale';
 import './language-switch.css';
 
-export function LanguageSwitch() {
+export function LanguageSwitch({ variant = 'nav' }: { variant?: 'nav' | 'panel' }) {
   const t = useTranslations('app');
   const current = useLocale() as Locale;
 
@@ -16,7 +16,11 @@ export function LanguageSwitch() {
   }
 
   return (
-    <div className="lang-switch" role="group" aria-label={t('nav.language')}>
+    <div
+      className={variant === 'panel' ? 'lang-switch lang-switch--panel' : 'lang-switch'}
+      role="group"
+      aria-label={t('nav.language')}
+    >
       {locales.map((locale) => (
         <button
           key={locale}

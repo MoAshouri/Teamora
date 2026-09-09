@@ -42,3 +42,13 @@
   background: rgba(224, 122, 58, 0.28);
   box-shadow: inset 0 0 0 1px var(--accent);
 }
+
+.lang-switch--panel .lang-switch__btn {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg-deep) 70%, transparent);
+  border-color: var(--line);
+}
+
+.lang-switch--panel .lang-switch__btn[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--accent) 22%, var(--card));
+}
