@@ -23,3 +23,13 @@ export function getAppLocale(cookieHeader: string | null | undefined): Locale {
   const raw = match?.[1] ? decodeURIComponent(match[1]) : undefined;
   return parseAppLocale(raw);
 }
+
+export function setAppLocale(locale: Locale) {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${APP_LOCALE_COOKIE}=${locale}; Path=/; Max-Age=31536000; SameSite=Lax`;
+}
+
+export function appLoginPath(cookieHeader?: string | null) {
+  const source = cookieHeader ?? (typeof document !== 'undefined' ? document.cookie : null);
+  return `/${getAppLocale(source)}/login`;
+}

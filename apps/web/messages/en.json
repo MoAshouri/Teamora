@@ -104,6 +104,15 @@
       "logout": "Logout",
       "today": "Today"
     },
+    "locale": {
+      "fa": "FA",
+      "en": "EN",
+      "hy": "HY"
+    },
+    "settings": {
+      "title": "Settings",
+      "lede": "Profile, password, and email will open in this room later."
+    },
     "theme": {
       "light": "Switch to light",
       "dark": "Switch to dark"

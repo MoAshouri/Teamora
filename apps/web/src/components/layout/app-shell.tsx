@@ -8,6 +8,8 @@ import { authApi, type AuthUser } from '@/lib/api';
 import { VerifyEmailGate } from '@/features/auth/verify-email-gate';
 import { TodayHeading } from '@/features/app-shell/today-heading';
 import { AppHeaderActions } from '@/features/app-shell/header-actions';
+import { LanguageSwitch } from '@/features/app-shell/language-switch';
+import { appLoginPath } from '@/lib/i18n/app-locale';
 
 function SetPasswordModal({ onDone }: { onDone: () => void }) {
   const [password, setPassword] = useState('');
@@ -98,12 +100,12 @@ export function AppShell({
         }
         setUser(u);
       })
-      .catch(() => router.replace('/fa/login'));
+      .catch(() => router.replace(appLoginPath()));
   }, [role, router]);
 
   async function logout() {
     await authApi.logout();
-    router.replace('/fa/login');
+    router.replace(appLoginPath());
   }
 
   if (!user) {
@@ -139,9 +141,15 @@ export function AppShell({
               {t(`nav.${l.key}`)}
             </Link>
           ))}
-          <button className="btn btn-ghost" style={{ marginTop: 'auto', color: '#fff' }} onClick={logout}>
-            {t('nav.logout')}
-          </button>
+          <div className="side-nav-foot">
+            <Link href="/app/admin/settings" data-active={pathname === '/app/admin/settings'}>
+              {t('nav.settings')}
+            </Link>
+            <LanguageSwitch />
+            <button className="btn btn-ghost" type="button" onClick={logout}>
+              {t('nav.logout')}
+            </button>
+          </div>
         </aside>
       ) : null}
       <div className="main-pane" style={{ order: 1 }}>
