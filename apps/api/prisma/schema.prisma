@@ -73,6 +73,8 @@ model User {
   createdInvites            InviteCode[]
   leaveBalanceAdjustments   LeaveBalanceAdjustment[]
   grantedLeaveAdjustments   LeaveBalanceAdjustment[] @relation("LeaveGrantActor")
+  lettersAuthored           Letter[]               @relation("LetterAuthor")
+  lettersReceived           Letter[]              @relation("LetterRecipient")
 }
 
 model Company {
@@ -91,6 +93,7 @@ model Company {
   leaveRequests LeaveRequest[]
   events       CalendarEvent[]
   leaveBalanceAdjustments LeaveBalanceAdjustment[]
+  letters      Letter[]
 }
 
 model CompanyMembership {
@@ -213,6 +216,25 @@ model LeaveBalanceAdjustment {
   actor   User    @relation("LeaveGrantActor", fields: [createdBy], references: [id])
 
   @@index([companyId, userId])
+}
+
+model Letter {
+  id          String    @id @default(cuid())
+  companyId   String
+  authorId    String
+  recipientId String
+  subject     String
+  body        String
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  author    User    @relation("LetterAuthor", fields: [authorId], references: [id])
+  recipient User    @relation("LetterRecipient", fields: [recipientId], references: [id])
+
+  @@index([companyId, recipientId])
+  @@index([recipientId, readAt])
 }
 
 model CalendarEvent {
