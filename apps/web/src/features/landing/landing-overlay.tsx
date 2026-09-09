@@ -19,7 +19,7 @@ function Ctas({ locale, copy, primaryOnly = false }: { locale: string; copy: Lan
           <Link className="btn btn-ghost landing-btn" href={`/${locale}/join`}>
             {copy.ctaJoin}
           </Link>
-          <Link className="btn btn-ghost landing-btn" href={`/${locale}/login?mode=register`}>
+          <Link className="btn btn-ghost landing-btn" href={`/${locale}/login?mode=create`}>
             {copy.ctaRegister}
           </Link>
         </>

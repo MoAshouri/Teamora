@@ -45,10 +45,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return {
       id: user.id,
       email: user.email,
-      username: user.username,
       fullName: user.fullName,
       role: user.role,
       companyId,
+      mustSetPassword: !user.passwordHash,
     };
   }
 }

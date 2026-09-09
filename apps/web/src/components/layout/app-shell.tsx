@@ -1,9 +1,59 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authApi, type AuthUser } from '@/lib/api';
+
+function SetPasswordModal({ onDone }: { onDone: () => void }) {
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError('');
+    if (password.length < 8) {
+      setError('رمز دست‌کم ۸ نویسه باشد.');
+      return;
+    }
+    setBusy(true);
+    try {
+      await authApi.setPassword(password);
+      onDone();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="set-password-title">
+      <form className="card modal-panel" onSubmit={onSubmit}>
+        <h2 id="set-password-title" style={{ marginTop: 0 }}>
+          گذاشتن رمز
+        </h2>
+        <p className="muted">برای ورودهای بعد، یک رمز روی در بگذارید.</p>
+        <label className="field">
+          <span>رمز عبور</span>
+          <input
+            type="password"
+            minLength={8}
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </label>
+        {error ? <p className="muted" style={{ color: '#9e3d1c' }}>{error}</p> : null}
+        <button className="btn btn-primary" type="submit" disabled={busy}>
+          مهر کردن
+        </button>
+      </form>
+    </div>
+  );
+}
 
 const adminLinks = [
   { href: '/app/admin/dashboard', key: 'dashboard', label: 'داشبورد' },
@@ -62,6 +112,7 @@ export function AppShell({
 
   return (
     <div className="sidebar-layout">
+      {user.mustSetPassword ? <SetPasswordModal onDone={() => setUser({ ...user, mustSetPassword: false })} /> : null}
       {role === 'ADMIN' ? (
         <aside className="side-nav" style={{ order: 2 }}>
           <strong style={{ padding: '0.5rem 0.9rem', marginBottom: '0.5rem' }}>تیمورا</strong>

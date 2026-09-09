@@ -3,10 +3,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 export type AuthUser = {
   id: string;
   email: string;
-  username: string;
   fullName: string;
   role: 'ADMIN' | 'EMPLOYEE';
   companyId: string | null;
+  mustSetPassword: boolean;
 };
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -44,7 +44,7 @@ export const api = {
 
 export const authApi = {
   me: () => api.get<AuthUser>('/auth/me'),
-  login: (body: { identifier: string; password: string }) =>
+  login: (body: { email: string; password: string }) =>
     api.post<{ token: string; user: AuthUser }>('/auth/login', body),
   registerAdmin: (body: unknown) =>
     api.post<{ token: string; user: AuthUser }>('/auth/register-admin', body),
@@ -53,6 +53,7 @@ export const authApi = {
   requestOtp: (email: string) => api.post('/auth/otp/request', { email }),
   verifyOtp: (email: string, code: string) =>
     api.post<{ token: string; user: AuthUser }>('/auth/otp/verify', { email, code }),
+  setPassword: (password: string) => api.post<AuthUser>('/auth/password', { password }),
   logout: () => api.post('/auth/logout'),
   googleUrl: `${API_URL}/auth/google`,
 };

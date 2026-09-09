@@ -11,7 +11,6 @@ export class UsersService {
       select: {
         id: true,
         email: true,
-        username: true,
         fullName: true,
         role: true,
         avatarUrl: true,
@@ -28,7 +27,6 @@ export class UsersService {
           select: {
             id: true,
             email: true,
-            username: true,
             fullName: true,
             avatarUrl: true,
             activeSession: true,

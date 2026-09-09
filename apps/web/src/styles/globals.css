@@ -287,9 +287,16 @@ textarea {
   min-height: 8px;
 }
 
-.brick-label {
-  text-align: center;
-  font-size: 0.7rem;
-  color: var(--muted);
-  margin-top: 0.35rem;
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1.2rem;
+  background: rgba(12, 16, 15, 0.62);
+}
+
+.modal-panel {
+  width: min(24rem, 100%);
 }
