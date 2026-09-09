@@ -97,3 +97,8 @@ export function authBrick(brand: AuthBrand, theme: AuthTheme) {
   const kit = brand.accent === 'hayat' ? brand.hayat : brand.gavit;
   return kit.brickAccent[theme];
 }
+
+export function brandSeal(family: AuthFamily, theme: AuthTheme) {
+  const kit = family === 'hayat' ? HAYAT : GAVIT;
+  return kit.wax[theme];
+}

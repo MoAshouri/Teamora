@@ -126,6 +126,11 @@
     "people": {
       "inviteCreate": "Create 6-digit invite",
       "expiresIn": "Expires"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
     }
   }
 }

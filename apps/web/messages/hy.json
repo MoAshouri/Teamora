@@ -126,6 +126,11 @@
     "people": {
       "inviteCreate": "Ստեղծել 6 նիշ հրավեր",
       "expiresIn": "Սպառվում է"
+    },
+    "status": {
+      "pending": "Սպասում",
+      "approved": "Հաստատված",
+      "rejected": "Մերժված"
     }
   }
 }

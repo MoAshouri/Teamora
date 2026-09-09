@@ -1,0 +1,72 @@
+.wax-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.wax-seal__face {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow:
+    0 10px 18px rgba(26, 43, 42, 0.2),
+    inset 0 -6px 10px rgba(26, 43, 42, 0.18);
+  transform: rotate(-7deg);
+}
+
+.wax-seal[data-size='md'] .wax-seal__face {
+  width: 4rem;
+  height: 4rem;
+}
+
+.wax-seal__face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.wax-seal[data-status='pending'] .wax-seal__face img {
+  filter: sepia(0.28) saturate(1.28) hue-rotate(-8deg);
+}
+
+.wax-seal[data-status='approved'] .wax-seal__face img {
+  filter: hue-rotate(78deg) saturate(0.82) brightness(0.96);
+}
+
+.wax-seal[data-status='rejected'] .wax-seal__face img {
+  filter: grayscale(0.62) brightness(0.72) saturate(0.35);
+}
+
+.wax-seal__glyph {
+  position: absolute;
+  inset: 22%;
+  color: #f7f2ea;
+  filter: drop-shadow(0 1px 1px rgba(26, 43, 42, 0.35));
+}
+
+.wax-seal[data-status='rejected'] .wax-seal__glyph {
+  color: #ebe4d6;
+  opacity: 0.85;
+}
+
+.wax-seal__label {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.wax-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem 1.1rem;
+  margin: 0.35rem 0 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wax-seal__face {
+    transform: none;
+  }
+}

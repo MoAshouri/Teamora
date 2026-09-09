@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { api, authApi, type AuthUser } from '@/lib/api';
 import { usePresence } from '@/hooks/use-presence';
+import { WaxSeal } from '@/features/ui/wax-seal';
+import { useTranslations } from 'next-intl';
 
 type Leave = {
   id: string;
@@ -13,6 +15,7 @@ type Leave = {
 };
 
 export default function AdminDashboardPage() {
+  const t = useTranslations('app');
   const [user, setUser] = useState<AuthUser | null>(null);
   const [pending, setPending] = useState<Leave[]>([]);
   const [activeCount, setActiveCount] = useState(0);
@@ -75,6 +78,11 @@ export default function AdminDashboardPage() {
 
       <div className="card">
         <h2>در انتظار تأیید</h2>
+        <div className="wax-legend">
+          <WaxSeal status="pending" label={t('status.pending')} />
+          <WaxSeal status="approved" label={t('status.approved')} />
+          <WaxSeal status="rejected" label={t('status.rejected')} />
+        </div>
         {pending.length === 0 ? <p className="muted">موردی نیست</p> : null}
         {pending.map((l) => (
           <div className="list-row" key={l.id}>

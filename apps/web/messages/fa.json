@@ -126,6 +126,11 @@
     "people": {
       "inviteCreate": "ساخت کد دعوت ۶ رقمی",
       "expiresIn": "انقضا"
+    },
+    "status": {
+      "pending": "در انتظار",
+      "approved": "تأیید شده",
+      "rejected": "رد شده"
     }
   }
 }
