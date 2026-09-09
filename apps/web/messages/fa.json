@@ -131,6 +131,10 @@
       "pending": "در انتظار",
       "approved": "تأیید شده",
       "rejected": "رد شده"
+    },
+    "hours": {
+      "restDay": "تعطیل",
+      "hoursShort": "{n}س"
     }
   }
 }

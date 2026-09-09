@@ -131,6 +131,10 @@
       "pending": "Pending",
       "approved": "Approved",
       "rejected": "Rejected"
+    },
+    "hours": {
+      "restDay": "Rest",
+      "hoursShort": "{n}h"
     }
   }
 }

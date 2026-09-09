@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { api, authApi, type AuthUser } from '@/lib/api';
 import { usePresence } from '@/hooks/use-presence';
 import { WaxSeal } from '@/features/ui/wax-seal';
+import { BrickWeekChart } from '@/features/ui/brick-week-chart';
 import { useTranslations } from 'next-intl';
 
 type Leave = {
@@ -44,8 +45,6 @@ export default function AdminDashboardPage() {
     await load();
   }
 
-  const bars = Object.entries(weekly);
-
   return (
     <div className="stack">
       <header>
@@ -66,14 +65,7 @@ export default function AdminDashboardPage() {
 
       <div className="card">
         <h2>ساعات این هفته</h2>
-        <div className="brick-chart">
-          {bars.map(([day, h]) => (
-            <div key={day}>
-              <div className="brick" style={{ height: `${Math.min(120, h * 12)}px` }} />
-              <div className="brick-label">{h.toFixed(1)}h</div>
-            </div>
-          ))}
-        </div>
+        <BrickWeekChart hoursByDay={weekly} />
       </div>
 
       <div className="card">

@@ -1,0 +1,76 @@
+.brick-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.4rem;
+  align-items: end;
+  min-height: 9.5rem;
+}
+
+.brick-week__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.brick-week__stack {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 2px;
+  width: 100%;
+  min-height: 6.75rem;
+  padding: 0.15rem 0.12rem 0;
+  background: color-mix(in srgb, var(--bg-deep) 55%, transparent);
+  border-radius: 4px 4px 2px 2px;
+}
+
+.brick-week__brick {
+  height: 0.7rem;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  border-radius: 2px 2px 1px 1px;
+  box-shadow: inset 0 1px 0 rgba(255, 252, 247, 0.18);
+}
+
+.brick-week__rest {
+  display: grid;
+  place-items: center;
+  min-height: 6.75rem;
+  width: 100%;
+}
+
+.brick-week__tatil {
+  width: 1.55rem;
+  height: 1.55rem;
+  object-fit: contain;
+  opacity: 0.88;
+}
+
+.brick-week__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.08rem;
+}
+
+.brick-week__hours {
+  font-size: 0.72rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.brick-week__day {
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brick-week__brick {
+    box-shadow: none;
+  }
+}

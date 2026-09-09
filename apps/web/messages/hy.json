@@ -131,6 +131,10 @@
       "pending": "Սպասում",
       "approved": "Հաստատված",
       "rejected": "Մերժված"
+    },
+    "hours": {
+      "restDay": "Հանգիստ",
+      "hoursShort": "{n}ժ"
     }
   }
 }

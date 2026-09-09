@@ -41,6 +41,14 @@ export function formatWeekday(value: Date, locale: Locale) {
   }).format(value);
 }
 
+export function formatWeekdayShort(value: Date, locale: Locale) {
+  return new Intl.DateTimeFormat(localeTag(locale), {
+    weekday: 'short',
+    calendar: calendarFor(locale),
+    timeZone: timeZoneFor(locale),
+  }).format(value);
+}
+
 export function formatPanelDate(value: Date, locale: Locale) {
   return new Intl.DateTimeFormat(localeTag(locale), {
     day: 'numeric',

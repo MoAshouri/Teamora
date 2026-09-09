@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { api, authApi, type AuthUser } from '@/lib/api';
+import { BrickWeekChart } from '@/features/ui/brick-week-chart';
 
 export default function EmployeeDashboardPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -79,13 +80,7 @@ export default function EmployeeDashboardPage() {
         </div>
         <div className="card">
           <p className="muted">ساعات این هفته</p>
-          <div className="brick-chart" style={{ minHeight: 80 }}>
-            {Object.entries(weekly).map(([day, h]) => (
-              <div key={day}>
-                <div className="brick" style={{ height: `${Math.min(80, h * 10)}px` }} />
-              </div>
-            ))}
-          </div>
+          <BrickWeekChart hoursByDay={weekly} />
         </div>
       </div>
     </div>

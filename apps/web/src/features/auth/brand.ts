@@ -102,3 +102,18 @@ export function brandSeal(family: AuthFamily, theme: AuthTheme) {
   const kit = family === 'hayat' ? HAYAT : GAVIT;
   return kit.wax[theme];
 }
+
+export function brandBrick(family: AuthFamily, theme: AuthTheme) {
+  const kit = family === 'hayat' ? HAYAT : GAVIT;
+  return kit.brick[theme];
+}
+
+export function brandBrickAccent(family: AuthFamily, theme: AuthTheme) {
+  const kit = family === 'hayat' ? HAYAT : GAVIT;
+  return kit.brickAccent[theme];
+}
+
+export function brandTatil(family: AuthFamily, theme: AuthTheme) {
+  const kit = family === 'hayat' ? HAYAT : GAVIT;
+  return kit.mark[theme];
+}
