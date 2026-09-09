@@ -7,6 +7,9 @@ export type AuthUser = {
   role: 'ADMIN' | 'EMPLOYEE';
   companyId: string | null;
   mustSetPassword: boolean;
+  emailVerified: boolean;
+  mustVerifyEmail: boolean;
+  pendingEmail: string | null;
 };
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {

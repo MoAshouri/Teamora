@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { AuthUser } from '../../common/auth/auth-user';
+import { verificationFlags, type AuthUser } from '../../common/auth/auth-user';
 
 type JwtPayload = { sub: string };
 
@@ -49,6 +49,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       role: user.role,
       companyId,
       mustSetPassword: !user.passwordHash,
+      ...verificationFlags(user),
     };
   }
 }

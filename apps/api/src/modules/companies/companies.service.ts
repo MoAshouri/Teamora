@@ -31,12 +31,22 @@ export class CompaniesService {
         workEnd: input.workEnd,
         workDays: input.workDays,
         timezone: input.timezone ?? 'Asia/Tehran',
+        dailyMinutes: input.dailyMinutes ?? 480,
+        overtimeAfterMinutes: input.overtimeAfterMinutes ?? 480,
+        flexInMinutes: input.flexInMinutes ?? 0,
+        flexOutMinutes: input.flexOutMinutes ?? 0,
       },
       update: {
         workStart: input.workStart,
         workEnd: input.workEnd,
         workDays: input.workDays,
         timezone: input.timezone ?? 'Asia/Tehran',
+        ...(input.dailyMinutes != null ? { dailyMinutes: input.dailyMinutes } : {}),
+        ...(input.overtimeAfterMinutes != null
+          ? { overtimeAfterMinutes: input.overtimeAfterMinutes }
+          : {}),
+        ...(input.flexInMinutes != null ? { flexInMinutes: input.flexInMinutes } : {}),
+        ...(input.flexOutMinutes != null ? { flexOutMinutes: input.flexOutMinutes } : {}),
       },
     });
   }

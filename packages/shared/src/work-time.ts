@@ -5,6 +5,10 @@ export const UpsertWorkPolicySchema = z.object({
   workEnd: z.string().regex(/^\d{2}:\d{2}$/),
   workDays: z.array(z.number().int().min(0).max(6)).min(1),
   timezone: z.string().min(1).default('Asia/Tehran'),
+  dailyMinutes: z.number().int().min(1).max(24 * 60).optional(),
+  overtimeAfterMinutes: z.number().int().min(0).max(24 * 60).optional(),
+  flexInMinutes: z.number().int().min(0).max(24 * 60).optional(),
+  flexOutMinutes: z.number().int().min(0).max(24 * 60).optional(),
 });
 export type UpsertWorkPolicyInput = z.infer<typeof UpsertWorkPolicySchema>;
 

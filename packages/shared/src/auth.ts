@@ -39,3 +39,8 @@ export const SetPasswordSchema = z.object({
   password: z.string().min(8),
 });
 export type SetPasswordInput = z.infer<typeof SetPasswordSchema>;
+
+export const ChangeEmailSchema = z.object({
+  newEmail: z.string().email(),
+});
+export type ChangeEmailInput = z.infer<typeof ChangeEmailSchema>;

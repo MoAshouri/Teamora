@@ -17,7 +17,7 @@ import type { Profile } from 'passport-google-oauth20';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CryptoService } from '../../common/crypto/crypto.service';
 import { RedisService } from '../../config/redis.module';
-import type { AuthUser } from '../../common/auth/auth-user';
+import { verificationFlags, type AuthUser } from '../../common/auth/auth-user';
 
 @Injectable()
 export class AuthService {
@@ -34,6 +34,8 @@ export class AuthService {
     fullName: string;
     role: 'ADMIN' | 'EMPLOYEE';
     passwordHash: string | null;
+    emailVerifiedAt: Date | null;
+    pendingEmail: string | null;
     ownedCompany?: { id: string } | null;
     membership?: { companyId: string } | null;
   }): AuthUser {
@@ -47,6 +49,7 @@ export class AuthService {
           ? user.ownedCompany?.id ?? null
           : user.membership?.companyId ?? null,
       mustSetPassword: !user.passwordHash,
+      ...verificationFlags(user),
     };
   }
 
