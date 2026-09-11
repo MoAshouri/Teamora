@@ -21,19 +21,22 @@ export function formatDate(
   value: string | Date,
   locale: Locale,
   calendar: 'jalali' | 'gregorian' = locale === 'fa' ? 'jalali' : 'gregorian',
+  timeZone?: string,
 ) {
   const date = typeof value === 'string' ? new Date(value) : value;
   return new Intl.DateTimeFormat(localeTag(locale), {
     calendar: calendar === 'jalali' ? 'persian' : 'gregory',
     dateStyle: 'medium',
+    timeZone: resolveTimeZone(locale, timeZone),
   }).format(date);
 }
 
-export function formatTime(value: string | Date, locale: Locale) {
+export function formatTime(value: string | Date, locale: Locale, timeZone?: string) {
   const date = typeof value === 'string' ? new Date(value) : value;
   return new Intl.DateTimeFormat(localeTag(locale), {
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: resolveTimeZone(locale, timeZone),
   }).format(date);
 }
 

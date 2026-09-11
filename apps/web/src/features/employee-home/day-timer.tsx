@@ -35,6 +35,20 @@ export function DayTimer({
     };
   }, []);
 
+  // #region agent log
+  useEffect(() => {
+    const instant = new Date();
+    const zone = policy?.timezone;
+    const formatted = formatTime(instant, locale, zone);
+    const utc = new Intl.DateTimeFormat('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'UTC',
+    }).format(instant);
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AF',location:'day-timer.tsx:clock',message:'day timer clock timezone',data:{locale,zone,formatted,utc,iso:instant.toISOString()},timestamp:Date.now()})}).catch(()=>{});
+  }, [locale, policy?.timezone]);
+  // #endregion
+
   const elapsedSec = session
     ? Math.max(0, Math.floor((now - new Date(session.startedAt).getTime()) / 1000))
     : null;
@@ -68,7 +82,7 @@ export function DayTimer({
         <p className="muted day-timer__live" aria-live="polite">
           {liveLabel}
         </p>
-        <p className="muted day-timer__now">{formatTime(new Date(now), locale)}</p>
+        <p className="muted day-timer__now">{formatTime(new Date(now), locale, policy?.timezone)}</p>
       </div>
     </IwanFrame>
   );

@@ -88,7 +88,7 @@ export function AdminStarredWeek({
                     <div className="star-chip" key={task.id} title={task.title}>
                       <span className="star-chip__title">{task.title}</span>
                       {dueHasClock(task.dueAt, timezone) ? (
-                        <span className="star-chip__time">{formatTime(task.dueAt, locale)}</span>
+                        <span className="star-chip__time">{formatTime(task.dueAt, locale, timezone)}</span>
                       ) : null}
                     </div>
                   ))}

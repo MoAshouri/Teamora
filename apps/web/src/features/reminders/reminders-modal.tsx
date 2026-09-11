@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Modal } from '@/features/ui/modal';
-import { remindersApi, type DueReminder } from '@/lib/api';
+import { api, remindersApi, type DueReminder } from '@/lib/api';
 import { formatDate, formatTime } from '@/lib/dates';
 import type { Locale } from '@/lib/i18n/config';
 import './reminders-modal.css';
@@ -22,6 +22,17 @@ export function RemindersModal({
   const t = useTranslations('app');
   const locale = useLocale() as Locale;
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [timeZone, setTimeZone] = useState('Asia/Tehran');
+
+  useEffect(() => {
+    if (!open) return;
+    api
+      .get<{ timezone?: string } | null>('/companies/work-policy')
+      .then((policy) => {
+        if (policy?.timezone) setTimeZone(policy.timezone);
+      })
+      .catch(() => undefined);
+  }, [open]);
 
   async function act(id: string, run: () => Promise<unknown>) {
     setBusyId(id);
@@ -47,7 +58,8 @@ export function RemindersModal({
             <li className="remind-item" key={item.id}>
               <strong>{item.title}</strong>
               <span className="remind-item__when">
-                {formatDate(item.fireAt, locale)} · {formatTime(item.fireAt, locale)}
+                {formatDate(item.fireAt, locale, locale === 'fa' ? 'jalali' : 'gregorian', timeZone)} ·{' '}
+                {formatTime(item.fireAt, locale, timeZone)}
               </span>
               <div className="remind-item__actions">
                 <button
