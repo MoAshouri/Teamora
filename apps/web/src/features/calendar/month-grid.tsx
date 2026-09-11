@@ -156,7 +156,9 @@ export function CalendarMonthGrid() {
             >
               <GunbadDay date={cell.date} locale={locale} rest={!workDays.includes(cell.date.getUTCDay())} size="month">
                 {holiday ? (
-                  <span className="cal-month__holiday">{holiday.nameFa || holiday.name}</span>
+                  <span className="cal-month__holiday">
+                    {locale === 'fa' ? holiday.nameFa || holiday.name : holiday.name}
+                  </span>
                 ) : null}
                 {dayLeaves.map((item) => (
                   <button

@@ -9,10 +9,20 @@ import { APP_THEME_BOOT_SCRIPT, APP_THEME_COOKIE, parseAppTheme } from '@/lib/th
 import { familyFromLocale } from '@/features/auth/brand';
 import '@/styles/app-family.css';
 
-export const metadata: Metadata = {
-  robots: { index: false, follow: false },
-  title: 'App',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const headerList = await headers();
+  const cookieStore = await cookies();
+  const locale = parseAppLocale(
+    headerList.get('x-teamora-locale') ?? cookieStore.get('teamora-locale')?.value,
+  );
+  const messages = (await import(`../../../messages/${locale}.json`)).default as {
+    app: { meta: { title: string } };
+  };
+  return {
+    robots: { index: false, follow: false },
+    title: messages.app.meta.title,
+  };
+}
 
 export default async function AuthenticatedRootLayout({
   children,

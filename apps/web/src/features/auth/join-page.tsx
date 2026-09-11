@@ -39,6 +39,7 @@ function JoinFormFields() {
 
 export default function JoinPage() {
   const t = useTranslations('auth');
+  const tCommon = useTranslations('common');
   const params = useParams<{ locale: string }>();
   const router = useRouter();
   const [error, setError] = useState('');
@@ -62,7 +63,7 @@ export default function JoinPage() {
       });
       router.push(`/app/${result.user.role === 'ADMIN' ? 'admin' : 'employee'}/dashboard`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error');
+      setError(err instanceof Error ? err.message : tCommon('error'));
     } finally {
       setBusy(false);
     }

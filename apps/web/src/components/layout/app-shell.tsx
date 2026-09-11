@@ -16,6 +16,8 @@ import { Modal } from '@/features/ui/modal';
 function noop() {}
 
 function SetPasswordModal({ onDone }: { onDone: () => void }) {
+  const tAuth = useTranslations('auth');
+  const tCommon = useTranslations('common');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -24,7 +26,7 @@ function SetPasswordModal({ onDone }: { onDone: () => void }) {
     e.preventDefault();
     setError('');
     if (password.length < 8) {
-      setError('رمز دست‌کم ۸ نویسه باشد.');
+      setError(tAuth('passwordMin'));
       return;
     }
     setBusy(true);
@@ -32,18 +34,18 @@ function SetPasswordModal({ onDone }: { onDone: () => void }) {
       await authApi.setPassword(password);
       onDone();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error');
+      setError(err instanceof Error ? err.message : tCommon('error'));
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <Modal open onClose={noop} title="گذاشتن رمز" dismissible={false}>
+    <Modal open onClose={noop} title={tAuth('setPasswordTitle')} dismissible={false}>
       <form onSubmit={onSubmit}>
-        <p className="muted">برای ورودهای بعد، یک رمز روی در بگذارید.</p>
+        <p className="muted">{tAuth('setPasswordBody')}</p>
         <label className="field">
-          <span>رمز عبور</span>
+          <span>{tAuth('password')}</span>
           <input
             type="password"
             minLength={8}
@@ -55,7 +57,7 @@ function SetPasswordModal({ onDone }: { onDone: () => void }) {
         </label>
         {error ? <p className="muted" style={{ color: '#9e3d1c' }}>{error}</p> : null}
         <button className="btn btn-primary" type="submit" disabled={busy}>
-          مهر کردن
+          {tAuth('setPasswordSubmit')}
         </button>
       </form>
     </Modal>
@@ -82,6 +84,7 @@ export function AppShell({
   const router = useRouter();
   const t = useTranslations('app');
   const tRoot = useTranslations();
+  const tCommon = useTranslations('common');
 
   useEffect(() => {
     authApi
@@ -109,7 +112,7 @@ export function AppShell({
 
   if (!user) {
     if (role === 'EMPLOYEE') {
-      return <EmployeeChrome onLogout={logout}>Loading…</EmployeeChrome>;
+      return <EmployeeChrome onLogout={logout}>{tCommon('loading')}</EmployeeChrome>;
     }
     return (
       <main className="container" style={{ padding: '3rem 0' }}>
@@ -117,7 +120,7 @@ export function AppShell({
           <TodayHeading />
           <AppHeaderActions />
         </header>
-        Loading…
+        {tCommon('loading')}
       </main>
     );
   }

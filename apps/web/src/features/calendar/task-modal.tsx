@@ -136,7 +136,7 @@ export function TaskModal({
       await onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('calendar.deleteMeeting'));
+      setError(err instanceof Error ? err.message : t('calendar.deleteTask'));
     }
   }
 
@@ -154,7 +154,7 @@ export function TaskModal({
         <label className="field">
           <span>{t('calendar.assignee')}</span>
           <select value={assigneeId} onChange={(event) => setAssigneeId(event.target.value)}>
-            <option value="">{tCommon('empty')}</option>
+            <option value="">{t('calendar.unassigned')}</option>
             {people.map((person) => (
               <option key={person.id} value={person.id}>
                 {person.fullName}
@@ -177,7 +177,7 @@ export function TaskModal({
         <div className="meeting-form__actions">
           {task ? (
             <button className="btn btn-ghost" type="button" onClick={onDelete}>
-              {t('calendar.deleteMeeting')}
+              {t('calendar.deleteTask')}
             </button>
           ) : null}
           <button className="btn btn-primary" type="submit">

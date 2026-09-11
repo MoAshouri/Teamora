@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { WaxSeal } from '@/features/ui/wax-seal';
 import { ReviewLeaveModal } from '@/features/leaves';
+import { leaveTypeMessageKey } from '@/features/leaves/type-label';
 import './pending-leaves.css';
 
 export type PendingLeave = {
@@ -55,7 +56,7 @@ export function PendingLeaves({
             <div className="pending-leaves__meta">
               <strong className="pending-leaves__name">{item.user.fullName}</strong>
               <div className="muted pending-leaves__detail">
-                {item.type} · {hourly ? t('leave.hourly') : t('leave.daily')}
+                {t(leaveTypeMessageKey(item.type))} · {hourly ? t('leave.hourly') : t('leave.daily')}
                 {hourly && item.hours != null ? ` · ${item.hours}` : ` · ${leaveIso(item.startDate)} → ${leaveIso(item.endDate)}`}
               </div>
             </div>

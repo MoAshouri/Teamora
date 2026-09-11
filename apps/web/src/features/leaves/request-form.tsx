@@ -3,6 +3,7 @@
 import { FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
+import { leaveTypeMessageKey } from './type-label';
 import './request-form.css';
 
 const TYPES = ['ANNUAL', 'SICK', 'UNPAID', 'OTHER'] as const;
@@ -65,7 +66,7 @@ export function LeaveRequestForm({ onSaved }: { onSaved: () => void }) {
         <select name="type" defaultValue="ANNUAL">
           {TYPES.map((type) => (
             <option key={type} value={type}>
-              {type}
+              {t(leaveTypeMessageKey(type))}
             </option>
           ))}
         </select>

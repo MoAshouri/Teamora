@@ -78,7 +78,7 @@ export function LettersBox() {
       )}
       {letters.length > 3 ? (
         <button className="btn btn-ghost" type="button" onClick={() => setListOpen(true)}>
-          {t('employee.letters')}
+          {t('employee.allLetters')}
         </button>
       ) : null}
       <Modal open={listOpen} onClose={() => setListOpen(false)} title={t('employee.letters')}>

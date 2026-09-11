@@ -33,6 +33,7 @@ function GoogleMark() {
 
 function LoginFields() {
   const t = useTranslations('auth');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const { theme, brand } = useAuthUi();
   const brickSrc = authBrick(brand, theme);
@@ -68,7 +69,7 @@ function LoginFields() {
       });
       goDashboard(result.user.role);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error');
+      setError(err instanceof Error ? err.message : tCommon('error'));
     } finally {
       setBusy(false);
     }
@@ -85,7 +86,7 @@ function LoginFields() {
       await authApi.requestOtp(email);
       setStep('otp');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error');
+      setError(err instanceof Error ? err.message : tCommon('error'));
     } finally {
       setBusy(false);
     }
@@ -99,7 +100,7 @@ function LoginFields() {
       const result = await authApi.verifyOtp(email, otpCode);
       goDashboard(result.user.role);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error');
+      setError(err instanceof Error ? err.message : tCommon('error'));
     } finally {
       setBusy(false);
     }
@@ -173,6 +174,7 @@ function LoginFields() {
 
 function CreateFields() {
   const t = useTranslations('auth');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -196,7 +198,7 @@ function CreateFields() {
       });
       router.push(`/app/${result.user.role === 'ADMIN' ? 'admin' : 'employee'}/dashboard`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error');
+      setError(err instanceof Error ? err.message : tCommon('error'));
     } finally {
       setBusy(false);
     }

@@ -15,6 +15,12 @@ type Entry = {
   user: { fullName: string };
 };
 
+function statusLabel(t: (key: 'status.pending' | 'status.approved' | 'status.rejected') => string, status: string) {
+  if (status === 'APPROVED') return t('status.approved');
+  if (status === 'REJECTED') return t('status.rejected');
+  return t('status.pending');
+}
+
 export default function AdminWorkTimePage() {
   const t = useTranslations('app');
   const [policy, setPolicy] = useState<WorkPolicy | null>(null);
@@ -61,7 +67,7 @@ export default function AdminWorkTimePage() {
           <div className="list-row" key={e.id}>
             <div>
               <strong>{e.user.fullName}</strong>
-              <div className="muted">{e.status}</div>
+              <div className="muted">{statusLabel(t, e.status)}</div>
             </div>
             {e.status === 'PENDING' ? (
               <div style={{ display: 'flex', gap: 8 }}>

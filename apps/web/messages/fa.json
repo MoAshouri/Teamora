@@ -81,7 +81,8 @@
     "create": "ایجاد",
     "approve": "تأیید",
     "reject": "رد",
-    "empty": "هنوز موردی نیست"
+    "empty": "هنوز موردی نیست",
+    "error": "خطایی رخ داد"
   },
   "app": {
     "verifyEmail": {
@@ -109,6 +110,9 @@
       "fa": "فا",
       "en": "EN",
       "hy": "ՀՀ"
+    },
+    "meta": {
+      "title": "سامانه"
     },
     "settings": {
       "title": "تنظیمات",
@@ -181,6 +185,8 @@
       "newMeeting": "جلسه تازه",
       "editMeeting": "ویرایش جلسه",
       "deleteMeeting": "حذف جلسه",
+      "deleteTask": "حذف کار",
+      "deleteNote": "حذف یادداشت",
       "meetingTitle": "عنوان",
       "attendees": "حاضران",
       "location": "مکان",
@@ -191,6 +197,7 @@
       "editTask": "ویرایش کار",
       "star": "ستاره",
       "assignee": "مسئول",
+      "unassigned": "بدون مسئول",
       "due": "موعد",
       "newNote": "یادداشت تازه",
       "editNote": "ویرایش یادداشت",
@@ -225,6 +232,7 @@
       "nextDay": "روز بعد",
       "tasksToday": "کارهای امروز",
       "allTasks": "همه کارها",
+      "allLetters": "همه نامه‌ها",
       "noTasks": "کاری نیست",
       "letters": "نامه‌ها",
       "unread": "نخوانده",
@@ -251,6 +259,10 @@
       "to": "تا",
       "reason": "دلیل",
       "type": "نوع",
+      "typeAnnual": "سالانه",
+      "typeSick": "استعلاجی",
+      "typeUnpaid": "بدون حقوق",
+      "typeOther": "دیگر",
       "reasonRequired": "دلیل لازم است",
       "pendingTitle": "مرخصی‌های در انتظار",
       "hourly": "ساعتی",

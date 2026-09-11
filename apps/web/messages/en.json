@@ -81,7 +81,8 @@
     "create": "Create",
     "approve": "Approve",
     "reject": "Reject",
-    "empty": "Nothing here yet"
+    "empty": "Nothing here yet",
+    "error": "Something went wrong"
   },
   "app": {
     "verifyEmail": {
@@ -109,6 +110,9 @@
       "fa": "FA",
       "en": "EN",
       "hy": "HY"
+    },
+    "meta": {
+      "title": "App"
     },
     "settings": {
       "title": "Settings",
@@ -181,6 +185,8 @@
       "newMeeting": "New meeting",
       "editMeeting": "Edit meeting",
       "deleteMeeting": "Delete meeting",
+      "deleteTask": "Delete task",
+      "deleteNote": "Delete note",
       "meetingTitle": "Title",
       "attendees": "Attendees",
       "location": "Location",
@@ -191,6 +197,7 @@
       "editTask": "Edit task",
       "star": "Star",
       "assignee": "Assignee",
+      "unassigned": "Unassigned",
       "due": "Due",
       "newNote": "New note",
       "editNote": "Edit note",
@@ -225,6 +232,7 @@
       "nextDay": "Next day",
       "tasksToday": "Tasks today",
       "allTasks": "All tasks",
+      "allLetters": "All letters",
       "noTasks": "No tasks",
       "letters": "Letters",
       "unread": "Unread",
@@ -251,6 +259,10 @@
       "to": "To",
       "reason": "Reason",
       "type": "Type",
+      "typeAnnual": "Annual",
+      "typeSick": "Sick",
+      "typeUnpaid": "Unpaid",
+      "typeOther": "Other",
       "reasonRequired": "A reason is required",
       "pendingTitle": "Pending leaves",
       "hourly": "Hourly",

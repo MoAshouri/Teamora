@@ -80,7 +80,7 @@ export function NoteModal({
       await onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('calendar.deleteMeeting'));
+      setError(err instanceof Error ? err.message : t('calendar.deleteNote'));
     }
   }
 
@@ -100,7 +100,7 @@ export function NoteModal({
         <div className="meeting-form__actions">
           {note ? (
             <button className="btn btn-ghost" type="button" onClick={onDelete}>
-              {t('calendar.deleteMeeting')}
+              {t('calendar.deleteNote')}
             </button>
           ) : null}
           <button className="btn btn-primary" type="submit">

@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { Modal } from '@/features/ui/modal';
 import { WaxSeal, type WaxStatus } from '@/features/ui/wax-seal';
 import { LeaveRequestForm } from './request-form';
+import { leaveTypeMessageKey } from './type-label';
 import './status-card.css';
 
 export type LeaveStatusItem = {
@@ -82,8 +83,9 @@ export function LeaveStatusCard({ variant = 'page' }: { variant?: 'page' | 'home
   function detail(item: LeaveStatusItem) {
     const hourly = item.kind === 'HOURLY';
     const kind = hourly ? t('leave.hourly') : t('leave.daily');
-    if (hourly && item.hours != null) return `${item.type} · ${kind} · ${item.hours}`;
-    return `${item.type} · ${kind} · ${leaveIso(item.startDate)} → ${leaveIso(item.endDate)}`;
+    const typeLabel = t(leaveTypeMessageKey(item.type));
+    if (hourly && item.hours != null) return `${typeLabel} · ${kind} · ${item.hours}`;
+    return `${typeLabel} · ${kind} · ${leaveIso(item.startDate)} → ${leaveIso(item.endDate)}`;
   }
 
   function reasonCopy(item: LeaveStatusItem) {
