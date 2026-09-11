@@ -11,6 +11,7 @@ import {
   RegisterAdminSchema,
   RequestOtpSchema,
   SetPasswordSchema,
+  ChangePasswordSchema,
   VerifyOtpSchema,
   ChangeEmailSchema,
   ConfirmEmailVerifySchema,
@@ -228,6 +229,23 @@ export class AuthService {
       throw new ConflictException('Password already set');
     }
     const passwordHash = await this.crypto.hashPassword(input.password);
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+      include: { ownedCompany: true, membership: true },
+    });
+    return this.toUser(user);
+  }
+
+  async changePassword(userId: string, raw: unknown) {
+    const input = ChangePasswordSchema.parse(raw);
+    const existing = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!existing?.passwordHash) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    const ok = await this.crypto.verifyPassword(input.currentPassword, existing.passwordHash);
+    if (!ok) throw new UnauthorizedException('Invalid credentials');
+    const passwordHash = await this.crypto.hashPassword(input.newPassword);
     const user = await this.prisma.user.update({
       where: { id: userId },
       data: { passwordHash },

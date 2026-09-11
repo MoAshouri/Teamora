@@ -58,6 +58,8 @@ export const authApi = {
   verifyOtp: (email: string, code: string) =>
     api.post<{ token: string; user: AuthUser }>('/auth/otp/verify', { email, code }),
   setPassword: (password: string) => api.post<AuthUser>('/auth/password', { password }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.post<AuthUser>('/auth/password/change', { currentPassword, newPassword }),
   requestEmailVerify: () => api.post('/auth/email/verify/request'),
   confirmEmailVerify: (code: string) => api.post<AuthUser>('/auth/email/verify/confirm', { code }),
   requestEmailChange: (newEmail: string) =>

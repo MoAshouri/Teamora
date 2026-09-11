@@ -94,6 +94,12 @@ export function AppShell({
         setUser(u);
       })
       .catch(() => router.replace(appLoginPath()));
+
+    const onMe = () => {
+      authApi.me().then(setUser).catch(() => undefined);
+    };
+    window.addEventListener('teamora-me', onMe);
+    return () => window.removeEventListener('teamora-me', onMe);
   }, [role, router]);
 
   async function logout() {

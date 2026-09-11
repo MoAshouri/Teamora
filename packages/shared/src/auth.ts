@@ -40,6 +40,20 @@ export const SetPasswordSchema = z.object({
 });
 export type SetPasswordInput = z.infer<typeof SetPasswordSchema>;
 
+export const ChangePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(8),
+});
+export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>;
+
+export const UpdateProfileSchema = z.object({
+  fullName: z.string().trim().min(2).max(120).optional(),
+  avatarUrl: z
+    .union([z.string().url().max(2048), z.literal(''), z.null()])
+    .optional(),
+});
+export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
+
 export const ChangeEmailSchema = z.object({
   newEmail: z.string().email(),
 });

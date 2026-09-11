@@ -112,7 +112,16 @@
     },
     "settings": {
       "title": "Settings",
-      "lede": "Profile, password, and email will open in this room later."
+      "lede": "Email change will open in this room later.",
+      "profile": "Profile",
+      "fullName": "Display name",
+      "avatarUrl": "Avatar URL",
+      "changePassword": "Change password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "save": "Save",
+      "saved": "Saved",
+      "email": "Email"
     },
     "theme": {
       "light": "Switch to light",

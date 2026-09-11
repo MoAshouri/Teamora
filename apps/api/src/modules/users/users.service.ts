@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import type { UpdateProfileInput } from '@teamora/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -8,6 +9,28 @@ export class UsersService {
   getProfile(userId: string) {
     return this.prisma.user.findUnique({
       where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        fullName: true,
+        role: true,
+        avatarUrl: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  async updateProfile(userId: string, input: UpdateProfileInput) {
+    const existing = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!existing) throw new NotFoundException('User not found');
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(input.fullName != null ? { fullName: input.fullName } : {}),
+        ...(input.avatarUrl !== undefined
+          ? { avatarUrl: input.avatarUrl === '' ? null : input.avatarUrl }
+          : {}),
+      },
       select: {
         id: true,
         email: true,

@@ -116,6 +116,12 @@ export class AuthController {
     return this.auth.setPassword(user.id, body);
   }
 
+  @Post('password/change')
+  @UseGuards(JwtAuthGuard)
+  changePassword(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    return this.auth.changePassword(user.id, body);
+  }
+
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie(COOKIE);

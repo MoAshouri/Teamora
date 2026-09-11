@@ -1,4 +1,5 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { UpdateProfileSchema } from '@teamora/shared';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../../common/auth/roles.decorator';
 import { RolesGuard } from '../../common/auth/roles.guard';
@@ -15,6 +16,15 @@ export class UsersController {
   @Get('me')
   me(@CurrentUser() user: AuthUser) {
     return this.users.getProfile(user.id);
+  }
+
+  @Patch('me')
+  updateMe(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    const parsed = UpdateProfileSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.flatten());
+    }
+    return this.users.updateProfile(user.id, parsed.data);
   }
 
   @Get()
