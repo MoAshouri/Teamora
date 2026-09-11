@@ -66,6 +66,7 @@ export class CalendarController {
   }
 
   @Get('conflicts')
+  @Roles('ADMIN')
   conflicts(
     @CurrentUser() user: AuthUser,
     @Query('from') from: string,
