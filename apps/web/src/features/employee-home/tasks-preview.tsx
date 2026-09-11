@@ -138,7 +138,7 @@ export function TasksPreview({ timezone = 'Asia/Tehran' }: { timezone?: string }
       <DayAgendaModal
         open={open}
         heading={t('employee.allTasks')}
-        dateLabel={formatPanelDate(new Date(`${day}T12:00:00.000Z`), locale)}
+        dateLabel={formatPanelDate(new Date(`${day}T12:00:00.000Z`), locale, timezone)}
         empty={t('employee.noTasks')}
         prevLabel={t('employee.prevDay')}
         nextLabel={t('employee.nextDay')}

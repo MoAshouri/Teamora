@@ -246,6 +246,7 @@ export function CalendarMonthGrid() {
         open={!!draft}
         dayIso={draft?.dayIso ?? todayIso}
         meeting={draft?.meeting ?? null}
+        timezone={timezone}
         onClose={() => setDraft(null)}
         onSaved={load}
       />
@@ -253,6 +254,7 @@ export function CalendarMonthGrid() {
         open={!!taskDraft}
         dayIso={taskDraft?.dayIso ?? todayIso}
         task={taskDraft?.task ?? null}
+        timezone={timezone}
         onClose={() => setTaskDraft(null)}
         onSaved={load}
       />
@@ -260,6 +262,7 @@ export function CalendarMonthGrid() {
         open={!!noteDraft}
         dayIso={noteDraft?.dayIso ?? todayIso}
         note={noteDraft?.note ?? null}
+        timezone={timezone}
         onClose={() => setNoteDraft(null)}
         onSaved={load}
       />

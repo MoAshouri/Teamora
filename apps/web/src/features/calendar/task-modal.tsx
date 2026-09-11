@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { Modal } from '@/features/ui/modal';
 import { brandTatil, type AuthFamily, type AuthTheme } from '@/features/auth/brand';
+import { isoToZonedDateTimeLocal, zonedDateTimeLocalToIso } from '@/lib/dates';
 import { RemindAtField, saveReminder } from './remind-at';
 import './meeting-modal.css';
 import './task-modal.css';
@@ -21,17 +22,8 @@ export type CalendarTask = {
 
 type Person = { id: string; fullName: string };
 
-function pad(value: number) {
-  return String(value).padStart(2, '0');
-}
-
-function isoToLocalInput(iso: string) {
-  const date = new Date(iso);
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
 function dayTimeLocal(isoDay: string, hour: number) {
-  return `${isoDay}T${pad(hour)}:00`;
+  return `${isoDay}T${String(hour).padStart(2, '0')}:00`;
 }
 
 function familyFromDom(): AuthFamily {
@@ -46,12 +38,14 @@ export function TaskModal({
   open,
   dayIso,
   task,
+  timezone = 'Asia/Tehran',
   onClose,
   onSaved,
 }: {
   open: boolean;
   dayIso: string;
   task: CalendarTask | null;
+  timezone?: string;
   onClose: () => void;
   onSaved: () => Promise<void> | void;
 }) {
@@ -85,7 +79,7 @@ export function TaskModal({
     setRemindAt('');
     if (task) {
       setTitle(task.title);
-      setDueAt(task.dueAt ? isoToLocalInput(task.dueAt) : dayTimeLocal(dayIso, 12));
+      setDueAt(task.dueAt ? isoToZonedDateTimeLocal(task.dueAt, timezone) : dayTimeLocal(dayIso, 12));
       setAssigneeId(task.assigneeId ?? task.assignee?.id ?? '');
       setStarred(!!task.starred);
     } else {
@@ -98,13 +92,13 @@ export function TaskModal({
       .get<{ user: Person }[]>('/users')
       .then((rows) => setPeople(rows.map((row) => row.user)))
       .catch(console.error);
-  }, [open, dayIso, task]);
+  }, [open, dayIso, task, timezone]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     const body = {
       title: title.trim(),
-      dueAt: new Date(dueAt).toISOString(),
+      dueAt: zonedDateTimeLocalToIso(dueAt, timezone),
       assigneeId: assigneeId || null,
       starred,
     };
@@ -117,6 +111,7 @@ export function TaskModal({
         targetId: saved.id,
         title: body.title,
         remindAt,
+        timeZone: timezone,
       });
       await onSaved();
       onClose();

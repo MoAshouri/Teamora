@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
+import { zonedDateTimeLocalToIso } from '@/lib/dates';
 
 export function RemindAtField({
   value,
@@ -24,12 +25,13 @@ export async function saveReminder(input: {
   targetId: string;
   title: string;
   remindAt: string;
+  timeZone?: string;
 }) {
   if (!input.remindAt) return;
   await api.post('/reminders', {
     targetKind: input.targetKind,
     targetId: input.targetId,
     title: input.title,
-    fireAt: new Date(input.remindAt).toISOString(),
+    fireAt: zonedDateTimeLocalToIso(input.remindAt, input.timeZone ?? 'Asia/Tehran'),
   });
 }

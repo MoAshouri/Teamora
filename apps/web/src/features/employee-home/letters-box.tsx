@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { lettersApi, type InboxLetter } from '@/lib/api';
+import { api, lettersApi, type InboxLetter } from '@/lib/api';
 import { formatDate } from '@/lib/dates';
 import { Modal } from '@/features/ui/modal';
 import type { Locale } from '@/lib/i18n/config';
@@ -22,6 +22,7 @@ export function LettersBox() {
   const [letters, setLetters] = useState<InboxLetter[]>([]);
   const [open, setOpen] = useState<InboxLetter | null>(null);
   const [listOpen, setListOpen] = useState(false);
+  const [timeZone, setTimeZone] = useState('Asia/Tehran');
 
   async function load() {
     const rows = await lettersApi.inbox();
@@ -30,6 +31,12 @@ export function LettersBox() {
 
   useEffect(() => {
     load().catch(console.error);
+    api
+      .get<{ timezone?: string } | null>('/companies/work-policy')
+      .then((policy) => {
+        if (policy?.timezone) setTimeZone(policy.timezone);
+      })
+      .catch(() => undefined);
   }, []);
 
   const unread = letters.filter((row) => !row.readAt).length;
@@ -69,7 +76,9 @@ export function LettersBox() {
                 onClick={() => void openLetter(letter)}
               >
                 <strong>{letter.subject}</strong>
-                <span className="muted">{formatDate(letter.createdAt, locale)}</span>
+                <span className="muted">
+                  {formatDate(letter.createdAt, locale, locale === 'fa' ? 'jalali' : 'gregorian', timeZone)}
+                </span>
                 {!letter.readAt ? <span className="letters-box__unread">{t('employee.unread')}</span> : null}
               </button>
             </li>
@@ -92,7 +101,9 @@ export function LettersBox() {
                 onClick={() => void openLetter(letter)}
               >
                 <strong>{letter.subject}</strong>
-                <span className="muted">{formatDate(letter.createdAt, locale)}</span>
+                <span className="muted">
+                  {formatDate(letter.createdAt, locale, locale === 'fa' ? 'jalali' : 'gregorian', timeZone)}
+                </span>
               </button>
             </li>
           ))}

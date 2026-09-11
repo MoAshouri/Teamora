@@ -153,6 +153,72 @@ export function utcInstantRangeForYmd(fromYmd: string, toYmd: string) {
   };
 }
 
+function zonedOffsetMs(date: Date, timeZone: string) {
+  try {
+    const parts: Record<string, string> = {};
+    for (const part of new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      hourCycle: 'h23',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }).formatToParts(date)) {
+      if (part.type !== 'literal') parts[part.type] = part.value;
+    }
+    const asUtc = Date.UTC(
+      Number(parts.year),
+      Number(parts.month) - 1,
+      Number(parts.day),
+      Number(parts.hour) % 24,
+      Number(parts.minute),
+      Number(parts.second),
+    );
+    return asUtc - date.getTime();
+  } catch {
+    return 0;
+  }
+}
+
+/** datetime-local value for an instant in a company timezone. */
+export function isoToZonedDateTimeLocal(iso: string, timeZone = 'UTC') {
+  try {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).formatToParts(new Date(iso));
+    const get = (type: Intl.DateTimeFormatPartTypes) =>
+      parts.find((part) => part.type === type)?.value ?? '00';
+    return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
+  } catch {
+    return iso.slice(0, 16);
+  }
+}
+
+/** Interpret a datetime-local string as company wall time and return UTC ISO. */
+export function zonedDateTimeLocalToIso(value: string, timeZone = 'UTC') {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value);
+  if (!match) return new Date(value).toISOString();
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const hour = Number(match[4]);
+  const minute = Number(match[5]);
+  let utc = Date.UTC(year, month - 1, day, hour, minute, 0);
+  const first = zonedOffsetMs(new Date(utc), timeZone);
+  utc -= first;
+  const second = zonedOffsetMs(new Date(utc), timeZone);
+  if (second !== first) utc = Date.UTC(year, month - 1, day, hour, minute, 0) - second;
+  return new Date(utc).toISOString();
+}
+
 export function hourInZone(timeZone = 'UTC', now = new Date()) {
   try {
     const hour = new Intl.DateTimeFormat('en-GB', {

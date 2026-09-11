@@ -123,7 +123,7 @@ export function MeetingsPreview({ timezone = 'Asia/Tehran' }: { timezone?: strin
       <DayAgendaModal
         open={open}
         heading={t('employee.allMeetings')}
-        dateLabel={formatPanelDate(new Date(`${day}T12:00:00.000Z`), locale)}
+        dateLabel={formatPanelDate(new Date(`${day}T12:00:00.000Z`), locale, timezone)}
         empty={t('employee.noMeetings')}
         prevLabel={t('employee.prevDay')}
         nextLabel={t('employee.nextDay')}

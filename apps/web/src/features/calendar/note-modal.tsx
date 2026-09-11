@@ -19,12 +19,14 @@ export function NoteModal({
   open,
   dayIso,
   note,
+  timezone = 'Asia/Tehran',
   onClose,
   onSaved,
 }: {
   open: boolean;
   dayIso: string;
   note: CalendarNote | null;
+  timezone?: string;
   onClose: () => void;
   onSaved: () => Promise<void> | void;
 }) {
@@ -61,6 +63,7 @@ export function NoteModal({
         targetId: saved.id,
         title: payload.title,
         remindAt,
+        timeZone: timezone,
       });
       await onSaved();
       onClose();

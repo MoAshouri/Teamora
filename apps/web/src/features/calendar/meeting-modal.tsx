@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { Modal } from '@/features/ui/modal';
+import { isoToZonedDateTimeLocal, zonedDateTimeLocalToIso } from '@/lib/dates';
 import { RemindAtField, saveReminder } from './remind-at';
 import './meeting-modal.css';
 
@@ -24,17 +25,8 @@ type LeaveRow = {
   user: { id: string; fullName: string };
 };
 
-function pad(value: number) {
-  return String(value).padStart(2, '0');
-}
-
-function isoToLocalInput(iso: string) {
-  const date = new Date(iso);
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
 function dayTimeLocal(isoDay: string, hour: number) {
-  return `${isoDay}T${pad(hour)}:00`;
+  return `${isoDay}T${String(hour).padStart(2, '0')}:00`;
 }
 
 function overlappingLeave(leave: LeaveRow, startIso: string, endIso: string) {
@@ -49,12 +41,14 @@ export function MeetingModal({
   open,
   dayIso,
   meeting,
+  timezone = 'Asia/Tehran',
   onClose,
   onSaved,
 }: {
   open: boolean;
   dayIso: string;
   meeting: CalendarMeeting | null;
+  timezone?: string;
   onClose: () => void;
   onSaved: () => Promise<void> | void;
 }) {
@@ -80,8 +74,8 @@ export function MeetingModal({
     if (meeting) {
       setTitle(meeting.title);
       setLocation(meeting.location ?? '');
-      setStartsAt(isoToLocalInput(meeting.startsAt));
-      setEndsAt(isoToLocalInput(meeting.endsAt));
+      setStartsAt(isoToZonedDateTimeLocal(meeting.startsAt, timezone));
+      setEndsAt(isoToZonedDateTimeLocal(meeting.endsAt, timezone));
       setAttendeeIds(
         meeting.attendees?.map((row) => row.user?.id ?? row.userId).filter(Boolean) as string[],
       );
@@ -96,15 +90,15 @@ export function MeetingModal({
       .get<{ user: Person }[]>('/users')
       .then((rows) => setPeople(rows.map((row) => row.user)))
       .catch(console.error);
-  }, [open, dayIso, meeting]);
+  }, [open, dayIso, meeting, timezone]);
 
   useEffect(() => {
     if (!open || !startsAt || !endsAt || attendeeIds.length === 0) {
       setConflict('');
       return;
     }
-    const startIso = new Date(startsAt).toISOString();
-    const endIso = new Date(endsAt).toISOString();
+    const startIso = zonedDateTimeLocalToIso(startsAt, timezone);
+    const endIso = zonedDateTimeLocalToIso(endsAt, timezone);
     const from = startIso.slice(0, 10);
     const to = endIso.slice(0, 10);
     api
@@ -116,12 +110,15 @@ export function MeetingModal({
         setConflict(hit ? t('calendar.leaveConflict', { name: hit.user.fullName }) : '');
       })
       .catch(() => setConflict(''));
-  }, [open, startsAt, endsAt, attendeeIds, t]);
+  }, [open, startsAt, endsAt, attendeeIds, t, timezone]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
-    const startIso = new Date(startsAt).toISOString();
-    const endIso = new Date(endsAt).toISOString();
+    const startIso = zonedDateTimeLocalToIso(startsAt, timezone);
+    const endIso = zonedDateTimeLocalToIso(endsAt, timezone);
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AL',location:'meeting-modal.tsx:submit',message:'meeting datetime company tz',data:{timezone,naiveStart:startsAt,hostIso:new Date(startsAt).toISOString(),zonedIso:startIso,mismatch:new Date(startsAt).toISOString()!==startIso},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     const body = {
       title: title.trim(),
       location: location.trim() || undefined,
@@ -138,6 +135,7 @@ export function MeetingModal({
         targetId: saved.id,
         title: body.title,
         remindAt,
+        timeZone: timezone,
       });
       await onSaved();
       onClose();
