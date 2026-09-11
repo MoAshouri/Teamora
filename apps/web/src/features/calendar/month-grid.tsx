@@ -14,6 +14,7 @@ import {
   formatMonthTitle,
   formatWeekdayShort,
   getMonthGrid,
+  dateKeyInZone,
   isoDateUtc,
   shiftCalendarMonth,
 } from '@/lib/dates';
@@ -29,8 +30,8 @@ type Holiday = {
   date: string;
 };
 
-function eventIso(value: string) {
-  return value.slice(0, 10);
+function eventIso(value: string, timeZone = 'UTC') {
+  return dateKeyInZone(value, timeZone);
 }
 
 export function CalendarMonthGrid() {
@@ -41,6 +42,7 @@ export function CalendarMonthGrid() {
   const [tasks, setTasks] = useState<CalendarTask[]>([]);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [workDays, setWorkDays] = useState<number[]>(DEFAULT_WORK_DAYS);
+  const [timezone, setTimezone] = useState('Asia/Tehran');
   const [draft, setDraft] = useState<{ dayIso: string; meeting: CalendarMeeting | null } | null>(null);
   const [taskDraft, setTaskDraft] = useState<{ dayIso: string; task: CalendarTask | null } | null>(null);
   const [noteDraft, setNoteDraft] = useState<{ dayIso: string; note: CalendarNote | null } | null>(null);
@@ -98,7 +100,7 @@ export function CalendarMonthGrid() {
           )
         : Promise.resolve([]),
       api.get<Holiday[]>('/holidays'),
-      api.get<{ workDays?: number[] } | null>('/companies/work-policy'),
+      api.get<{ workDays?: number[]; timezone?: string } | null>('/companies/work-policy'),
     ]);
     setEvents(monthEvents);
     setTasks(monthTasks);
@@ -106,6 +108,11 @@ export function CalendarMonthGrid() {
     setLeaves(overlayLeaves(monthLeaves));
     setHolidays(holidayRows);
     if (policy?.workDays?.length) setWorkDays(policy.workDays);
+    if (policy?.timezone) setTimezone(policy.timezone);
+    // #region agent log
+    const sample = monthEvents[0]?.startsAt ?? monthTasks[0]?.dueAt ?? null;
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'H',location:'month-grid.tsx:load',message:'calendar day keys',data:{timezone:policy?.timezone??'Asia/Tehran',sample,utcSlice:sample?sample.slice(0,10):null,zoned:sample?dateKeyInZone(sample,policy?.timezone??'Asia/Tehran'):null},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
   }
 
   useEffect(() => {
@@ -141,8 +148,8 @@ export function CalendarMonthGrid() {
       <div className="cal-month__grid">
         {cells.map((cell) => {
           const iso = isoDateUtc(cell.date);
-          const dayEvents = events.filter((item) => eventIso(item.startsAt) === iso);
-          const dayTasks = tasks.filter((item) => item.dueAt && eventIso(item.dueAt) === iso);
+          const dayEvents = events.filter((item) => eventIso(item.startsAt, timezone) === iso);
+          const dayTasks = tasks.filter((item) => item.dueAt && eventIso(item.dueAt, timezone) === iso);
           const dayNotes = notes.filter((item) => eventIso(item.date) === iso);
           const dayLeaves = leaves.filter((item) => leaveOnDay(item, iso));
           const holiday = holidays.find((item) => eventIso(item.date) === iso);

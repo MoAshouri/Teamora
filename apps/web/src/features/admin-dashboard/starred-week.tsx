@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { GunbadDay } from '@/features/ui/gunbad-day';
 import { saturdayWeekKeys } from '@/features/ui/brick-week-chart';
-import { formatTime } from '@/lib/dates';
+import { dateKeyInZone, formatTime } from '@/lib/dates';
 import type { Locale } from '@/lib/i18n/config';
 import './starred-week.css';
 
@@ -18,19 +18,6 @@ type StarredTask = {
   dueAt: string;
   assignee?: { fullName: string; avatarUrl: string | null };
 };
-
-function dateKeyInZone(iso: string, timeZone: string) {
-  try {
-    return new Intl.DateTimeFormat('en-CA', {
-      timeZone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).format(new Date(iso));
-  } catch {
-    return iso.slice(0, 10);
-  }
-}
 
 function dueHasClock(iso: string, timeZone: string) {
   try {

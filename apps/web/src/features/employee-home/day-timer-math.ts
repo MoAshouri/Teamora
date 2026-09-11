@@ -19,7 +19,14 @@ export function thresholdSeconds(policy: {
   dailyMinutes?: number;
   overtimeAfterMinutes?: number;
 } | null) {
-  const minutes = policy?.overtimeAfterMinutes ?? policy?.dailyMinutes ?? 480;
+  const overtime = policy?.overtimeAfterMinutes;
+  const daily = policy?.dailyMinutes;
+  const minutes = overtime && overtime > 0 ? overtime : daily ?? 480;
+  // #region agent log
+  if (overtime === 0) {
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'I',location:'day-timer-math.ts:thresholdSeconds',message:'overtime 0 uses daily minutes',data:{overtime,daily,minutes,seconds:Math.max(1,minutes)*60},timestamp:Date.now()})}).catch(()=>{});
+  }
+  // #endregion
   return Math.max(1, minutes) * 60;
 }
 

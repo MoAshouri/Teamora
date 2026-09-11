@@ -113,6 +113,21 @@ export function isoDateUtc(date: Date) {
   return utcNoon(date).toISOString().slice(0, 10);
 }
 
+/** Calendar-day key in a company timezone. Date-only values stay as YYYY-MM-DD. */
+export function dateKeyInZone(iso: string, timeZone = 'UTC') {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date(iso));
+  } catch {
+    return iso.slice(0, 10);
+  }
+}
+
 export function startOfCalendarMonth(anchor: Date, locale: Locale) {
   let cursor = utcNoon(anchor);
   const start = calendarYmd(cursor, locale);
