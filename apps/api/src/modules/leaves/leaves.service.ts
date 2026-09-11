@@ -15,6 +15,27 @@ export class LeavesService {
     }
     const kind = input.kind ?? 'DAILY';
     const hours = kind === 'HOURLY' ? input.hours : null;
+    const pool = await this.balance(companyId, userId);
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'pre-fix',hypothesisId:'K',location:'leaves.service.ts:create',message:'leave create balance gate',data:{type:input.type,kind,hours,remainingHours:pool.remainingHours,remainingDays:pool.remainingDays,checksDailyAnnual:input.type==='ANNUAL'&&kind==='DAILY'},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    if (input.type === 'ANNUAL' && kind === 'HOURLY') {
+      const pendingHourly = await this.prisma.leaveRequest.findMany({
+        where: {
+          companyId,
+          userId,
+          status: 'PENDING',
+          type: 'ANNUAL',
+          source: 'REQUEST',
+          kind: 'HOURLY',
+        },
+      });
+      const pendingHours = pendingHourly.reduce((sum, row) => sum + Number(row.hours ?? 0), 0);
+      const requested = Number(hours ?? 0);
+      if (requested > pool.remainingHours - pendingHours) {
+        throw new BadRequestException('Insufficient leave hours');
+      }
+    }
     if (input.type === 'ANNUAL' && kind === 'DAILY') {
       const [pool, pending] = await Promise.all([
         this.balance(companyId, userId),
@@ -155,7 +176,7 @@ export class LeavesService {
         return sum + days;
       }, 0);
     const usedHours = approved
-      .filter((leave) => leave.kind === 'HOURLY')
+      .filter((leave) => leave.kind === 'HOURLY' && leave.type === 'ANNUAL')
       .reduce((sum, leave) => sum + Number(leave.hours ?? 0), 0);
     const bonusDays = grants
       .filter((row) => row.kind === 'DAILY')

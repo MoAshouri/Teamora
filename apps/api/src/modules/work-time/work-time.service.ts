@@ -12,11 +12,16 @@ import type { AuthUser } from '../../common/auth/auth-user';
 export class WorkTimeService {
   constructor(private readonly prisma: PrismaService) {}
 
-  startSession(companyId: string, userId: string) {
-    return this.prisma.activeWorkSession.upsert({
-      where: { userId },
-      create: { companyId, userId, startedAt: new Date() },
-      update: { startedAt: new Date(), companyId },
+  async startSession(companyId: string, userId: string) {
+    const existing = await this.prisma.activeWorkSession.findUnique({ where: { userId } });
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'pre-fix',hypothesisId:'J',location:'work-time.service.ts:startSession',message:'session start existing',data:{hasExisting:Boolean(existing),existingStartedAt:existing?.startedAt?.toISOString?.()??null,sameCompany:existing?.companyId===companyId},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    if (existing) {
+      return existing;
+    }
+    return this.prisma.activeWorkSession.create({
+      data: { companyId, userId, startedAt: new Date() },
     });
   }
 

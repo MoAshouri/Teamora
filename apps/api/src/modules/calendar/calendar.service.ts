@@ -1,4 +1,4 @@
-﻿import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+﻿import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import type { CreateCalendarEventInput, UpdateCalendarEventInput } from '@teamora/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -59,7 +59,7 @@ export class CalendarService {
     }));
   }
 
-  createEvent(
+  async createEvent(
     companyId: string,
     creatorId: string,
     input: CreateCalendarEventInput,
@@ -69,6 +69,10 @@ export class CalendarService {
     if (endsAt <= startsAt) {
       throw new BadRequestException('endsAt must be after startsAt');
     }
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'pre-fix',hypothesisId:'L',location:'calendar.service.ts:createEvent',message:'create event attendees unchecked',data:{companyId,attendeeCount:input.attendeeIds.length,attendeeIds:input.attendeeIds},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    await this.assertAttendees(companyId, input.attendeeIds);
     return this.prisma.calendarEvent.create({
       data: {
         companyId,
@@ -112,6 +116,9 @@ export class CalendarService {
     if (endsAt <= startsAt) {
       throw new BadRequestException('endsAt must be after startsAt');
     }
+    if (input.attendeeIds) {
+      await this.assertAttendees(companyId, input.attendeeIds);
+    }
     return this.prisma.calendarEvent.update({
       where: { id },
       data: {
@@ -139,6 +146,20 @@ export class CalendarService {
     });
     if (!existing) throw new NotFoundException('Event not found');
     await this.prisma.calendarEvent.delete({ where: { id } });
+  }
+
+  private async assertAttendees(companyId: string, userIds: string[]) {
+    for (const userId of userIds) {
+      const member = await this.prisma.companyMembership.findFirst({
+        where: { companyId, userId },
+      });
+      const company = await this.prisma.company.findFirst({
+        where: { id: companyId, adminId: userId },
+      });
+      if (!member && !company) {
+        throw new ForbiddenException('Attendee not in company');
+      }
+    }
   }
 
   async detectConflicts(companyId: string, from: string, to: string) {
