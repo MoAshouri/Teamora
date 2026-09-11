@@ -211,7 +211,12 @@
       "morning": "صبح بخیر، {name}"
     },
     "employee": {
-      "dayLengthHours": "طول روز {hours} ساعت"
+      "dayLengthHours": "طول روز {hours} ساعت",
+      "start": "شروع",
+      "endDay": "پایان روز",
+      "overtime": "اضافه‌کار",
+      "remaining": "مانده",
+      "idleMax": "طول روز"
     },
     "leaves": {
       "monthTitle": "مرخصی ماه",

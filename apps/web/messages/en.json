@@ -211,7 +211,12 @@
       "morning": "Good morning, {name}"
     },
     "employee": {
-      "dayLengthHours": "Day length {hours}h"
+      "dayLengthHours": "Day length {hours}h",
+      "start": "Start",
+      "endDay": "End day",
+      "overtime": "Overtime",
+      "remaining": "Remaining",
+      "idleMax": "Day length"
     },
     "leaves": {
       "monthTitle": "Leave month",

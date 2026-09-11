@@ -211,7 +211,12 @@
       "morning": "Բարի լույս, {name}"
     },
     "employee": {
-      "dayLengthHours": "Օրվա տևողությունը {hours}ժ"
+      "dayLengthHours": "Օրվա տևողությունը {hours}ժ",
+      "start": "Սկսել",
+      "endDay": "Ավարտել օրը",
+      "overtime": "Ավելացված ժամ",
+      "remaining": "Մնացորդ",
+      "idleMax": "Օրվա տևողություն"
     },
     "leaves": {
       "monthTitle": "Արձակուրդի ամիս",
