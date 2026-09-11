@@ -216,7 +216,8 @@
       "endDay": "End day",
       "overtime": "Overtime",
       "remaining": "Remaining",
-      "idleMax": "Day length"
+      "idleMax": "Day length",
+      "myWeekHours": "My hours this week · {total}h"
     },
     "leaves": {
       "monthTitle": "Leave month",

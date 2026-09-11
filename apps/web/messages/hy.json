@@ -216,7 +216,8 @@
       "endDay": "Ավարտել օրը",
       "overtime": "Ավելացված ժամ",
       "remaining": "Մնացորդ",
-      "idleMax": "Օրվա տևողություն"
+      "idleMax": "Օրվա տևողություն",
+      "myWeekHours": "Իմ ժամերը այս շաբաթ · {total}ժ"
     },
     "leaves": {
       "monthTitle": "Արձակուրդի ամիս",

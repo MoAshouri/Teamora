@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api, authApi, type AuthUser } from '@/lib/api';
-import { BrickWeekChart } from '@/features/ui/brick-week-chart';
 import { DayTimer } from '@/features/employee-home/day-timer';
+import { EmployeeWeekHours } from '@/features/employee-home/week-hours';
 import type { WorkPolicy } from '@/features/work-time';
 
 export default function EmployeeDashboardPage() {
@@ -55,13 +55,14 @@ export default function EmployeeDashboardPage() {
       <DayTimer session={session} policy={policy} onStart={startDay} onEnd={endDay} />
 
       <div className="grid-2">
+        <EmployeeWeekHours
+          hoursByDay={weekly}
+          workDays={policy?.workDays}
+          dailyMinutes={policy?.dailyMinutes}
+        />
         <div className="card">
           <p className="muted">{tDash('remainingLeave')}</p>
           <div className="stat">{balance?.remaining ?? '—'}</div>
-        </div>
-        <div className="card">
-          <p className="muted">{tDash('weeklyHours')}</p>
-          <BrickWeekChart hoursByDay={weekly} />
         </div>
       </div>
     </div>

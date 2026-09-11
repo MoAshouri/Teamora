@@ -216,7 +216,8 @@
       "endDay": "پایان روز",
       "overtime": "اضافه‌کار",
       "remaining": "مانده",
-      "idleMax": "طول روز"
+      "idleMax": "طول روز",
+      "myWeekHours": "ساعت‌های من این هفته · {total} ساعت"
     },
     "leaves": {
       "monthTitle": "مرخصی ماه",
