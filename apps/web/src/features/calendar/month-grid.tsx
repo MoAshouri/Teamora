@@ -17,6 +17,7 @@ import {
   dateKeyInZone,
   isoDateUtc,
   todayKeyInZone,
+  utcInstantRangeForYmd,
   shiftCalendarMonth,
 } from '@/lib/dates';
 import type { Locale } from '@/lib/i18n/config';
@@ -76,15 +77,20 @@ export function CalendarMonthGrid() {
     const start = cells[0]?.date;
     const end = cells[cells.length - 1]?.date;
     if (!start || !end) return null;
+    const fromYmd = isoDateUtc(start);
+    const toYmd = isoDateUtc(end);
+    const instants = utcInstantRangeForYmd(fromYmd, toYmd);
     return {
-      from: `${isoDateUtc(start)}T00:00:00.000Z`,
-      to: `${isoDateUtc(end)}T23:59:59.999Z`,
+      fromYmd,
+      toYmd,
+      from: instants.from,
+      to: instants.to,
     };
   }, [cells]);
 
   async function load() {
-    const dayFrom = range?.from.slice(0, 10);
-    const dayTo = range?.to.slice(0, 10);
+    const dayFrom = range?.fromYmd;
+    const dayTo = range?.toYmd;
     const [monthEvents, monthTasks, monthNotes, monthLeaves, holidayRows, policy] = await Promise.all([
       range
         ? api.get<CalendarMeeting[]>(
@@ -118,7 +124,7 @@ export function CalendarMonthGrid() {
     if (policy?.timezone) setTimezone(policy.timezone);
     // #region agent log
     const sample = monthEvents[0]?.startsAt ?? monthTasks[0]?.dueAt ?? null;
-    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'H',location:'month-grid.tsx:load',message:'calendar day keys',data:{timezone:policy?.timezone??'Asia/Tehran',sample,utcSlice:sample?sample.slice(0,10):null,zoned:sample?dateKeyInZone(sample,policy?.timezone??'Asia/Tehran'):null},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AI',location:'month-grid.tsx:load',message:'calendar fetch range padded',data:{timezone:policy?.timezone??'Asia/Tehran',fromYmd:dayFrom,toYmd:dayTo,from:range?.from,to:range?.to,sample,zoned:sample?dateKeyInZone(sample,policy?.timezone??'Asia/Tehran'):null},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
   }
 

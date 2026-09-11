@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { brandTatil, type AuthFamily, type AuthTheme } from '@/features/auth/brand';
-import { formatPanelDate } from '@/lib/dates';
+import { formatPanelDate, utcInstantRangeForYmd } from '@/lib/dates';
 import type { Locale } from '@/lib/i18n/config';
 import { DayAgendaModal, type AgendaRow } from './day-agenda-modal';
 import './meetings-preview.css';
@@ -80,8 +80,7 @@ export function TasksPreview({ timezone = 'Asia/Tehran' }: { timezone?: string }
   }, []);
 
   useEffect(() => {
-    const from = `${shiftYmd(today, -8)}T00:00:00.000Z`;
-    const to = `${shiftYmd(today, 8)}T23:59:59.999Z`;
+    const { from, to } = utcInstantRangeForYmd(shiftYmd(today, -8), shiftYmd(today, 8));
     api
       .get<HomeTask[]>(`/tasks?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
       .then(setTasks)

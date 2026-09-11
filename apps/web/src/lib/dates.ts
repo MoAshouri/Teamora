@@ -139,6 +139,20 @@ export function todayKeyInZone(timeZone = 'UTC', now = new Date()) {
   return dateKeyInZone(now.toISOString(), timeZone);
 }
 
+export function addUtcDaysYmd(ymd: string, days: number) {
+  const date = new Date(`${ymd}T12:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+/** Widen a YMD window so UTC timestamp queries still include early/late company-local hours. */
+export function utcInstantRangeForYmd(fromYmd: string, toYmd: string) {
+  return {
+    from: `${addUtcDaysYmd(fromYmd, -1)}T00:00:00.000Z`,
+    to: `${addUtcDaysYmd(toYmd, 1)}T23:59:59.999Z`,
+  };
+}
+
 export function hourInZone(timeZone = 'UTC', now = new Date()) {
   try {
     const hour = new Intl.DateTimeFormat('en-GB', {

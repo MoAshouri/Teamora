@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { GunbadDay } from '@/features/ui/gunbad-day';
 import { saturdayWeekKeys } from '@/features/ui/brick-week-chart';
-import { dateKeyInZone, formatTime } from '@/lib/dates';
+import { dateKeyInZone, formatTime, utcInstantRangeForYmd } from '@/lib/dates';
 import type { Locale } from '@/lib/i18n/config';
 import './starred-week.css';
 
@@ -49,8 +49,10 @@ export function AdminStarredWeek({
   const keys = useMemo(() => saturdayWeekKeys(new Date(), timezone), [timezone]);
 
   useEffect(() => {
-    const from = `${keys[0]}T00:00:00.000Z`;
-    const to = `${keys[6]}T23:59:59.999Z`;
+    const { from, to } = utcInstantRangeForYmd(keys[0], keys[6]);
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AI',location:'starred-week.tsx:load',message:'starred week fetch range',data:{fromYmd:keys[0],toYmd:keys[6],from,to},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     api
       .get<StarredTask[]>(`/tasks?starred=1&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
       .then(setTasks)
