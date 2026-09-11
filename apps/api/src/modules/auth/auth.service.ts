@@ -65,6 +65,13 @@ export class AuthService {
     return this.toUser(user);
   }
 
+  private userByEmail(email: string) {
+    return this.prisma.user.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } },
+      include: { ownedCompany: true, membership: true },
+    });
+  }
+
   private async uniqueUsername(email: string) {
     const base =
       email
@@ -92,37 +99,48 @@ export class AuthService {
 
   async registerAdmin(raw: unknown) {
     const input = RegisterAdminSchema.parse(raw);
-    const existing = await this.prisma.user.findUnique({ where: { email: input.email } });
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'pre-fix',hypothesisId:'C',location:'auth.service.ts:registerAdmin',message:'register email casing',data:{inputEmail:input.email,lower:input.email.toLowerCase(),caseMismatch:input.email!==input.email.toLowerCase()},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    const email = input.email.toLowerCase();
+    const existing = await this.userByEmail(email);
     if (existing) throw new ConflictException('Email already used');
 
     const passwordHash = await this.crypto.hashPassword(input.password);
-    const user = await this.prisma.user.create({
-      data: {
-        email: input.email,
-        username: await this.uniqueUsername(input.email),
-        fullName: input.fullName,
-        passwordHash,
-        role: 'ADMIN',
-        ownedCompany: {
-          create: { name: input.companyName },
+    const username = await this.uniqueUsername(email);
+    const user = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.user.create({
+        data: {
+          email,
+          username,
+          fullName: input.fullName,
+          passwordHash,
+          role: 'ADMIN',
+          ownedCompany: {
+            create: { name: input.companyName },
+          },
         },
-      },
-      include: { ownedCompany: true, membership: true },
+        include: { ownedCompany: true, membership: true },
+      });
+      await tx.workPolicy.create({
+        data: {
+          companyId: created.ownedCompany!.id,
+          workStart: '09:00',
+          workEnd: '18:00',
+          workDays: [6, 0, 1, 2, 3],
+          timezone: 'Asia/Tehran',
+          dailyMinutes: 480,
+          overtimeAfterMinutes: 480,
+          flexInMinutes: 0,
+          flexOutMinutes: 0,
+        },
+      });
+      return created;
     });
-
-    await this.prisma.workPolicy.create({
-      data: {
-        companyId: user.ownedCompany!.id,
-        workStart: '09:00',
-        workEnd: '18:00',
-        workDays: [6, 0, 1, 2, 3],
-        timezone: 'Asia/Tehran',
-        dailyMinutes: 480,
-        overtimeAfterMinutes: 480,
-        flexInMinutes: 0,
-        flexOutMinutes: 0,
-      },
-    });
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'F',location:'auth.service.ts:registerAdmin',message:'register transaction completed',data:{hasCompany:Boolean(user.ownedCompany?.id),emailLower:user.email.toLowerCase()},timestamp:Date.now()})}).catch(()=>{});
+    try { require('fs').appendFileSync('c:/Users/MEDIA MARK/Desktop/Mohammad Codes/HR Management System/debug-a506d6.log', JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'F',location:'auth.service.ts:registerAdmin',message:'register transaction completed',data:{hasCompany:Boolean(user.ownedCompany?.id)},timestamp:Date.now()})+'\n'); } catch {}
+    // #endregion
 
     const token = this.signToken(user.id);
     await this.sendEmailVerificationCode(user.id, user.email);
@@ -135,15 +153,25 @@ export class AuthService {
       where: { email: input.email },
       include: { ownedCompany: true, membership: true },
     });
-    if (!user?.passwordHash) {
+    const lowerMatch = user
+      ? null
+      : await this.prisma.user.findFirst({
+          where: { email: { equals: input.email, mode: 'insensitive' } },
+          select: { id: true, email: true },
+        });
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'pre-fix',hypothesisId:'C',location:'auth.service.ts:loginPassword',message:'login email lookup',data:{inputEmail:input.email,foundExact:Boolean(user),storedEmail:user?.email??lowerMatch?.email??null,insensitiveHit:Boolean(!user&&lowerMatch)},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    const account = user ?? (await this.userByEmail(input.email));
+    if (!account?.passwordHash) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    const ok = await this.crypto.verifyPassword(input.password, user.passwordHash);
+    const ok = await this.crypto.verifyPassword(input.password, account.passwordHash);
     if (!ok) throw new UnauthorizedException('Invalid credentials');
 
     return {
-      token: this.signToken(user.id),
-      user: this.toUser(user),
+      token: this.signToken(account.id),
+      user: this.toUser(account),
     };
   }
 
@@ -159,21 +187,31 @@ export class AuthService {
   async verifyOtp(raw: unknown) {
     const input = VerifyOtpSchema.parse(raw);
     const email = input.email.toLowerCase();
-    await this.assertOtp(`otp:${email}`, input.code);
 
     const user = await this.prisma.user.findUnique({
       where: { email: input.email },
       include: { ownedCompany: true, membership: true },
     });
-    if (!user) {
+    const lowerUser = user
+      ? null
+      : await this.prisma.user.findFirst({
+          where: { email: { equals: email, mode: 'insensitive' } },
+          select: { id: true, email: true },
+        });
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'pre-fix',hypothesisId:'A',location:'auth.service.ts:verifyOtp',message:'otp verify lookup mismatch',data:{rawEmail:input.email,otpKeyEmail:email,foundExact:Boolean(user),insensitiveHit:Boolean(!user&&lowerUser),storedEmail:user?.email??lowerUser?.email??null},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    const account = user ?? (await this.userByEmail(email));
+    if (!account) {
       throw new BadRequestException(
         'No account for this email. Register as admin or join with invite code first.',
       );
     }
+    await this.assertOtp(`otp:${email}`, input.code);
 
     return {
-      token: this.signToken(user.id),
-      user: this.toUser(user),
+      token: this.signToken(account.id),
+      user: this.toUser(account),
     };
   }
 
@@ -190,14 +228,15 @@ export class AuthService {
       throw new BadRequestException('Invite code already used');
     }
 
-    const existing = await this.prisma.user.findUnique({ where: { email: input.email } });
+    const email = input.email.toLowerCase();
+    const existing = await this.userByEmail(email);
     if (existing) throw new ConflictException('Email already used');
 
-    const username = await this.uniqueUsername(input.email);
+    const username = await this.uniqueUsername(email);
     const user = await this.prisma.$transaction(async (tx) => {
       const created = await tx.user.create({
         data: {
-          email: input.email,
+          email,
           username,
           fullName: input.fullName,
           passwordHash: null,
@@ -260,7 +299,7 @@ export class AuthService {
 
     let user = await this.prisma.user.findFirst({
       where: {
-        OR: [{ googleId: profile.id }, { email }],
+        OR: [{ googleId: profile.id }, { email: { equals: email, mode: 'insensitive' } }],
       },
       include: { ownedCompany: true, membership: true },
     });

@@ -21,11 +21,18 @@ const COOKIE = 'access_token';
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
+  private cookieOpts() {
+    return {
+      httpOnly: true as const,
+      sameSite: 'lax' as const,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+    };
+  }
+
   private setCookie(res: Response, token: string) {
     res.cookie(COOKIE, token, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
+      ...this.cookieOpts(),
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
   }
@@ -123,8 +130,13 @@ export class AuthController {
   }
 
   @Post('logout')
-  logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie(COOKIE);
+  logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const hadCookie = Boolean(req.cookies?.[COOKIE]);
+    res.clearCookie(COOKIE, this.cookieOpts());
+    const setCookie = res.getHeader('Set-Cookie');
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'pre-fix',hypothesisId:'D',location:'auth.controller.ts:logout',message:'logout clearCookie',data:{hadCookie,setCookie:String(setCookie??''),secure:process.env.NODE_ENV==='production'},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     return { ok: true };
   }
 }
