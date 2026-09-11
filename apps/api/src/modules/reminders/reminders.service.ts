@@ -86,7 +86,7 @@ export class RemindersService {
       return rows.map((row) => this.map(row));
     }
 
-    const [tasks, attending] = await Promise.all([
+    const [tasks, attending, openMeetings] = await Promise.all([
       this.prisma.task.findMany({
         where: { companyId: user.companyId!, assigneeId: user.id },
         select: { id: true },
@@ -95,7 +95,17 @@ export class RemindersService {
         where: { userId: user.id, event: { companyId: user.companyId! } },
         select: { eventId: true },
       }),
+      this.prisma.calendarEvent.findMany({
+        where: { companyId: user.companyId!, attendees: { none: {} } },
+        select: { id: true },
+      }),
     ]);
+    const meetingIds = [
+      ...new Set([
+        ...attending.map((row) => row.eventId),
+        ...openMeetings.map((row) => row.id),
+      ]),
+    ];
 
     const rows = await this.prisma.reminder.findMany({
       where: {
@@ -112,13 +122,16 @@ export class RemindersService {
             OR: [
               { targetKind: 'CUSTOM', creatorId: user.id },
               { targetKind: 'TASK', targetId: { in: tasks.map((row) => row.id) } },
-              { targetKind: 'MEETING', targetId: { in: attending.map((row) => row.eventId) } },
+              { targetKind: 'MEETING', targetId: { in: meetingIds } },
             ],
           },
         ],
       },
       orderBy: { fireAt: 'asc' },
     });
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AD',location:'reminders.service.ts:due',message:'employee due meetings',data:{role:user.role,meetingIds:meetingIds.length,due:rows.length},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     return rows.map((row) => this.map(row));
   }
 
@@ -140,6 +153,10 @@ export class RemindersService {
         where: { eventId: reminder.targetId, userId: user.id },
       });
       if (seat) return reminder;
+      const open = await this.prisma.calendarEvent.findFirst({
+        where: { id: reminder.targetId, companyId: user.companyId!, attendees: { none: {} } },
+      });
+      if (open) return reminder;
     }
     throw new ForbiddenException('Insufficient role');
   }
