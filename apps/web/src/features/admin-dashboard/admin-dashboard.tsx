@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api, authApi, type AuthUser } from '@/lib/api';
+import { greetKey, hourInZone } from '@/lib/dates';
 import { usePresence } from '@/hooks/use-presence';
 import { PendingLeaves, type PendingLeave } from './pending-leaves';
 import { AdminWeekHours } from './week-hours';
@@ -43,12 +44,19 @@ export default function AdminDashboard() {
     () => Object.values(weekly).reduce((sum, hours) => sum + hours, 0),
     [weekly],
   );
+  const hour = hourInZone(timezone);
+  const hello = greetKey(hour);
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AC',location:'admin-dashboard.tsx',message:'greeting bucket',data:{timezone,hour,hello},timestamp:Date.now()})}).catch(()=>{});
+  }, [timezone, hour, hello]);
+  // #endregion
 
   return (
     <div className="stack">
       <header>
         <h1 className="admin-dash__greet">
-          {t('greet.morning', { name: user?.fullName ?? '' })}
+          {t(`greet.${hello}`, { name: user?.fullName ?? '' })}
         </h1>
       </header>
 

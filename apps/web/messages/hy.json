@@ -215,7 +215,10 @@
       "pendingLeaves": "Սպասող արձակուրդ"
     },
     "greet": {
-      "morning": "Բարի լույս, {name}"
+      "morning": "Բարի լույս, {name}",
+      "afternoon": "Բարի օր, {name}",
+      "evening": "Բարի երեկո, {name}",
+      "night": "Բարի գիշեր, {name}"
     },
     "employee": {
       "dayLengthHours": "Օրվա տևողությունը {hours}ժ",

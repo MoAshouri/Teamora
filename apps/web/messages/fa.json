@@ -215,7 +215,10 @@
       "pendingLeaves": "مرخصی در انتظار"
     },
     "greet": {
-      "morning": "صبح بخیر، {name}"
+      "morning": "صبح بخیر، {name}",
+      "afternoon": "ظهر بخیر، {name}",
+      "evening": "عصر بخیر، {name}",
+      "night": "شب بخیر، {name}"
     },
     "employee": {
       "dayLengthHours": "طول روز {hours} ساعت",

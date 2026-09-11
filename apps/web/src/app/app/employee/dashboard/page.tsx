@@ -10,6 +10,7 @@ import { MeetingsPreview } from '@/features/employee-home/meetings-preview';
 import { TasksPreview } from '@/features/employee-home/tasks-preview';
 import { LettersBox } from '@/features/employee-home/letters-box';
 import type { WorkPolicy } from '@/features/work-time';
+import { greetKey, hourInZone } from '@/lib/dates';
 
 export default function EmployeeDashboardPage() {
   const t = useTranslations('app');
@@ -45,10 +46,19 @@ export default function EmployeeDashboardPage() {
     await load();
   }
 
+  const timezone = policy?.timezone ?? 'Asia/Tehran';
+  const hour = hourInZone(timezone);
+  const hello = greetKey(hour);
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AC',location:'employee/dashboard/page.tsx',message:'greeting bucket',data:{timezone,hour,hello},timestamp:Date.now()})}).catch(()=>{});
+  }, [timezone, hour, hello]);
+  // #endregion
+
   return (
     <div className="stack">
       <header>
-        <h1 style={{ marginBottom: 0 }}>{t('greet.morning', { name: user?.fullName ?? '' })}</h1>
+        <h1 style={{ marginBottom: 0 }}>{t(`greet.${hello}`, { name: user?.fullName ?? '' })}</h1>
         <p className="muted">{session ? t('dashboard.presentNow') : t('people.away')}</p>
       </header>
 

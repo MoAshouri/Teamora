@@ -136,6 +136,28 @@ export function todayKeyInZone(timeZone = 'UTC', now = new Date()) {
   return dateKeyInZone(now.toISOString(), timeZone);
 }
 
+export function hourInZone(timeZone = 'UTC', now = new Date()) {
+  try {
+    const hour = new Intl.DateTimeFormat('en-GB', {
+      timeZone,
+      hour: '2-digit',
+      hourCycle: 'h23',
+    })
+      .formatToParts(now)
+      .find((part) => part.type === 'hour')?.value;
+    return Number(hour);
+  } catch {
+    return now.getUTCHours();
+  }
+}
+
+export function greetKey(hour: number): 'morning' | 'afternoon' | 'evening' | 'night' {
+  if (hour >= 5 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 17) return 'afternoon';
+  if (hour >= 17 && hour < 21) return 'evening';
+  return 'night';
+}
+
 export function startOfCalendarMonth(anchor: Date, locale: Locale) {
   let cursor = utcNoon(anchor);
   const start = calendarYmd(cursor, locale);
