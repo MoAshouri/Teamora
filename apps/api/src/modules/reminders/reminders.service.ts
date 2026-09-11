@@ -88,8 +88,11 @@ export class RemindersService {
 
     const [tasks, attending, openMeetings] = await Promise.all([
       this.prisma.task.findMany({
-        where: { companyId: user.companyId!, assigneeId: user.id },
-        select: { id: true },
+        where: {
+          companyId: user.companyId!,
+          OR: [{ assigneeId: user.id }, { assigneeId: null }],
+        },
+        select: { id: true, assigneeId: true },
       }),
       this.prisma.calendarAttendee.findMany({
         where: { userId: user.id, event: { companyId: user.companyId! } },
@@ -130,7 +133,7 @@ export class RemindersService {
       orderBy: { fireAt: 'asc' },
     });
     // #region agent log
-    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AD',location:'reminders.service.ts:due',message:'employee due meetings',data:{role:user.role,meetingIds:meetingIds.length,due:rows.length},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AG',location:'reminders.service.ts:due',message:'employee due tasks and meetings',data:{role:user.role,meetingIds:meetingIds.length,taskIds:tasks.length,unassignedTasks:tasks.filter((row)=>row.assigneeId==null).length,due:rows.length,dueTaskKinds:rows.filter((row)=>row.targetKind==='TASK').length},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
     return rows.map((row) => this.map(row));
   }
@@ -144,7 +147,11 @@ export class RemindersService {
     if (reminder.targetKind === 'CUSTOM' && reminder.creatorId === user.id) return reminder;
     if (reminder.targetKind === 'TASK' && reminder.targetId) {
       const task = await this.prisma.task.findFirst({
-        where: { id: reminder.targetId, companyId: user.companyId!, assigneeId: user.id },
+        where: {
+          id: reminder.targetId,
+          companyId: user.companyId!,
+          OR: [{ assigneeId: user.id }, { assigneeId: null }],
+        },
       });
       if (task) return reminder;
     }
