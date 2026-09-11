@@ -1,0 +1,7 @@
+.tasks-preview__star {
+  width: 0.95rem;
+  height: 0.95rem;
+  margin-inline-start: 0.35rem;
+  vertical-align: -0.12rem;
+  object-fit: contain;
+}

@@ -222,7 +222,10 @@
       "allMeetings": "All meetings",
       "noMeetings": "No meetings",
       "prevDay": "Previous day",
-      "nextDay": "Next day"
+      "nextDay": "Next day",
+      "tasksToday": "Tasks today",
+      "allTasks": "All tasks",
+      "noTasks": "No tasks"
     },
     "leaves": {
       "monthTitle": "Leave month",

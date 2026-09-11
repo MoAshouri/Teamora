@@ -222,7 +222,10 @@
       "allMeetings": "همه جلسه‌ها",
       "noMeetings": "جلسه‌ای نیست",
       "prevDay": "روز قبل",
-      "nextDay": "روز بعد"
+      "nextDay": "روز بعد",
+      "tasksToday": "کارهای امروز",
+      "allTasks": "همه کارها",
+      "noTasks": "کاری نیست"
     },
     "leaves": {
       "monthTitle": "مرخصی ماه",

@@ -15,6 +15,7 @@ export type AgendaRow = {
   time: string;
   title: string;
   people?: AgendaPerson[];
+  starred?: boolean;
 };
 
 function initials(name: string) {
@@ -30,6 +31,7 @@ export function DayAgendaModal({
   prevLabel,
   nextLabel,
   rows,
+  starSrc,
   onPrev,
   onNext,
   onClose,
@@ -41,6 +43,7 @@ export function DayAgendaModal({
   prevLabel: string;
   nextLabel: string;
   rows: AgendaRow[];
+  starSrc?: string;
   onPrev: () => void;
   onNext: () => void;
   onClose: () => void;
@@ -81,7 +84,12 @@ export function DayAgendaModal({
               <li className="day-agenda__row" key={row.id}>
                 <time className="day-agenda__time">{row.time}</time>
                 <div>
-                  <strong>{row.title}</strong>
+                  <strong>
+                    {row.title}
+                    {row.starred && starSrc ? (
+                      <img className="day-agenda__star" src={starSrc} alt="" />
+                    ) : null}
+                  </strong>
                   {row.people?.length ? (
                     <span className="day-agenda__faces">
                       {row.people.map((person) =>
