@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api, authApi } from '@/lib/api';
+import { EmailSection } from './email-section';
 import './settings-page.css';
 
 type Profile = {
@@ -123,10 +124,7 @@ export default function SettingsPage() {
           </button>
         </form>
       </section>
-      <section className="card settings-well">
-        <h2>{t('settings.email')}</h2>
-        <p className="muted">{t('settings.lede')}</p>
-      </section>
+      <EmailSection />
     </div>
   );
 }

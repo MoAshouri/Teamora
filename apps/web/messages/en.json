@@ -112,7 +112,7 @@
     },
     "settings": {
       "title": "Settings",
-      "lede": "Email change will open in this room later.",
+      "lede": "A six-brick code is sent to the new address.",
       "profile": "Profile",
       "fullName": "Display name",
       "avatarUrl": "Avatar URL",
@@ -121,7 +121,14 @@
       "newPassword": "New password",
       "save": "Save",
       "saved": "Saved",
-      "email": "Email"
+      "email": "Email",
+      "newEmail": "New email",
+      "sendCode": "Send code",
+      "confirmCode": "Confirm code",
+      "emailUpdated": "Email updated",
+      "emailTaken": "That email is already used",
+      "verified": "Verified",
+      "unverified": "Not verified"
     },
     "theme": {
       "light": "Switch to light",
