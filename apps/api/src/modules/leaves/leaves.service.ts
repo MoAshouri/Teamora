@@ -137,7 +137,10 @@ export class LeavesService {
     const membership = await this.prisma.companyMembership.findFirst({
       where: { companyId, userId: input.userId },
     });
-    if (!membership) {
+    const company = await this.prisma.company.findFirst({
+      where: { id: companyId, adminId: input.userId },
+    });
+    if (!membership && !company) {
       throw new ForbiddenException('Recipient not in company');
     }
     return this.prisma.leaveBalanceAdjustment.create({

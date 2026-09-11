@@ -1,4 +1,5 @@
 ﻿import {
+  BadRequestException,
   Body,
   Controller,
   ForbiddenException,
@@ -10,6 +11,7 @@
   UseGuards,
 } from '@nestjs/common';
 import { SubmitTimeEntrySchema } from '@teamora/shared';
+import { z } from 'zod';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../../common/auth/roles.decorator';
 import { RolesGuard } from '../../common/auth/roles.guard';
@@ -83,9 +85,13 @@ export class WorkTimeController {
   review(
     @CurrentUser() user: AuthUser,
     @Param('id') id: string,
-    @Body() body: { status: 'APPROVED' | 'REJECTED' },
+    @Body() body: unknown,
   ) {
-    return this.workTime.reviewEntry(user.companyId!, user.id, id, body.status);
+    const parsed = z.object({ status: z.enum(['APPROVED', 'REJECTED']) }).safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException('status must be APPROVED or REJECTED');
+    }
+    return this.workTime.reviewEntry(user.companyId!, user.id, id, parsed.data.status);
   }
 
   @Get('weekly/company')

@@ -34,7 +34,12 @@ export class WorkTimeService {
     }
 
     const endedAt = new Date();
-    const date = new Date(session.startedAt.toISOString().slice(0, 10));
+    const timeZone = await this.policyTimezone(companyId);
+    const dateKey = this.zonedYmd(session.startedAt, timeZone);
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'M',location:'work-time.service.ts:endSession',message:'session date tz',data:{utc:session.startedAt.toISOString().slice(0,10),zoned:dateKey,timeZone},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    const date = new Date(`${dateKey}T00:00:00.000Z`);
 
     const [entry] = await this.prisma.$transaction([
       this.prisma.timeEntry.create({
@@ -116,6 +121,9 @@ export class WorkTimeService {
       where: { id: entryId, companyId },
     });
     if (!entry) throw new NotFoundException('Entry not found');
+    if (entry.status !== 'PENDING') {
+      throw new BadRequestException('Entry already reviewed');
+    }
     return this.prisma.timeEntry.update({
       where: { id: entryId },
       data: {
@@ -126,26 +134,48 @@ export class WorkTimeService {
     });
   }
 
-  private saturdayWeekWindow(now = new Date()) {
-    const day = now.getUTCDay();
-    const diffToSat = (day + 1) % 7;
-    const start = new Date(now);
-    start.setUTCDate(now.getUTCDate() - diffToSat);
-    start.setUTCHours(0, 0, 0, 0);
-    const end = new Date(start);
-    end.setUTCDate(start.getUTCDate() + 6);
-    end.setUTCHours(23, 59, 59, 999);
+  private async policyTimezone(companyId: string) {
+    const policy = await this.prisma.workPolicy.findUnique({ where: { companyId } });
+    return policy?.timezone || 'Asia/Tehran';
+  }
+
+  private zonedYmd(value: Date, timeZone: string) {
+    try {
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(value);
+    } catch {
+      return value.toISOString().slice(0, 10);
+    }
+  }
+
+  private addDaysYmd(ymd: string, days: number) {
+    const date = new Date(`${ymd}T12:00:00.000Z`);
+    date.setUTCDate(date.getUTCDate() + days);
+    return date.toISOString().slice(0, 10);
+  }
+
+  private async saturdayWeekWindow(companyId: string, now = new Date()) {
+    const timeZone = await this.policyTimezone(companyId);
+    const today = this.zonedYmd(now, timeZone);
+    const weekday = new Date(`${today}T12:00:00.000Z`).getUTCDay();
+    const diffToSat = (weekday + 1) % 7;
+    const startYmd = this.addDaysYmd(today, -diffToSat);
+    const endYmd = this.addDaysYmd(startYmd, 6);
+    const start = new Date(`${startYmd}T00:00:00.000Z`);
+    const end = new Date(`${endYmd}T23:59:59.999Z`);
     const emptyDay: Record<string, number> = {};
     for (let i = 0; i < 7; i++) {
-      const d = new Date(start);
-      d.setUTCDate(start.getUTCDate() + i);
-      emptyDay[d.toISOString().slice(0, 10)] = 0;
+      emptyDay[this.addDaysYmd(startYmd, i)] = 0;
     }
     return { start, end, emptyDay };
   }
 
   async weeklyHours(companyId: string, userId?: string) {
-    const { start, end, emptyDay } = this.saturdayWeekWindow();
+    const { start, end, emptyDay } = await this.saturdayWeekWindow(companyId);
 
     if (userId) {
       const membership = await this.prisma.companyMembership.findFirst({
@@ -179,7 +209,7 @@ export class WorkTimeService {
   }
 
   async weeklyHoursByPerson(companyId: string) {
-    const { start, end, emptyDay } = this.saturdayWeekWindow();
+    const { start, end, emptyDay } = await this.saturdayWeekWindow(companyId);
     const company = await this.prisma.company.findUnique({
       where: { id: companyId },
       include: { memberships: { select: { userId: true } } },

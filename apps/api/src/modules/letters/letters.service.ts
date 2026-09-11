@@ -14,7 +14,10 @@ export class LettersService {
     const membership = await this.prisma.companyMembership.findFirst({
       where: { companyId, userId: input.recipientId },
     });
-    if (!membership) {
+    const company = await this.prisma.company.findFirst({
+      where: { id: companyId, adminId: input.recipientId },
+    });
+    if (!membership && !company) {
       throw new ForbiddenException('Recipient not in company');
     }
 
