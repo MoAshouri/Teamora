@@ -16,6 +16,7 @@ import {
   getMonthGrid,
   dateKeyInZone,
   isoDateUtc,
+  todayKeyInZone,
   shiftCalendarMonth,
 } from '@/lib/dates';
 import type { Locale } from '@/lib/i18n/config';
@@ -64,7 +65,13 @@ export function CalendarMonthGrid() {
     });
   }, [cells, locale]);
 
-  const todayIso = isoDateUtc(new Date());
+  const todayIso = todayKeyInZone(timezone);
+  const todayUtc = isoDateUtc(new Date());
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AE',location:'month-grid.tsx:today',message:'calendar today highlight',data:{timezone,todayIso,todayUtc,mismatch:todayIso!==todayUtc},timestamp:Date.now()})}).catch(()=>{});
+  }, [timezone, todayIso, todayUtc]);
+  // #endregion
   const range = useMemo(() => {
     const start = cells[0]?.date;
     const end = cells[cells.length - 1]?.date;
