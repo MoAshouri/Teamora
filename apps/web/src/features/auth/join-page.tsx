@@ -4,6 +4,7 @@ import { FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
+import { parseAppLocale, setAppLocale } from '@/lib/i18n/app-locale';
 import { authBrick } from './brand';
 import { AuthShell, useAuthUi } from './auth-shell';
 import { BrickCodeInput } from './brick-code-input';
@@ -61,6 +62,7 @@ export default function JoinPage() {
         email: String(fd.get('email') ?? ''),
         fullName: String(fd.get('fullName') ?? ''),
       });
+      setAppLocale(parseAppLocale(params.locale));
       router.push(`/app/${result.user.role === 'ADMIN' ? 'admin' : 'employee'}/dashboard`);
     } catch (err) {
       setError(err instanceof Error ? err.message : tCommon('error'));

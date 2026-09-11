@@ -4,6 +4,7 @@ import { FormEvent, Suspense, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { authApi } from '@/lib/api';
+import { parseAppLocale, setAppLocale } from '@/lib/i18n/app-locale';
 import { authBrick } from './brand';
 import { AuthShell, AuthStageFallback, useAuthUi } from './auth-shell';
 import { BrickCodeInput } from './brick-code-input';
@@ -35,6 +36,7 @@ function LoginFields() {
   const t = useTranslations('auth');
   const tCommon = useTranslations('common');
   const router = useRouter();
+  const params = useParams<{ locale: string }>();
   const { theme, brand } = useAuthUi();
   const brickSrc = authBrick(brand, theme);
   const [error, setError] = useState('');
@@ -44,6 +46,10 @@ function LoginFields() {
   const [busy, setBusy] = useState(false);
 
   function goDashboard(role: 'ADMIN' | 'EMPLOYEE') {
+    setAppLocale(parseAppLocale(params.locale));
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'E',location:'login-page.tsx:goDashboard',message:'login success locale cookie',data:{path:typeof window==='undefined'?'':window.location.pathname,cookieLocale:(typeof document==='undefined'?'':(document.cookie.match(/teamora-locale=([^;]*)/)||[])[1])||null,role},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     router.push(`/app/${role === 'ADMIN' ? 'admin' : 'employee'}/dashboard`);
   }
 
@@ -176,6 +182,7 @@ function CreateFields() {
   const t = useTranslations('auth');
   const tCommon = useTranslations('common');
   const router = useRouter();
+  const params = useParams<{ locale: string }>();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -196,6 +203,10 @@ function CreateFields() {
         fullName: String(fd.get('fullName') ?? ''),
         companyName: String(fd.get('companyName') ?? ''),
       });
+      // #region agent log
+      fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'E',location:'login-page.tsx:onRegister',message:'register success locale cookie',data:{path:typeof window==='undefined'?'':window.location.pathname,cookieLocale:(typeof document==='undefined'?'':(document.cookie.match(/teamora-locale=([^;]*)/)||[])[1])||null,mustVerifyEmail:result.user.mustVerifyEmail,role:result.user.role},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+      setAppLocale(parseAppLocale(params.locale));
       router.push(`/app/${result.user.role === 'ADMIN' ? 'admin' : 'employee'}/dashboard`);
     } catch (err) {
       setError(err instanceof Error ? err.message : tCommon('error'));
