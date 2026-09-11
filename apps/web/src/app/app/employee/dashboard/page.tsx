@@ -8,6 +8,7 @@ import { EmployeeWeekHours } from '@/features/employee-home/week-hours';
 import { LeaveStatusCard } from '@/features/leaves';
 import { MeetingsPreview } from '@/features/employee-home/meetings-preview';
 import { TasksPreview } from '@/features/employee-home/tasks-preview';
+import { LettersBox } from '@/features/employee-home/letters-box';
 import type { WorkPolicy } from '@/features/work-time';
 
 export default function EmployeeDashboardPage() {
@@ -63,6 +64,7 @@ export default function EmployeeDashboardPage() {
       </div>
       <MeetingsPreview timezone={policy?.timezone ?? 'Asia/Tehran'} />
       <TasksPreview timezone={policy?.timezone ?? 'Asia/Tehran'} />
+      <LettersBox />
     </div>
   );
 }

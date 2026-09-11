@@ -73,7 +73,16 @@ export const authApi = {
 export const lettersApi = {
   create: (body: { recipientId: string; subject: string; body: string }) =>
     api.post('/letters', body),
-  inbox: () => api.get('/letters/inbox'),
+  inbox: () => api.get<InboxLetter[]>('/letters/inbox'),
+  markRead: (id: string) => api.post<InboxLetter>(`/letters/${id}/read`),
+};
+
+export type InboxLetter = {
+  id: string;
+  subject: string;
+  body: string;
+  createdAt: string;
+  readAt: string | null;
 };
 
 export type DueReminder = {

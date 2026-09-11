@@ -225,7 +225,11 @@
       "nextDay": "روز بعد",
       "tasksToday": "کارهای امروز",
       "allTasks": "همه کارها",
-      "noTasks": "کاری نیست"
+      "noTasks": "کاری نیست",
+      "letters": "نامه‌ها",
+      "unread": "نخوانده",
+      "markRead": "خوانده شد",
+      "noLetters": "نامه‌ای نیست"
     },
     "leaves": {
       "monthTitle": "مرخصی ماه",

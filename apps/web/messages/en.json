@@ -225,7 +225,11 @@
       "nextDay": "Next day",
       "tasksToday": "Tasks today",
       "allTasks": "All tasks",
-      "noTasks": "No tasks"
+      "noTasks": "No tasks",
+      "letters": "Letters",
+      "unread": "Unread",
+      "markRead": "Mark read",
+      "noLetters": "No letters"
     },
     "leaves": {
       "monthTitle": "Leave month",

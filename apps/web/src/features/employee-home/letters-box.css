@@ -1,0 +1,57 @@
+.letters-box__head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.7rem;
+}
+
+.letters-box__head h2 {
+  margin: 0;
+}
+
+.letters-box__badge {
+  min-width: 1.35rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff8f1;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.letters-box__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.letters-box__row {
+  display: grid;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--card) 82%, var(--bg-deep));
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.letters-box__row[data-unread='true'] {
+  box-shadow: inset 0.28rem 0 0 var(--accent);
+}
+
+.letters-box__unread {
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.letters-box__body {
+  margin: 0;
+  white-space: pre-wrap;
+}
