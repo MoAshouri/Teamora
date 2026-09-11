@@ -12,6 +12,7 @@ type Session = { id: string; startedAt: string; user: { fullName: string } };
 type Entry = {
   id: string;
   status: string;
+  date: string;
   startedAt: string;
   endedAt: string;
   user: { fullName: string };
@@ -74,6 +75,10 @@ export default function AdminWorkTimePage() {
             <div>
               <strong>{e.user.fullName}</strong>
               <div className="muted">{statusLabel(t, e.status)}</div>
+              <div className="muted">
+                {e.date.slice(0, 10)} · {formatTime(e.startedAt, locale, policy?.timezone)} –{' '}
+                {formatTime(e.endedAt, locale, policy?.timezone)}
+              </div>
             </div>
             {e.status === 'PENDING' ? (
               <div style={{ display: 'flex', gap: 8 }}>
