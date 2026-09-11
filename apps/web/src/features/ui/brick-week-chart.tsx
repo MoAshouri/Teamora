@@ -9,7 +9,7 @@ import {
   type AuthFamily,
   type AuthTheme,
 } from '@/features/auth/brand';
-import { formatWeekday, formatWeekdayShort } from '@/lib/dates';
+import { formatWeekday, formatWeekdayShort, todayKeyInZone } from '@/lib/dates';
 import type { Locale } from '@/lib/i18n/config';
 import './brick-week-chart.css';
 
@@ -27,22 +27,27 @@ function isoFromUtcDate(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
-export function saturdayWeekKeys(from = new Date()): string[] {
-  const day = from.getUTCDay();
-  const diffToSat = (day + 1) % 7;
-  const start = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate()));
+export function saturdayWeekKeys(from = new Date(), timeZone = 'Asia/Tehran'): string[] {
+  const today = todayKeyInZone(timeZone, from);
+  const weekday = new Date(`${today}T12:00:00.000Z`).getUTCDay();
+  const diffToSat = (weekday + 1) % 7;
+  const start = new Date(`${today}T12:00:00.000Z`);
   start.setUTCDate(start.getUTCDate() - diffToSat);
-  return Array.from({ length: 7 }, (_, i) => {
+  const keys = Array.from({ length: 7 }, (_, i) => {
     const next = new Date(start);
     next.setUTCDate(start.getUTCDate() + i);
     return isoFromUtcDate(next);
   });
+  // #region agent log
+  fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'Q',location:'brick-week-chart.tsx:saturdayWeekKeys',message:'saturday week keys',data:{timeZone,today,keys,utcToday:from.toISOString().slice(0,10)},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
+  return keys;
 }
 
-export function weekKeys(hoursByDay: Record<string, number>): string[] {
+export function weekKeys(hoursByDay: Record<string, number>, timeZone = 'Asia/Tehran'): string[] {
   const keys = Object.keys(hoursByDay).sort();
   if (keys.length === 7) return keys;
-  return saturdayWeekKeys();
+  return saturdayWeekKeys(new Date(), timeZone);
 }
 
 function dateFromIso(iso: string) {
@@ -59,12 +64,14 @@ export function BrickWeekChart({
   hoursByDay,
   workDays = DEFAULT_WORK_DAYS,
   highlightDate,
+  timezone = 'Asia/Tehran',
   yMax = 8,
   size = 'default',
 }: {
   hoursByDay: Record<string, number>;
   workDays?: number[];
   highlightDate?: string;
+  timezone?: string;
   yMax?: number;
   size?: 'default' | 'compact';
 }) {
@@ -95,8 +102,8 @@ export function BrickWeekChart({
     return () => observer.disconnect();
   }, []);
 
-  const days = useMemo(() => weekKeys(hoursByDay), [hoursByDay]);
-  const today = highlightDate ?? isoFromUtcDate(new Date());
+  const days = useMemo(() => weekKeys(hoursByDay, timezone), [hoursByDay, timezone]);
+  const today = highlightDate ?? todayKeyInZone(timezone);
 
   return (
     <div className="brick-chart brick-week" data-size={size}>

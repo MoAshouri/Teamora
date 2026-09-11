@@ -67,7 +67,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <AdminWeekHours hoursByDay={weekly} workDays={workDays} />
+      <AdminWeekHours hoursByDay={weekly} workDays={workDays} timezone={timezone} />
 
       <AdminStarredWeek workDays={workDays} timezone={timezone} />
 

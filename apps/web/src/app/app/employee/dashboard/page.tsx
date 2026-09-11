@@ -59,6 +59,7 @@ export default function EmployeeDashboardPage() {
           hoursByDay={weekly}
           workDays={policy?.workDays}
           dailyMinutes={policy?.dailyMinutes}
+          timezone={policy?.timezone ?? 'Asia/Tehran'}
         />
         <LeaveStatusCard variant="home" />
       </div>

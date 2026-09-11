@@ -12,6 +12,10 @@ function timeZoneFor(locale: Locale) {
   return locale === 'fa' ? 'Asia/Tehran' : undefined;
 }
 
+function resolveTimeZone(locale: Locale, timeZone?: string) {
+  return timeZone || timeZoneFor(locale);
+}
+
 /** Format an ISO/UTC date for display. Storage remains UTC; UI chooses calendar. */
 export function formatDate(
   value: string | Date,
@@ -33,44 +37,44 @@ export function formatTime(value: string | Date, locale: Locale) {
   }).format(date);
 }
 
-export function formatWeekday(value: Date, locale: Locale) {
+export function formatWeekday(value: Date, locale: Locale, timeZone?: string) {
   return new Intl.DateTimeFormat(localeTag(locale), {
     weekday: 'long',
     calendar: calendarFor(locale),
-    timeZone: timeZoneFor(locale),
+    timeZone: resolveTimeZone(locale, timeZone),
   }).format(value);
 }
 
-export function formatWeekdayShort(value: Date, locale: Locale) {
+export function formatWeekdayShort(value: Date, locale: Locale, timeZone?: string) {
   return new Intl.DateTimeFormat(localeTag(locale), {
     weekday: 'short',
     calendar: calendarFor(locale),
-    timeZone: timeZoneFor(locale),
+    timeZone: resolveTimeZone(locale, timeZone),
   }).format(value);
 }
 
-export function formatPanelDate(value: Date, locale: Locale) {
+export function formatPanelDate(value: Date, locale: Locale, timeZone?: string) {
   return new Intl.DateTimeFormat(localeTag(locale), {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
     calendar: calendarFor(locale),
-    timeZone: timeZoneFor(locale),
+    timeZone: resolveTimeZone(locale, timeZone),
   }).format(value);
 }
 
-export function formatDayNumber(value: Date, locale: Locale) {
+export function formatDayNumber(value: Date, locale: Locale, timeZone?: string) {
   return new Intl.DateTimeFormat(localeTag(locale), {
     day: 'numeric',
     calendar: calendarFor(locale),
-    timeZone: timeZoneFor(locale),
+    timeZone: resolveTimeZone(locale, timeZone),
   }).format(value);
 }
 
-export function formatPanelDay(value: Date, locale: Locale) {
+export function formatPanelDay(value: Date, locale: Locale, timeZone?: string) {
   return {
-    weekday: formatWeekday(value, locale),
-    date: formatPanelDate(value, locale),
+    weekday: formatWeekday(value, locale, timeZone),
+    date: formatPanelDate(value, locale, timeZone),
   };
 }
 
@@ -126,6 +130,10 @@ export function dateKeyInZone(iso: string, timeZone = 'UTC') {
   } catch {
     return iso.slice(0, 10);
   }
+}
+
+export function todayKeyInZone(timeZone = 'UTC', now = new Date()) {
+  return dateKeyInZone(now.toISOString(), timeZone);
 }
 
 export function startOfCalendarMonth(anchor: Date, locale: Locale) {

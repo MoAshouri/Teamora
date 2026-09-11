@@ -85,7 +85,7 @@ export function AdminLeaveMonth() {
     load().catch(console.error);
   }, [range.from, range.to]);
 
-  const pendingCount = items.filter((item) => item.status === 'PENDING').length;
+  const pendingCount = pending.length;
   const approvedDays = items
     .filter((item) => item.status === 'APPROVED' && item.kind !== 'HOURLY')
     .reduce(

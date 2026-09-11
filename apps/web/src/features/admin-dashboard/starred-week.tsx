@@ -46,7 +46,7 @@ export function AdminStarredWeek({
   const t = useTranslations('app');
   const locale = useLocale() as Locale;
   const [tasks, setTasks] = useState<StarredTask[]>([]);
-  const keys = useMemo(() => saturdayWeekKeys(), []);
+  const keys = useMemo(() => saturdayWeekKeys(new Date(), timezone), [timezone]);
 
   useEffect(() => {
     const from = `${keys[0]}T00:00:00.000Z`;

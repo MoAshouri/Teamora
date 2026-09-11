@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
@@ -34,7 +34,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       },
     });
     if (!user) {
-      throw new Error('User not found');
+      // #region agent log
+      fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'U',location:'jwt.strategy.ts:validate',message:'missing user jwt',data:{hasSub:Boolean(payload.sub)},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+      throw new UnauthorizedException('User not found');
     }
 
     const companyId =

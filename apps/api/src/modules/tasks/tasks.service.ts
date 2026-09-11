@@ -37,17 +37,24 @@ export class TasksService {
     const tasks = await this.prisma.task.findMany({
       where: {
         companyId: user.companyId!,
-        dueAt: { not: null, gte: from, lte: to },
-        ...(query.starred ? { starred: true } : {}),
-        ...(user.role === 'EMPLOYEE'
-          ? { OR: [{ assigneeId: user.id }, { assigneeId: null }] }
-          : {}),
+        AND: [
+          {
+            OR: [{ dueAt: null }, { dueAt: { gte: from, lte: to } }],
+          },
+          ...(query.starred ? [{ starred: true }] : []),
+          ...(user.role === 'EMPLOYEE'
+            ? [{ OR: [{ assigneeId: user.id }, { assigneeId: null }] }]
+            : []),
+        ],
       },
       include: {
         assignee: { select: personSelect },
       },
       orderBy: { dueAt: 'asc' },
     });
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'T',location:'tasks.service.ts:list',message:'task list dueAt mix',data:{from:query.from,to:query.to,total:tasks.length,nullDue:tasks.filter((row)=>row.dueAt==null).length},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     return tasks.map((task) => this.map(task));
   }
 

@@ -88,13 +88,15 @@ export function GunbadDay({
 
 export function GunbadWeekRow({
   workDays = DEFAULT_WORK_DAYS,
+  timezone = 'Asia/Tehran',
 }: {
   workDays?: number[];
+  timezone?: string;
 }) {
   const locale = useLocale() as Locale;
   const days = useMemo(
-    () => saturdayWeekKeys().map((iso) => new Date(`${iso}T12:00:00.000Z`)),
-    [],
+    () => saturdayWeekKeys(new Date(), timezone).map((iso) => new Date(`${iso}T12:00:00.000Z`)),
+    [timezone],
   );
 
   return (

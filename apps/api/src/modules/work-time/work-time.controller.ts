@@ -67,8 +67,11 @@ export class WorkTimeController {
   @Post('entries')
   @Roles('EMPLOYEE')
   submit(@CurrentUser() user: AuthUser, @Body() body: unknown) {
-    const input = SubmitTimeEntrySchema.parse(body);
-    return this.workTime.submitEntry(user.companyId!, user.id, input);
+    const parsed = SubmitTimeEntrySchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException('Invalid time entry');
+    }
+    return this.workTime.submitEntry(user.companyId!, user.id, parsed.data);
   }
 
   @Get('entries')
