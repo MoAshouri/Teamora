@@ -86,13 +86,17 @@ export class RemindersService {
       return rows.map((row) => this.map(row));
     }
 
-    const [tasks, attending, openMeetings] = await Promise.all([
+    const [tasks, notes, attending, openMeetings] = await Promise.all([
       this.prisma.task.findMany({
         where: {
           companyId: user.companyId!,
           OR: [{ assigneeId: user.id }, { assigneeId: null }],
         },
         select: { id: true, assigneeId: true },
+      }),
+      this.prisma.note.findMany({
+        where: { companyId: user.companyId! },
+        select: { id: true },
       }),
       this.prisma.calendarAttendee.findMany({
         where: { userId: user.id, event: { companyId: user.companyId! } },
@@ -125,6 +129,7 @@ export class RemindersService {
             OR: [
               { targetKind: 'CUSTOM', creatorId: user.id },
               { targetKind: 'TASK', targetId: { in: tasks.map((row) => row.id) } },
+              { targetKind: 'NOTE', targetId: { in: notes.map((row) => row.id) } },
               { targetKind: 'MEETING', targetId: { in: meetingIds } },
             ],
           },
@@ -133,7 +138,7 @@ export class RemindersService {
       orderBy: { fireAt: 'asc' },
     });
     // #region agent log
-    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AG',location:'reminders.service.ts:due',message:'employee due tasks and meetings',data:{role:user.role,meetingIds:meetingIds.length,taskIds:tasks.length,unassignedTasks:tasks.filter((row)=>row.assigneeId==null).length,due:rows.length,dueTaskKinds:rows.filter((row)=>row.targetKind==='TASK').length},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AH',location:'reminders.service.ts:due',message:'employee due notes tasks meetings',data:{role:user.role,meetingIds:meetingIds.length,taskIds:tasks.length,noteIds:notes.length,due:rows.length,dueNoteKinds:rows.filter((row)=>row.targetKind==='NOTE').length},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
     return rows.map((row) => this.map(row));
   }
@@ -154,6 +159,12 @@ export class RemindersService {
         },
       });
       if (task) return reminder;
+    }
+    if (reminder.targetKind === 'NOTE' && reminder.targetId) {
+      const note = await this.prisma.note.findFirst({
+        where: { id: reminder.targetId, companyId: user.companyId! },
+      });
+      if (note) return reminder;
     }
     if (reminder.targetKind === 'MEETING' && reminder.targetId) {
       const seat = await this.prisma.calendarAttendee.findFirst({
