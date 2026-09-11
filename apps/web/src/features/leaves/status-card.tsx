@@ -35,12 +35,13 @@ function waxStatus(status: string): WaxStatus {
   return 'pending';
 }
 
-export function LeaveStatusCard() {
+export function LeaveStatusCard({ variant = 'page' }: { variant?: 'page' | 'home' }) {
   const t = useTranslations('app');
   const tCommon = useTranslations('common');
   const [items, setItems] = useState<LeaveStatusItem[]>([]);
   const [balance, setBalance] = useState<LeaveBalance | null>(null);
   const [open, setOpen] = useState<LeaveStatusItem | null>(null);
+  const [requestOpen, setRequestOpen] = useState(false);
 
   async function load() {
     const [list, nextBalance] = await Promise.all([
@@ -53,7 +54,21 @@ export function LeaveStatusCard() {
 
   useEffect(() => {
     load().catch(console.error);
+    const onFocus = () => {
+      load().catch(console.error);
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
   }, []);
+
+  const pending = items.some((item) => item.status === 'PENDING');
+  useEffect(() => {
+    if (!pending) return;
+    const id = window.setInterval(() => {
+      load().catch(console.error);
+    }, 30_000);
+    return () => window.clearInterval(id);
+  }, [pending]);
 
   const latest = items[0];
   const rest = items.slice(1);
@@ -77,8 +92,8 @@ export function LeaveStatusCard() {
   }
 
   return (
-    <div className="stack leave-status">
-      <h1>{t('nav.leaves')}</h1>
+    <div className={variant === 'home' ? 'leave-status leave-status--home' : 'stack leave-status'}>
+      {variant === 'page' ? <h1>{t('nav.leaves')}</h1> : null}
       <div className="card">
         <div className="leave-status__balance">
           <div>
@@ -108,8 +123,24 @@ export function LeaveStatusCard() {
             <span className="muted">{t('leave.viewReason')}</span>
           </button>
         ))}
+        {variant === 'home' ? (
+          <button className="btn btn-primary leave-status__request" type="button" onClick={() => setRequestOpen(true)}>
+            {t('leave.request')}
+          </button>
+        ) : null}
       </div>
-      <LeaveRequestForm onSaved={load} />
+      {variant === 'page' ? (
+        <LeaveRequestForm onSaved={load} />
+      ) : (
+        <Modal open={requestOpen} onClose={() => setRequestOpen(false)} title={t('leave.request')}>
+          <LeaveRequestForm
+            onSaved={() => {
+              setRequestOpen(false);
+              load().catch(console.error);
+            }}
+          />
+        </Modal>
+      )}
       <Modal
         open={!!open}
         onClose={() => setOpen(null)}

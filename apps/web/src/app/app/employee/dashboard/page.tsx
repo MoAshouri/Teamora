@@ -5,28 +5,25 @@ import { useTranslations } from 'next-intl';
 import { api, authApi, type AuthUser } from '@/lib/api';
 import { DayTimer } from '@/features/employee-home/day-timer';
 import { EmployeeWeekHours } from '@/features/employee-home/week-hours';
+import { LeaveStatusCard } from '@/features/leaves';
 import type { WorkPolicy } from '@/features/work-time';
 
 export default function EmployeeDashboardPage() {
   const t = useTranslations('app');
-  const tDash = useTranslations('dashboard');
   const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<{ startedAt: string } | null>(null);
-  const [balance, setBalance] = useState<{ remaining: number } | null>(null);
   const [weekly, setWeekly] = useState<Record<string, number>>({});
   const [policy, setPolicy] = useState<WorkPolicy | null>(null);
 
   async function load() {
     const me = await authApi.me();
     setUser(me);
-    const [s, b, w, p] = await Promise.all([
+    const [s, w, p] = await Promise.all([
       api.get<{ startedAt: string } | null>('/work-time/session/me'),
-      api.get<{ remaining: number }>('/leaves/balance/me'),
       api.get<{ hoursByDay: Record<string, number> }>('/work-time/weekly'),
       api.get<WorkPolicy | null>('/companies/work-policy'),
     ]);
     setSession(s);
-    setBalance(b);
     setWeekly(w.hoursByDay);
     setPolicy(p);
   }
@@ -60,10 +57,7 @@ export default function EmployeeDashboardPage() {
           workDays={policy?.workDays}
           dailyMinutes={policy?.dailyMinutes}
         />
-        <div className="card">
-          <p className="muted">{tDash('remainingLeave')}</p>
-          <div className="stat">{balance?.remaining ?? '—'}</div>
-        </div>
+        <LeaveStatusCard variant="home" />
       </div>
     </div>
   );

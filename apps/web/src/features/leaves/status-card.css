@@ -61,6 +61,16 @@
   white-space: pre-wrap;
 }
 
+.leave-status__request {
+  margin-top: 0.85rem;
+  min-height: 2.25rem;
+  width: 100%;
+}
+
+.leave-status--home {
+  min-width: 0;
+}
+
 @media (max-width: 640px) {
   .leave-status__balance {
     grid-template-columns: 1fr;
