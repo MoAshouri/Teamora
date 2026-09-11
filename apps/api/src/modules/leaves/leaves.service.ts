@@ -16,9 +16,14 @@ export class LeavesService {
     const kind = input.kind ?? 'DAILY';
     const hours = kind === 'HOURLY' ? input.hours : null;
     const pool = await this.balance(companyId, userId);
+    const policy = await this.prisma.workPolicy.findUnique({ where: { companyId } });
+    const dayHours = (policy?.dailyMinutes ?? 480) / 60;
     // #region agent log
-    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'pre-fix',hypothesisId:'K',location:'leaves.service.ts:create',message:'leave create balance gate',data:{type:input.type,kind,hours,remainingHours:pool.remainingHours,remainingDays:pool.remainingDays,checksDailyAnnual:input.type==='ANNUAL'&&kind==='DAILY'},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'X',location:'leaves.service.ts:create',message:'leave create balance gate',data:{type:input.type,kind,hours,remainingHours:pool.remainingHours,remainingDays:pool.remainingDays,dayHours,usesBonusHours:input.type==='ANNUAL'&&kind==='HOURLY'},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
+    if (kind === 'HOURLY' && Number(hours ?? 0) > dayHours) {
+      throw new BadRequestException('Hours exceed the work day');
+    }
     if (input.type === 'ANNUAL' && kind === 'HOURLY') {
       const pendingHourly = await this.prisma.leaveRequest.findMany({
         where: {

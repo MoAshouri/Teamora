@@ -7,6 +7,7 @@ import { parseAppLocale } from '@/lib/i18n/app-locale';
 import { fontClassForLocale } from '@/lib/fonts/for-locale';
 import { APP_THEME_BOOT_SCRIPT, APP_THEME_COOKIE, parseAppTheme } from '@/lib/theme';
 import { familyFromLocale } from '@/features/auth/brand';
+import { ApiErrorToasts } from '@/features/app-shell/api-error-toasts';
 import '@/styles/app-family.css';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -55,6 +56,7 @@ export default async function AuthenticatedRootLayout({
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <ApiErrorToasts />
           {children}
         </NextIntlClientProvider>
       </body>

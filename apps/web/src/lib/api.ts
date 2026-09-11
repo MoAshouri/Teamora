@@ -21,16 +21,24 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       ...(init?.headers ?? {}),
     },
   });
-  if (!res.ok) {
-    const text = await res.text();
-    let message = text;
-    try {
-      message = JSON.parse(text)?.message ?? text;
-    } catch {
-      /* keep text */
+    if (!res.ok) {
+      const text = await res.text();
+      let message: unknown = text;
+      try {
+        message = JSON.parse(text)?.message ?? text;
+      } catch {
+        /* keep text */
+      }
+      const textMessage = Array.isArray(message) ? message.join(', ') : String(message);
+      if (typeof window !== 'undefined' && res.status !== 401) {
+        window.dispatchEvent(
+          new CustomEvent('teamora-api-error', {
+            detail: { message: textMessage, status: res.status, path },
+          }),
+        );
+      }
+      throw new Error(textMessage);
     }
-    throw new Error(Array.isArray(message) ? message.join(', ') : String(message));
-  }
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }

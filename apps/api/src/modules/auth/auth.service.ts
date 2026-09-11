@@ -234,7 +234,21 @@ export class AuthService {
 
     const username = await this.uniqueUsername(email);
     const user = await this.prisma.$transaction(async (tx) => {
-      const created = await tx.user.create({
+      const bumped = await tx.inviteCode.updateMany({
+        where: {
+          id: invite.id,
+          usedCount: { lt: invite.maxUses },
+          OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+        },
+        data: { usedCount: { increment: 1 } },
+      });
+      // #region agent log
+      fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'W',location:'auth.service.ts:joinCompany',message:'invite seat claim',data:{maxUses:invite.maxUses,usedCount:invite.usedCount,bumped:bumped.count},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+      if (bumped.count !== 1) {
+        throw new BadRequestException('Invite code already used');
+      }
+      return tx.user.create({
         data: {
           email,
           username,
@@ -247,11 +261,6 @@ export class AuthService {
         },
         include: { ownedCompany: true, membership: true },
       });
-      await tx.inviteCode.update({
-        where: { id: invite.id },
-        data: { usedCount: { increment: 1 } },
-      });
-      return created;
     });
 
     return {

@@ -5,6 +5,7 @@ import { locales, localeDirection, type Locale } from '@/lib/i18n/config';
 import { inter } from '@/lib/fonts/en';
 import { estedad } from '@/lib/fonts/fa';
 import { notoSansArmenian } from '@/lib/fonts/hy';
+import { ApiErrorToasts } from '@/features/app-shell/api-error-toasts';
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -39,7 +40,10 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <body data-theme="light">
-        <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ApiErrorToasts />
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

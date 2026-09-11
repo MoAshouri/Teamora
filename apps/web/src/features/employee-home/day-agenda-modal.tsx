@@ -51,13 +51,19 @@ export function DayAgendaModal({
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
+      const rtl = document.documentElement.dir === 'rtl';
+      // #region agent log
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'Y',location:'day-agenda-modal.tsx',message:'agenda arrow',data:{key:event.key,rtl,goes:event.key==='ArrowLeft'?(rtl?'next':'prev'):(rtl?'prev':'next')},timestamp:Date.now()})}).catch(()=>{});
+      }
+      // #endregion
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
-        onPrev();
+        (rtl ? onNext : onPrev)();
       }
       if (event.key === 'ArrowRight') {
         event.preventDefault();
-        onNext();
+        (rtl ? onPrev : onNext)();
       }
     };
     window.addEventListener('keydown', onKey);

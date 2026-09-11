@@ -1,4 +1,4 @@
-﻿import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
+﻿import { BadRequestException, Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
 import { UpsertWorkPolicySchema } from '@teamora/shared';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../../common/auth/roles.decorator';
@@ -27,7 +27,10 @@ export class CompaniesController {
   @Put('work-policy')
   @Roles('ADMIN')
   upsertPolicy(@CurrentUser() user: AuthUser, @Body() body: unknown) {
-    const input = UpsertWorkPolicySchema.parse(body);
-    return this.companies.upsertWorkPolicy(user.companyId!, input);
+    const parsed = UpsertWorkPolicySchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException('Invalid work policy');
+    }
+    return this.companies.upsertWorkPolicy(user.companyId!, parsed.data);
   }
 }
