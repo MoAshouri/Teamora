@@ -6,6 +6,7 @@ import { api, authApi, type AuthUser } from '@/lib/api';
 import { DayTimer } from '@/features/employee-home/day-timer';
 import { EmployeeWeekHours } from '@/features/employee-home/week-hours';
 import { LeaveStatusCard } from '@/features/leaves';
+import { MeetingsPreview } from '@/features/employee-home/meetings-preview';
 import type { WorkPolicy } from '@/features/work-time';
 
 export default function EmployeeDashboardPage() {
@@ -59,6 +60,7 @@ export default function EmployeeDashboardPage() {
         />
         <LeaveStatusCard variant="home" />
       </div>
+      <MeetingsPreview timezone={policy?.timezone ?? 'Asia/Tehran'} />
     </div>
   );
 }

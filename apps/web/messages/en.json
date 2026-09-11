@@ -217,7 +217,12 @@
       "overtime": "Overtime",
       "remaining": "Remaining",
       "idleMax": "Day length",
-      "myWeekHours": "My hours this week · {total}h"
+      "myWeekHours": "My hours this week · {total}h",
+      "meetingsToday": "Meetings today",
+      "allMeetings": "All meetings",
+      "noMeetings": "No meetings",
+      "prevDay": "Previous day",
+      "nextDay": "Next day"
     },
     "leaves": {
       "monthTitle": "Leave month",

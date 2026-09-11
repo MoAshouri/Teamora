@@ -217,7 +217,12 @@
       "overtime": "اضافه‌کار",
       "remaining": "مانده",
       "idleMax": "طول روز",
-      "myWeekHours": "ساعت‌های من این هفته · {total} ساعت"
+      "myWeekHours": "ساعت‌های من این هفته · {total} ساعت",
+      "meetingsToday": "جلسه‌های امروز",
+      "allMeetings": "همه جلسه‌ها",
+      "noMeetings": "جلسه‌ای نیست",
+      "prevDay": "روز قبل",
+      "nextDay": "روز بعد"
     },
     "leaves": {
       "monthTitle": "مرخصی ماه",

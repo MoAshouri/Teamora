@@ -217,7 +217,12 @@
       "overtime": "Ավելացված ժամ",
       "remaining": "Մնացորդ",
       "idleMax": "Օրվա տևողություն",
-      "myWeekHours": "Իմ ժամերը այս շաբաթ · {total}ժ"
+      "myWeekHours": "Իմ ժամերը այս շաբաթ · {total}ժ",
+      "meetingsToday": "Այսօրվա հանդիպումներ",
+      "allMeetings": "Բոլոր հանդիպումները",
+      "noMeetings": "Հանդիպում չկա",
+      "prevDay": "Նախորդ օր",
+      "nextDay": "Հաջորդ օր"
     },
     "leaves": {
       "monthTitle": "Արձակուրդի ամիս",
