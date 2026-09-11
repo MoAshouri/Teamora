@@ -128,7 +128,8 @@
       "emailUpdated": "Email updated",
       "emailTaken": "That email is already used",
       "verified": "Verified",
-      "unverified": "Not verified"
+      "unverified": "Not verified",
+      "languageHint": "Persian opens the Hayat courtyard. English and Armenian open the Gavit hall."
     },
     "theme": {
       "light": "Switch to light",

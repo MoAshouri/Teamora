@@ -1,12 +1,11 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { FormEvent, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { BrickCodeInput } from '@/features/auth/brick-code-input';
-import { authBrand, authBrick } from '@/features/auth/brand';
+import { brandBrickAccent, type AuthFamily, type AuthTheme } from '@/features/auth/brand';
 import { authApi, type AuthUser } from '@/lib/api';
 import { readClientTheme, type AppTheme } from '@/lib/theme';
-import type { Locale } from '@/lib/i18n/config';
 import './email-section.css';
 
 function isEmailTaken(err: unknown) {
@@ -14,10 +13,14 @@ function isEmailTaken(err: unknown) {
   return /already used/i.test(message);
 }
 
+function familyFromDom(): AuthFamily {
+  return document.documentElement.dataset.family === 'hayat' ? 'hayat' : 'gavit';
+}
+
 export function EmailSection() {
   const t = useTranslations('app');
-  const locale = useLocale() as Locale;
   const [theme, setTheme] = useState<AppTheme>('light');
+  const [family, setFamily] = useState<AuthFamily>('gavit');
   const [me, setMe] = useState<AuthUser | null>(null);
   const [newEmail, setNewEmail] = useState('');
   const [code, setCode] = useState('');
@@ -26,15 +29,18 @@ export function EmailSection() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [ok, setOk] = useState(false);
-  const brand = useMemo(() => authBrand(locale), [locale]);
-  const brickSrc = authBrick(brand, theme);
+  const brickSrc = brandBrickAccent(family, theme as AuthTheme);
 
   useEffect(() => {
     setTheme(readClientTheme());
+    setFamily(familyFromDom());
     const root = document.documentElement;
-    const sync = () => setTheme(readClientTheme());
+    const sync = () => {
+      setTheme(readClientTheme());
+      setFamily(familyFromDom());
+    };
     const observer = new MutationObserver(sync);
-    observer.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    observer.observe(root, { attributes: true, attributeFilter: ['data-theme', 'data-family'] });
     return () => observer.disconnect();
   }, []);
 

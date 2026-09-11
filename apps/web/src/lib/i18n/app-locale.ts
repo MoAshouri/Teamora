@@ -1,4 +1,5 @@
-import { locales, type Locale } from './config';
+import { locales, localeDirection, type Locale } from './config';
+import { familyFromLocale } from '@/features/auth/brand';
 
 /** Cookie name for authenticated `/app` locale. Not used on `/{locale}` marketing routes. */
 export const APP_LOCALE_COOKIE = 'teamora-locale';
@@ -27,6 +28,10 @@ export function getAppLocale(cookieHeader: string | null | undefined): Locale {
 export function setAppLocale(locale: Locale) {
   if (typeof document === 'undefined') return;
   document.cookie = `${APP_LOCALE_COOKIE}=${locale}; Path=/; Max-Age=31536000; SameSite=Lax`;
+  const root = document.documentElement;
+  root.lang = locale;
+  root.dir = localeDirection[locale];
+  root.dataset.family = familyFromLocale(locale);
 }
 
 export function appLoginPath(cookieHeader?: string | null) {

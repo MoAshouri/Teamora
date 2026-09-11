@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api, authApi } from '@/lib/api';
+import { LanguageSwitch } from '@/features/app-shell/language-switch';
 import { EmailSection } from './email-section';
 import './settings-page.css';
 
@@ -123,6 +124,11 @@ export default function SettingsPage() {
             {t('settings.save')}
           </button>
         </form>
+      </section>
+      <section className="card settings-well">
+        <h2>{t('nav.language')}</h2>
+        <p className="muted">{t('settings.languageHint')}</p>
+        <LanguageSwitch variant="panel" />
       </section>
       <EmailSection />
     </div>
