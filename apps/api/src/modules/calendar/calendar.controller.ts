@@ -31,7 +31,7 @@ export class CalendarController {
     @Query('from') from: string,
     @Query('to') to: string,
   ) {
-    return this.calendar.listEvents(user.companyId!, from, to);
+    return this.calendar.listEvents(user, from, to);
   }
 
   @Post('events')

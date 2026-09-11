@@ -1,12 +1,14 @@
 ﻿import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import type { CreateCalendarEventInput, UpdateCalendarEventInput } from '@teamora/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import type { AuthUser } from '../../common/auth/auth-user';
 
 @Injectable()
 export class CalendarService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listEvents(companyId: string, from?: string, to?: string) {
+  async listEvents(user: AuthUser, from?: string, to?: string) {
+    const companyId = user.companyId!;
     const events = await this.prisma.calendarEvent.findMany({
       where: {
         companyId,
@@ -16,6 +18,11 @@ export class CalendarService {
                 ...(from ? { gte: new Date(from) } : {}),
                 ...(to ? { lte: new Date(to) } : {}),
               },
+            }
+          : {}),
+        ...(user.role === 'EMPLOYEE'
+          ? {
+              OR: [{ creatorId: user.id }, { attendees: { some: { userId: user.id } } }],
             }
           : {}),
       },
@@ -30,19 +37,35 @@ export class CalendarService {
       orderBy: { startsAt: 'asc' },
     });
 
-    if (!events.length) return events;
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+      select: { adminId: true, memberships: { select: { userId: true } } },
+    });
+    const inCompany = new Set<string>([
+      ...(company?.adminId ? [company.adminId] : []),
+      ...(company?.memberships.map((row) => row.userId) ?? []),
+    ]);
+    const scoped = events.map((event) => ({
+      ...event,
+      attendees: event.attendees.filter((row) => inCompany.has(row.userId)),
+    }));
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AA',location:'calendar.service.ts:listEvents',message:'calendar visibility',data:{role:user.role,raw:events.length,visible:scoped.length,droppedAttendees:events.reduce((n,e)=>n+e.attendees.length,0)-scoped.reduce((n,e)=>n+e.attendees.length,0)},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+
+    if (!scoped.length) return scoped;
 
     const rangeFrom = from
       ? new Date(from)
-      : events.reduce(
+      : scoped.reduce(
           (min, e) => (e.startsAt < min ? e.startsAt : min),
-          events[0].startsAt,
+          scoped[0].startsAt,
         );
     const rangeTo = to
       ? new Date(to)
-      : events.reduce(
+      : scoped.reduce(
           (max, e) => (e.endsAt > max ? e.endsAt : max),
-          events[0].endsAt,
+          scoped[0].endsAt,
         );
 
     const conflicts = await this.detectConflicts(
@@ -51,7 +74,7 @@ export class CalendarService {
       rangeTo.toISOString(),
     );
 
-    return events.map((event) => ({
+    return scoped.map((event) => ({
       ...event,
       conflicts: conflicts
         .filter((c) => c.eventId === event.id)
