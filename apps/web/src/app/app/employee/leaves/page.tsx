@@ -1,7 +1,5 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import { LeaveStatusCard } from '@/features/leaves';
-
-export default function EmployeeLeavesPage() {
-  return <LeaveStatusCard />;
+export default function Page() {
+  redirect('/app/employee/dashboard');
 }

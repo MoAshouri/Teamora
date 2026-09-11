@@ -225,10 +225,6 @@ textarea {
   margin-top: 1.5rem;
 }
 
-.bottom-nav {
-  display: none;
-}
-
 .error {
   color: #b42318;
   font-size: 0.9rem;
