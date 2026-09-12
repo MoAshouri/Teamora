@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { leavesApi } from '@/lib/api';
 import { Modal } from '@/features/ui/modal';
@@ -21,6 +21,13 @@ export function GrantLeave({
   const [amount, setAmount] = useState('1');
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
+
+  // #region agent log
+  useEffect(() => {
+    if (!open) return;
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'GL',location:'grant-leave.tsx:open',message:'grant leave note label is reason not letter',data:{labelKey:'leave.reasonLabel',label:t('leave.reasonLabel'),notLetter:t('leave.reasonLabel')!==t('letter.body')},timestamp:Date.now()})}).catch(()=>{});
+  }, [open, t]);
+  // #endregion
 
   function close() {
     setOpen(false);
@@ -89,7 +96,7 @@ export function GrantLeave({
             />
           </div>
           <div className="letter-field">
-            <label htmlFor={`grant-note-${userId}`}>{t('letter.body')}</label>
+            <label htmlFor={`grant-note-${userId}`}>{t('leave.reasonLabel')}</label>
             <input
               id={`grant-note-${userId}`}
               value={note}
