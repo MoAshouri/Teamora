@@ -168,7 +168,9 @@ export function CalendarMonthGrid() {
           const dayEvents = events.filter((item) =>
             overlapsZonedYmd(item.startsAt, item.endsAt, iso, timezone),
           );
-          const dayTasks = tasks.filter((item) => item.dueAt && eventIso(item.dueAt, timezone) === iso);
+          const dayTasks = tasks.filter((item) =>
+            item.dueAt ? eventIso(item.dueAt, timezone) === iso : iso === todayIso,
+          );
           const dayNotes = notes.filter((item) => eventIso(item.date) === iso);
           const dayLeaves = leaves.filter((item) => leaveOnDay(item, iso));
           const holiday = holidays.find((item) => eventIso(item.date) === iso);

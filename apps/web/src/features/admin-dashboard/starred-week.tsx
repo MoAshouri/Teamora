@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { GunbadDay } from '@/features/ui/gunbad-day';
 import { saturdayWeekKeys } from '@/features/ui/brick-week-chart';
-import { dateKeyInZone, formatTime, utcInstantRangeForYmd } from '@/lib/dates';
+import { dateKeyInZone, formatTime, todayKeyInZone, utcInstantRangeForYmd } from '@/lib/dates';
 import type { Locale } from '@/lib/i18n/config';
 import './starred-week.css';
 
@@ -63,8 +63,9 @@ export function AdminStarredWeek({
     const map: Record<string, StarredTask[]> = {};
     for (const key of keys) map[key] = [];
     for (const task of tasks) {
-      if (!task.dueAt) continue;
-      const key = dateKeyInZone(task.dueAt, timezone || 'UTC');
+      const key = task.dueAt
+        ? dateKeyInZone(task.dueAt, timezone || 'UTC')
+        : todayKeyInZone(timezone || 'Asia/Tehran');
       if (!map[key]) continue;
       map[key].push(task);
     }

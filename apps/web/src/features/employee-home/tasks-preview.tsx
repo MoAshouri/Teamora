@@ -83,14 +83,19 @@ export function TasksPreview({ timezone = 'Asia/Tehran' }: { timezone?: string }
     const { from, to } = utcInstantRangeForYmd(shiftYmd(today, -8), shiftYmd(today, 8));
     api
       .get<HomeTask[]>(`/tasks?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
-      .then(setTasks)
+      .then((rows) => {
+        setTasks(rows);
+        // #region agent log
+        fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'UT',location:'tasks-preview.tsx:load',message:'undated tasks pinned to today',data:{total:rows.length,undated:rows.filter((row)=>!row.dueAt).length,todayCount:rows.filter((row)=>!row.dueAt||ymdInZone(new Date(row.dueAt),timezone)===today).length},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+      })
       .catch(console.error);
   }, [today]);
 
   const todayTasks = useMemo(
     () =>
       tasks
-        .filter((row) => row.dueAt && ymdInZone(new Date(row.dueAt), timezone) === today)
+        .filter((row) => !row.dueAt || ymdInZone(new Date(row.dueAt), timezone) === today)
         .slice()
         .sort((a, b) => (a.dueAt ?? '').localeCompare(b.dueAt ?? '')),
     [tasks, today, timezone],
@@ -99,10 +104,12 @@ export function TasksPreview({ timezone = 'Asia/Tehran' }: { timezone?: string }
   const onDay = useMemo(
     () =>
       tasks
-        .filter((row) => row.dueAt && ymdInZone(new Date(row.dueAt), timezone) === day)
+        .filter((row) =>
+          row.dueAt ? ymdInZone(new Date(row.dueAt), timezone) === day : day === today,
+        )
         .slice()
         .sort((a, b) => (a.dueAt ?? '').localeCompare(b.dueAt ?? '')),
-    [tasks, day, timezone],
+    [tasks, day, today, timezone],
   );
 
   const preview = todayTasks.slice(0, 3);
