@@ -42,12 +42,20 @@ export default function AdminWorkTimePage() {
     setSessions(s);
     setEntries(e);
     // #region agent log
-    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AF',location:'work-time/page.tsx:live',message:'admin live clock timezone',data:{zone:p?.timezone,live:s[0]?formatTime(s[0].startedAt,locale,p?.timezone):null,utc:s[0]?new Intl.DateTimeFormat('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'UTC'}).format(new Date(s[0].startedAt)):null},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AQ',location:'work-time/page.tsx:load',message:'admin entries order',data:{first:e[0]?.status??null,pending:e.filter((row)=>row.status==='PENDING').length,total:e.length},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
   }
 
   useEffect(() => {
     load().catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (events.length === 0) return;
+    api
+      .get<Session[]>('/work-time/sessions/active')
+      .then(setSessions)
+      .catch(console.error);
   }, [events.length]);
 
   async function review(id: string, status: 'APPROVED' | 'REJECTED') {

@@ -93,7 +93,7 @@ export class WorkTimeService {
     });
   }
 
-  listEntries(user: AuthUser, from?: string, to?: string) {
+  async listEntries(user: AuthUser, from?: string, to?: string) {
     const where: Record<string, unknown> = { companyId: user.companyId! };
     if (user.role === 'EMPLOYEE') where.userId = user.id;
     if (from || to) {
@@ -102,13 +102,22 @@ export class WorkTimeService {
         ...(to ? { lte: new Date(to) } : {}),
       };
     }
-    return this.prisma.timeEntry.findMany({
+    const rows = await this.prisma.timeEntry.findMany({
       where,
       include: {
         user: { select: { id: true, fullName: true, avatarUrl: true } },
       },
       orderBy: { date: 'desc' },
     });
+    rows.sort((a, b) => {
+      if (a.status === 'PENDING' && b.status !== 'PENDING') return -1;
+      if (a.status !== 'PENDING' && b.status === 'PENDING') return 1;
+      return b.date.getTime() - a.date.getTime();
+    });
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AQ',location:'work-time.service.ts:listEntries',message:'entries pending first',data:{count:rows.length,first:rows[0]?.status??null,pending:rows.filter((row)=>row.status==='PENDING').length},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    return rows;
   }
 
   async reviewEntry(
