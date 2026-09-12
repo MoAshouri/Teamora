@@ -72,11 +72,18 @@ export class CalendarService {
           scoped[0].endsAt,
         );
 
+    if (user.role !== 'ADMIN') {
+      return scoped.map((event) => ({ ...event, conflicts: [] as Array<{ leaveId: string; userId: string; userName: string }> }));
+    }
+
     const conflicts = await this.detectConflicts(
       companyId,
       rangeFrom.toISOString(),
       rangeTo.toISOString(),
     );
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AN',location:'calendar.service.ts:listEvents',message:'conflicts attached for admin only',data:{role:user.role,events:scoped.length,conflicts:conflicts.length},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
 
     return scoped.map((event) => ({
       ...event,
