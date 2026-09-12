@@ -6,6 +6,7 @@ import {
   companyMemberIds,
   employeeCanSeeEvent,
   inCompanyAttendees,
+  isCompanyWideMeeting,
 } from './calendar-visibility';
 import { ymdUtc, zonedInclusiveDayRange } from '../../common/zoned-time';
 
@@ -44,10 +45,14 @@ export class CalendarService {
       adminId: company?.adminId ?? null,
       memberships: company?.memberships ?? [],
     });
-    const scoped = events.map((event) => ({
-      ...event,
-      attendees: inCompanyAttendees(event.attendees, inCompany),
-    }));
+    const scoped = events.map((event) => {
+      const attendees = inCompanyAttendees(event.attendees, inCompany);
+      return {
+        ...event,
+        attendees,
+        companyWide: isCompanyWideMeeting(attendees.length, event.attendees.length),
+      };
+    });
     const visible =
       user.role === 'EMPLOYEE'
         ? scoped.filter((event, index) =>
@@ -55,7 +60,7 @@ export class CalendarService {
           )
         : scoped;
     // #region agent log
-    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'CT',location:'calendar.service.ts:listEvents',message:'calendar overlap query',data:{role:user.role,from:from??null,to:to??null,raw:events.length,visible:visible.length,openMeetings:visible.filter((row)=>row.attendees.length===0).length,foreignOnlyOpen:scoped.filter((event)=>{const raw=events.find((row)=>row.id===event.id);return event.attendees.length===0&&(raw?.attendees.length??0)>0;}).length},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'FA',location:'calendar.service.ts:listEvents',message:'calendar overlap query',data:{role:user.role,from:from??null,to:to??null,raw:events.length,visible:visible.length,openMeetings:visible.filter((row)=>row.companyWide).length,foreignOnlyOpen:scoped.filter((row)=>row.companyWide===false&&row.attendees.length===0).length},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
 
     if (!visible.length) return visible;
@@ -146,6 +151,7 @@ export class CalendarService {
   async updateEvent(companyId: string, id: string, input: UpdateCalendarEventInput) {
     const existing = await this.prisma.calendarEvent.findFirst({
       where: { id, companyId },
+      include: { attendees: { select: { userId: true } } },
     });
     if (!existing) throw new NotFoundException('Event not found');
     const startsAt = input.startsAt ? new Date(input.startsAt) : existing.startsAt;
@@ -153,8 +159,25 @@ export class CalendarService {
     if (endsAt <= startsAt) {
       throw new BadRequestException('endsAt must be after startsAt');
     }
-    if (input.attendeeIds) {
-      await this.assertAttendees(companyId, input.attendeeIds);
+    let attendeeIds = input.attendeeIds;
+    if (attendeeIds !== undefined) {
+      await this.assertAttendees(companyId, attendeeIds);
+      const company = await this.prisma.company.findUnique({
+        where: { id: companyId },
+        select: { adminId: true, memberships: { select: { userId: true } } },
+      });
+      const inCompany = companyMemberIds({
+        adminId: company?.adminId ?? null,
+        memberships: company?.memberships ?? [],
+      });
+      const keepForeign = existing.attendees
+        .map((row) => row.userId)
+        .filter((userId) => !inCompany.has(userId));
+      const postedCount = attendeeIds.length;
+      attendeeIds = [...new Set([...attendeeIds, ...keepForeign])];
+      // #region agent log
+      fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'FA',location:'calendar.service.ts:updateEvent',message:'preserve leftover foreign attendees',data:{posted:postedCount,keepForeign:keepForeign.length,next:attendeeIds.length,companyWide:isCompanyWideMeeting(postedCount,attendeeIds.length)},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
     }
     return this.prisma.calendarEvent.update({
       where: { id },
@@ -164,11 +187,11 @@ export class CalendarService {
         ...(input.location !== undefined ? { location: input.location } : {}),
         startsAt,
         endsAt,
-        ...(input.attendeeIds
+        ...(attendeeIds
           ? {
               attendees: {
                 deleteMany: {},
-                create: input.attendeeIds.map((userId) => ({ userId })),
+                create: attendeeIds.map((userId) => ({ userId })),
               },
             }
           : {}),

@@ -14,6 +14,7 @@ export type CalendarMeeting = {
   location?: string | null;
   startsAt: string;
   endsAt: string;
+  companyWide?: boolean;
   attendees?: Array<{ userId?: string; user: { id: string; fullName: string } }>;
   conflicts?: Array<{ leaveId: string; userId: string; userName: string }>;
 };
@@ -112,7 +113,12 @@ export function MeetingModal({
       if (!(open && meeting?.conflicts?.length)) setConflict('');
       return;
     }
-    const ids = attendeeIds.length > 0 ? attendeeIds : people.map((row) => row.id);
+    const ids =
+      attendeeIds.length > 0
+        ? attendeeIds
+        : meeting && meeting.companyWide === false
+          ? []
+          : people.map((row) => row.id);
     if (ids.length === 0) {
       if (!(open && meeting?.conflicts?.length)) setConflict('');
       return;
@@ -130,7 +136,7 @@ export function MeetingModal({
         );
         setConflict(hit ? t('calendar.leaveConflict', { name: hit.user.fullName }) : meetingConflictLabel(t, meeting?.conflicts));
         // #region agent log
-        fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'OM',location:'meeting-modal.tsx:conflicts',message:'compose leave check includes open meetings',data:{attendeeCount:attendeeIds.length,checked:ids.length,hit:hit?.user.fullName??null},timestamp:Date.now()})}).catch(()=>{});
+        fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'FA',location:'meeting-modal.tsx:conflicts',message:'compose leave check includes open meetings',data:{attendeeCount:attendeeIds.length,checked:ids.length,companyWide:meeting?.companyWide??null,hit:hit?.user.fullName??null},timestamp:Date.now()})}).catch(()=>{});
         // #endregion
       })
       .catch(() => {
