@@ -149,7 +149,9 @@ export function AdminLeaveMonth() {
                 {dayLeaves.map((item) => (
                   <span className="leave-chip" data-status={item.status.toLowerCase()} key={item.id}>
                     {item.user.fullName}
-                    {item.kind === 'HOURLY' ? ` · ${item.hours}` : ''}
+                    {item.kind === 'HOURLY'
+                      ? ` · ${t('calendar.hourlyLeave', { hours: String(Number(item.hours ?? 0)) })}`
+                      : ''}
                   </span>
                 ))}
               </div>

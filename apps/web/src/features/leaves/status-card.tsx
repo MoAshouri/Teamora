@@ -71,6 +71,7 @@ export function LeaveStatusCard({ variant = 'page' }: { variant?: 'page' | 'home
     setBalance(nextBalance);
     // #region agent log
     fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'RD',location:'status-card.tsx:load',message:'remaining days split from hour pool',data:{remainingDays:nextBalance?.remainingDays??null,remainingHours:nextBalance?.remainingHours??null,displayed:remainingDaysStat(t,nextBalance)},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'HU',location:'status-card.tsx:load',message:'hourly leave detail unit',data:{hourly:list.filter((item)=>item.kind==='HOURLY').slice(0,3).map((item)=>({hours:item.hours,rendered:item.hours!=null?t('calendar.hourlyLeave',{hours:String(Number(item.hours))}):null}))},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
   }
 
@@ -105,7 +106,9 @@ export function LeaveStatusCard({ variant = 'page' }: { variant?: 'page' | 'home
     const hourly = item.kind === 'HOURLY';
     const kind = hourly ? t('leave.hourly') : t('leave.daily');
     const typeLabel = t(leaveTypeMessageKey(item.type));
-    if (hourly && item.hours != null) return `${typeLabel} · ${kind} · ${item.hours}`;
+    if (hourly && item.hours != null) {
+      return `${typeLabel} · ${kind} · ${t('calendar.hourlyLeave', { hours: String(Number(item.hours)) })}`;
+    }
     return `${typeLabel} · ${kind} · ${leaveIso(item.startDate)} → ${leaveIso(item.endDate)}`;
   }
 

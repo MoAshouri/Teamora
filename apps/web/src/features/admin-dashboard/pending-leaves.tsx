@@ -57,7 +57,9 @@ export function PendingLeaves({
               <strong className="pending-leaves__name">{item.user.fullName}</strong>
               <div className="muted pending-leaves__detail">
                 {t(leaveTypeMessageKey(item.type))} · {hourly ? t('leave.hourly') : t('leave.daily')}
-                {hourly && item.hours != null ? ` · ${item.hours}` : ` · ${leaveIso(item.startDate)} → ${leaveIso(item.endDate)}`}
+                {hourly && item.hours != null
+                  ? ` · ${t('calendar.hourlyLeave', { hours: String(Number(item.hours)) })}`
+                  : ` · ${leaveIso(item.startDate)} → ${leaveIso(item.endDate)}`}
               </div>
             </div>
             <div className="pending-leaves__actions">
