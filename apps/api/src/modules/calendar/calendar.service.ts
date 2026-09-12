@@ -14,10 +14,8 @@ export class CalendarService {
         companyId,
         ...(from || to
           ? {
-              startsAt: {
-                ...(from ? { gte: new Date(from) } : {}),
-                ...(to ? { lte: new Date(to) } : {}),
-              },
+              ...(from ? { endsAt: { gte: new Date(from) } } : {}),
+              ...(to ? { startsAt: { lte: new Date(to) } } : {}),
             }
           : {}),
         ...(user.role === 'EMPLOYEE'
@@ -54,7 +52,7 @@ export class CalendarService {
       attendees: event.attendees.filter((row) => inCompany.has(row.userId)),
     }));
     // #region agent log
-    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AB',location:'calendar.service.ts:listEvents',message:'calendar visibility',data:{role:user.role,raw:events.length,visible:scoped.length,openMeetings:scoped.filter((row)=>row.attendees.length===0).length,droppedAttendees:events.reduce((n,e)=>n+e.attendees.length,0)-scoped.reduce((n,e)=>n+e.attendees.length,0)},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AP',location:'calendar.service.ts:listEvents',message:'calendar overlap query',data:{role:user.role,from:from??null,to:to??null,raw:events.length,visible:scoped.length,openMeetings:scoped.filter((row)=>row.attendees.length===0).length},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
 
     if (!scoped.length) return scoped;

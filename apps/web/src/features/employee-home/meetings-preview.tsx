@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
-import { formatPanelDate, utcInstantRangeForYmd } from '@/lib/dates';
+import { formatPanelDate, overlapsZonedYmd, utcInstantRangeForYmd } from '@/lib/dates';
 import type { Locale } from '@/lib/i18n/config';
 import { DayAgendaModal, type AgendaRow } from './day-agenda-modal';
 import './meetings-preview.css';
@@ -78,7 +78,7 @@ export function MeetingsPreview({ timezone = 'Asia/Tehran' }: { timezone?: strin
   const todayMeetings = useMemo(
     () =>
       meetings
-        .filter((row) => ymdInZone(new Date(row.startsAt), timezone) === today)
+        .filter((row) => overlapsZonedYmd(row.startsAt, row.endsAt, today, timezone))
         .slice()
         .sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
     [meetings, today, timezone],
@@ -87,7 +87,7 @@ export function MeetingsPreview({ timezone = 'Asia/Tehran' }: { timezone?: strin
   const onDay = useMemo(
     () =>
       meetings
-        .filter((row) => ymdInZone(new Date(row.startsAt), timezone) === day)
+        .filter((row) => overlapsZonedYmd(row.startsAt, row.endsAt, day, timezone))
         .slice()
         .sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
     [meetings, day, timezone],

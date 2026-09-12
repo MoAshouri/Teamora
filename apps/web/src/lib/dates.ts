@@ -139,6 +139,12 @@ export function todayKeyInZone(timeZone = 'UTC', now = new Date()) {
   return dateKeyInZone(now.toISOString(), timeZone);
 }
 
+export function overlapsZonedYmd(startIso: string, endIso: string, ymd: string, timeZone: string) {
+  const start = dateKeyInZone(startIso, timeZone);
+  const end = dateKeyInZone(endIso, timeZone);
+  return start <= ymd && end >= ymd;
+}
+
 export function addUtcDaysYmd(ymd: string, days: number) {
   const date = new Date(`${ymd}T12:00:00.000Z`);
   date.setUTCDate(date.getUTCDate() + days);

@@ -17,6 +17,7 @@ import {
   dateKeyInZone,
   isoDateUtc,
   todayKeyInZone,
+  overlapsZonedYmd,
   utcInstantRangeForYmd,
   shiftCalendarMonth,
 } from '@/lib/dates';
@@ -161,7 +162,9 @@ export function CalendarMonthGrid() {
       <div className="cal-month__grid">
         {cells.map((cell) => {
           const iso = isoDateUtc(cell.date);
-          const dayEvents = events.filter((item) => eventIso(item.startsAt, timezone) === iso);
+          const dayEvents = events.filter((item) =>
+            overlapsZonedYmd(item.startsAt, item.endsAt, iso, timezone),
+          );
           const dayTasks = tasks.filter((item) => item.dueAt && eventIso(item.dueAt, timezone) === iso);
           const dayNotes = notes.filter((item) => eventIso(item.date) === iso);
           const dayLeaves = leaves.filter((item) => leaveOnDay(item, iso));
