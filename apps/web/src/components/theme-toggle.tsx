@@ -1,10 +1,11 @@
 'use client';
 
-import { useId } from 'react';
+import { useEffect } from 'react';
 import type { AppTheme } from '@/lib/theme';
 import './theme-toggle.css';
 
 const RAYS = [0, 45, 90, 135, 180, 225, 270, 315];
+const MASK_ID = 'theme-moon-mask';
 
 export function ThemeToggle({
   theme,
@@ -15,8 +16,12 @@ export function ThemeToggle({
   onToggle: () => void;
   label: string;
 }) {
-  const raw = useId().replace(/:/g, '');
-  const maskId = `theme-moon-${raw}`;
+  const maskId = MASK_ID;
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'HY1',location:'theme-toggle.tsx:render',message:'theme toggle attrs',data:{theme,maskId,htmlTheme:document.documentElement.getAttribute('data-theme'),htmlFamily:document.documentElement.getAttribute('data-family')},timestamp:Date.now()})}).catch(()=>{});
+  }, [theme, maskId, label]);
+  // #endregion
 
   return (
     <button

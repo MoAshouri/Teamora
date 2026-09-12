@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -31,8 +31,13 @@ export function EmployeeChrome({
   const tRoot = useTranslations();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const menuId = useId();
+  const menuId = 'employee-more-menu';
   const rootRef = useRef<HTMLDivElement>(null);
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'HY4',location:'employee-chrome.tsx:render',message:'employee chrome render',data:{menuId,pathname,open,hasWindow:true},timestamp:Date.now()})}).catch(()=>{});
+  }, [menuId, pathname, open]);
+  // #endregion
 
   useEffect(() => {
     if (!open) return;
