@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
-import { formatPanelDate, overlapsZonedYmd, utcInstantRangeForYmd } from '@/lib/dates';
+import { formatPanelDate, overlapsZonedYmd, utcInstantRangeForYmd, dateKeyInZone, zonedDateTimeLocalToIso } from '@/lib/dates';
 import type { Locale } from '@/lib/i18n/config';
 import { DayAgendaModal, type AgendaRow } from './day-agenda-modal';
 import './meetings-preview.css';
@@ -42,10 +42,15 @@ function clockInZone(iso: string, locale: Locale, timeZone: string) {
   }).format(new Date(iso));
 }
 
-function toRow(meeting: HomeMeeting, locale: Locale, timeZone: string): AgendaRow {
+function clipStartIso(startIso: string, ymd: string, timeZone: string) {
+  const dayStart = zonedDateTimeLocalToIso(`${ymd}T00:00`, timeZone);
+  return Date.parse(startIso) > Date.parse(dayStart) ? startIso : dayStart;
+}
+
+function toRow(meeting: HomeMeeting, ymd: string, locale: Locale, timeZone: string): AgendaRow {
   return {
     id: meeting.id,
-    time: clockInZone(meeting.startsAt, locale, timeZone),
+    time: clockInZone(clipStartIso(meeting.startsAt, ymd, timeZone), locale, timeZone),
     title: meeting.title,
     people: meeting.attendees
       ?.map((row) => row.user)
@@ -83,6 +88,17 @@ export function MeetingsPreview({ timezone = 'Asia/Tehran' }: { timezone?: strin
         .sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
     [meetings, today, timezone],
   );
+  // #region agent log
+  useEffect(() => {
+    const sample = todayMeetings.map((row) => ({
+      title: row.title,
+      startYmd: dateKeyInZone(row.startsAt, timezone),
+      raw: clockInZone(row.startsAt, locale, timezone),
+      clipped: clockInZone(clipStartIso(row.startsAt, today, timezone), locale, timezone),
+    }));
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'ON',location:'meetings-preview.tsx:today',message:'today meeting clocks clipped to day',data:{today,sample},timestamp:Date.now()})}).catch(()=>{});
+  }, [todayMeetings, today, timezone, locale]);
+  // #endregion
 
   const onDay = useMemo(
     () =>
@@ -113,7 +129,7 @@ export function MeetingsPreview({ timezone = 'Asia/Tehran' }: { timezone?: strin
           <ul className="meetings-preview__list">
             {preview.map((row) => (
               <li key={row.id}>
-                <time>{clockInZone(row.startsAt, locale, timezone)}</time>
+                <time>{clockInZone(clipStartIso(row.startsAt, today, timezone), locale, timezone)}</time>
                 <strong>{row.title}</strong>
               </li>
             ))}
@@ -127,7 +143,7 @@ export function MeetingsPreview({ timezone = 'Asia/Tehran' }: { timezone?: strin
         empty={t('employee.noMeetings')}
         prevLabel={t('employee.prevDay')}
         nextLabel={t('employee.nextDay')}
-        rows={onDay.map((row) => toRow(row, locale, timezone))}
+        rows={onDay.map((row) => toRow(row, day, locale, timezone))}
         onPrev={onPrev}
         onNext={onNext}
         onClose={() => setOpen(false)}
