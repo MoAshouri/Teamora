@@ -73,7 +73,7 @@ export default function AdminWorkTimePage() {
         {sessions.map((s) => (
           <div className="list-row" key={s.id}>
             <strong>{s.user.fullName}</strong>
-            <span className="muted">{formatTime(s.startedAt, locale, policy?.timezone)}</span>
+            <span className="muted">{formatTime(s.startedAt, locale, policy?.timezone || 'Asia/Tehran')}</span>
           </div>
         ))}
       </div>
@@ -85,8 +85,8 @@ export default function AdminWorkTimePage() {
               <strong>{e.user.fullName}</strong>
               <div className="muted">{statusLabel(t, e.status)}</div>
               <div className="muted">
-                {todayKeyInZone(policy?.timezone || 'Asia/Tehran', new Date(e.startedAt))} · {formatTime(e.startedAt, locale, policy?.timezone)} –{' '}
-                {formatTime(e.endedAt, locale, policy?.timezone)}
+                {todayKeyInZone(policy?.timezone || 'Asia/Tehran', new Date(e.startedAt))} · {formatTime(e.startedAt, locale, policy?.timezone || 'Asia/Tehran')} –{' '}
+                {formatTime(e.endedAt, locale, policy?.timezone || 'Asia/Tehran')}
               </div>
             </div>
             {e.status === 'PENDING' ? (

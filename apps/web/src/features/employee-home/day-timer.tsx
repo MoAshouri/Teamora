@@ -82,7 +82,7 @@ export function DayTimer({
         <p className="muted day-timer__live" aria-live="polite">
           {liveLabel}
         </p>
-        <p className="muted day-timer__now">{formatTime(new Date(now), locale, policy?.timezone)}</p>
+        <p className="muted day-timer__now">{formatTime(new Date(now), locale, policy?.timezone || 'Asia/Tehran')}</p>
       </div>
     </IwanFrame>
   );
