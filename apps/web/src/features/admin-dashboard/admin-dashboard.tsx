@@ -34,10 +34,26 @@ export default function AdminDashboard() {
     setWeekly(hours.hoursByDay);
     if (policy?.workDays?.length) setWorkDays(policy.workDays);
     if (policy?.timezone) setTimezone(policy.timezone);
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AD',location:'admin-dashboard.tsx:load',message:'full dashboard load',data:{pending:leaves.length,active:sessions.length},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
   }
 
   useEffect(() => {
     load().catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (events.length === 0) return;
+    api
+      .get<unknown[]>('/work-time/sessions/active')
+      .then((sessions) => {
+        setActiveCount(sessions.length);
+        // #region agent log
+        fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AD',location:'admin-dashboard.tsx:presence',message:'presence refreshes live count only',data:{active:sessions.length,events:events.length},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+      })
+      .catch(console.error);
   }, [events.length]);
 
   const weekHours = useMemo(
