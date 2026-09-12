@@ -24,38 +24,31 @@ export class LeavesService {
     if (kind === 'HOURLY' && Number(hours ?? 0) > dayHours) {
       throw new BadRequestException('Hours exceed the work day');
     }
-    if (input.type === 'ANNUAL' && kind === 'HOURLY') {
-      const pendingHourly = await this.prisma.leaveRequest.findMany({
+    if (input.type === 'ANNUAL') {
+      const pending = await this.prisma.leaveRequest.findMany({
         where: {
           companyId,
           userId,
           status: 'PENDING',
           type: 'ANNUAL',
           source: 'REQUEST',
-          kind: 'HOURLY',
         },
       });
-      const pendingHours = pendingHourly.reduce((sum, row) => sum + Number(row.hours ?? 0), 0);
-      const requested = Number(hours ?? 0);
-      if (requested > pool.remainingHours - pendingHours) {
-        throw new BadRequestException('Insufficient leave hours');
-      }
-    }
-    if (input.type === 'ANNUAL' && kind === 'DAILY') {
-      const [pool, pending] = await Promise.all([
-        this.balance(companyId, userId),
-        this.prisma.leaveRequest.findMany({
-          where: { companyId, userId, status: 'PENDING', type: 'ANNUAL', source: 'REQUEST', kind: 'DAILY' },
-        }),
-      ]);
-      const days = Math.floor((endDate.getTime() - startDate.getTime()) / 86_400_000) + 1;
-      const pendingDays = pending.reduce((sum, row) => {
-        return (
-          sum + Math.floor((row.endDate.getTime() - row.startDate.getTime()) / 86_400_000) + 1
+      const pendingHours = pending.reduce(
+        (sum, row) => sum + this.leaveHours(row.kind, row.hours, row.startDate, row.endDate, dayHours),
+        0,
+      );
+      const requestedHours =
+        kind === 'HOURLY'
+          ? Number(hours ?? 0)
+          : this.leaveHours('DAILY', null, startDate, endDate, dayHours);
+      // #region agent log
+      fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'RH',location:'leaves.service.ts:create:annualGate',message:'unified annual hour gate',data:{kind,requestedHours,pendingHours,remainingHours:pool.remainingHours,available:pool.remainingHours-pendingHours},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+      if (requestedHours > pool.remainingHours - pendingHours) {
+        throw new BadRequestException(
+          kind === 'HOURLY' ? 'Insufficient leave hours' : 'Insufficient leave days',
         );
-      }, 0);
-      if (days > pool.remainingDays - pendingDays) {
-        throw new BadRequestException('Insufficient leave days');
       }
     }
     return this.prisma.leaveRequest.create({
@@ -166,9 +159,21 @@ export class LeavesService {
     });
   }
 
+  private leaveHours(
+    kind: string | null | undefined,
+    hours: unknown,
+    startDate: Date,
+    endDate: Date,
+    dayHours: number,
+  ) {
+    if (kind === 'HOURLY') return Number(hours ?? 0);
+    const days = Math.floor((endDate.getTime() - startDate.getTime()) / 86_400_000) + 1;
+    return days * dayHours;
+  }
+
   async balance(companyId: string, userId: string) {
     const annualAllowanceDays = 12;
-    const [approved, grants] = await Promise.all([
+    const [approved, grants, policy] = await Promise.all([
       this.prisma.leaveRequest.findMany({
         where: {
           companyId,
@@ -180,7 +185,9 @@ export class LeavesService {
       this.prisma.leaveBalanceAdjustment.findMany({
         where: { companyId, userId },
       }),
+      this.prisma.workPolicy.findUnique({ where: { companyId } }),
     ]);
+    const dayHours = (policy?.dailyMinutes ?? 480) / 60;
 
     const usedDays = approved
       .filter((leave) => leave.kind === 'DAILY' && leave.type === 'ANNUAL')
@@ -198,8 +205,12 @@ export class LeavesService {
     const bonusHours = grants
       .filter((row) => row.kind === 'HOURLY')
       .reduce((sum, row) => sum + Number(row.amount), 0);
-    const remainingDays = annualAllowanceDays + bonusDays - usedDays;
-    const remainingHours = bonusHours - usedHours;
+    const remainingHours =
+      (annualAllowanceDays + bonusDays) * dayHours + bonusHours - usedDays * dayHours - usedHours;
+    const remainingDays = dayHours > 0 ? remainingHours / dayHours : 0;
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'RH',location:'leaves.service.ts:balance',message:'unified remaining leave pool',data:{dayHours,usedDays,usedHours,bonusDays,bonusHours,remainingDays,remainingHours},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
 
     return {
       annualAllowanceDays,
