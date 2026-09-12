@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { WaxSeal } from '@/features/ui/wax-seal';
@@ -32,6 +32,12 @@ export function PendingLeaves({
   const t = useTranslations('app');
   const [draft, setDraft] = useState<{ id: string; status: 'APPROVED' | 'REJECTED' } | null>(null);
 
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'PD',location:'pending-leaves.tsx:items',message:'pending hourly includes date',data:{hourly:items.filter((item)=>item.kind==='HOURLY').map((item)=>({hours:item.hours??null,start:leaveIso(item.startDate)}))},timestamp:Date.now()})}).catch(()=>{});
+  }, [items]);
+  // #endregion
+
   async function confirmReview(note: string) {
     if (!draft) return;
     await api.patch(`/leaves/${draft.id}`, { status: draft.status, note });
@@ -57,8 +63,8 @@ export function PendingLeaves({
               <strong className="pending-leaves__name">{item.user.fullName}</strong>
               <div className="muted pending-leaves__detail">
                 {t(leaveTypeMessageKey(item.type))} · {hourly ? t('leave.hourly') : t('leave.daily')}
-                {hourly && item.hours != null
-                  ? ` · ${t('calendar.hourlyLeave', { hours: String(Number(item.hours)) })}`
+                {hourly
+                  ? ` · ${leaveIso(item.startDate)}${item.hours != null ? ` · ${t('calendar.hourlyLeave', { hours: String(Number(item.hours)) })}` : ''}`
                   : ` · ${leaveIso(item.startDate)} → ${leaveIso(item.endDate)}`}
               </div>
             </div>
