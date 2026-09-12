@@ -180,11 +180,30 @@ export class WorkTimeService {
     for (let i = 0; i < 7; i++) {
       emptyDay[this.addDaysYmd(startYmd, i)] = 0;
     }
-    return { start, end, emptyDay };
+    return { start, end, emptyDay, timeZone };
+  }
+
+  private weekLookupWindow(start: Date, end: Date) {
+    return {
+      gte: new Date(start.getTime() - 36 * 3_600_000),
+      lte: new Date(end.getTime() + 36 * 3_600_000),
+    };
+  }
+
+  private addHoursToWeekDay(
+    byDay: Record<string, number>,
+    startedAt: Date,
+    endedAt: Date,
+    timeZone: string,
+  ) {
+    const key = this.zonedYmd(startedAt, timeZone);
+    if (byDay[key] === undefined) return false;
+    byDay[key] += (endedAt.getTime() - startedAt.getTime()) / 3_600_000;
+    return true;
   }
 
   async weeklyHours(companyId: string, userId?: string) {
-    const { start, end, emptyDay } = await this.saturdayWeekWindow(companyId);
+    const { start, end, emptyDay, timeZone } = await this.saturdayWeekWindow(companyId);
 
     if (userId) {
       const membership = await this.prisma.companyMembership.findFirst({
@@ -198,27 +217,34 @@ export class WorkTimeService {
       }
     }
 
+    const pad = this.weekLookupWindow(start, end);
     const entries = await this.prisma.timeEntry.findMany({
       where: {
         companyId,
         ...(userId ? { userId } : {}),
-        date: { gte: start, lte: end },
         status: { in: ['PENDING', 'APPROVED'] },
+        OR: [{ date: pad }, { startedAt: pad }],
       },
     });
 
     const byDay = { ...emptyDay };
+    let mismatched = 0;
+    let counted = 0;
     for (const e of entries) {
-      const key = e.date.toISOString().slice(0, 10);
-      const hours = (e.endedAt.getTime() - e.startedAt.getTime()) / 3_600_000;
-      byDay[key] = (byDay[key] ?? 0) + hours;
+      const stored = e.date.toISOString().slice(0, 10);
+      const zoned = this.zonedYmd(e.startedAt, timeZone);
+      if (stored !== zoned) mismatched += 1;
+      if (this.addHoursToWeekDay(byDay, e.startedAt, e.endedAt, timeZone)) counted += 1;
     }
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'WD',location:'work-time.service.ts:weeklyHours',message:'week buckets from zoned startedAt',data:{userId:userId??null,fetched:entries.length,counted,mismatched,saturdayHours:byDay[Object.keys(emptyDay)[0]]??null},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
 
     return { from: start, to: end, hoursByDay: byDay };
   }
 
   async weeklyHoursByPerson(companyId: string) {
-    const { start, end, emptyDay } = await this.saturdayWeekWindow(companyId);
+    const { start, end, emptyDay, timeZone } = await this.saturdayWeekWindow(companyId);
     const company = await this.prisma.company.findUnique({
       where: { id: companyId },
       include: { memberships: { select: { userId: true } } },
@@ -228,11 +254,12 @@ export class WorkTimeService {
       ...(company?.adminId ? [company.adminId] : []),
     ]);
 
+    const pad = this.weekLookupWindow(start, end);
     const entries = await this.prisma.timeEntry.findMany({
       where: {
         companyId,
-        date: { gte: start, lte: end },
         status: { in: ['PENDING', 'APPROVED'] },
+        OR: [{ date: pad }, { startedAt: pad }],
       },
     });
 
@@ -241,9 +268,7 @@ export class WorkTimeService {
     for (const e of entries) {
       if (!hours.has(e.userId)) hours.set(e.userId, { ...emptyDay });
       const byDay = hours.get(e.userId)!;
-      const key = e.date.toISOString().slice(0, 10);
-      const value = (e.endedAt.getTime() - e.startedAt.getTime()) / 3_600_000;
-      byDay[key] = (byDay[key] ?? 0) + value;
+      this.addHoursToWeekDay(byDay, e.startedAt, e.endedAt, timeZone);
     }
 
     return {

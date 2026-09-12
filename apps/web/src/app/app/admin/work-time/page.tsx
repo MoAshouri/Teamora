@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { usePresence } from '@/hooks/use-presence';
 import { PolicyForm, type WorkPolicy } from '@/features/work-time';
-import { formatTime } from '@/lib/dates';
+import { formatTime, todayKeyInZone } from '@/lib/dates';
 import type { Locale } from '@/lib/i18n/config';
 
 type Session = { id: string; startedAt: string; user: { fullName: string } };
@@ -43,6 +43,7 @@ export default function AdminWorkTimePage() {
     setEntries(e);
     // #region agent log
     fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AQ',location:'work-time/page.tsx:load',message:'admin entries order',data:{first:e[0]?.status??null,pending:e.filter((row)=>row.status==='PENDING').length,total:e.length},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'WD',location:'work-time/page.tsx:load',message:'entry date vs zoned startedAt',data:{zone:p?.timezone??null,rows:e.map((row)=>({stored:row.date.slice(0,10),zoned:todayKeyInZone(p?.timezone||'Asia/Tehran',new Date(row.startedAt))}))},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
   }
 
@@ -84,7 +85,7 @@ export default function AdminWorkTimePage() {
               <strong>{e.user.fullName}</strong>
               <div className="muted">{statusLabel(t, e.status)}</div>
               <div className="muted">
-                {e.date.slice(0, 10)} · {formatTime(e.startedAt, locale, policy?.timezone)} –{' '}
+                {todayKeyInZone(policy?.timezone || 'Asia/Tehran', new Date(e.startedAt))} · {formatTime(e.startedAt, locale, policy?.timezone)} –{' '}
                 {formatTime(e.endedAt, locale, policy?.timezone)}
               </div>
             </div>
