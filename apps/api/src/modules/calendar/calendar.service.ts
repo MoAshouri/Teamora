@@ -2,6 +2,11 @@
 import type { CreateCalendarEventInput, UpdateCalendarEventInput } from '@teamora/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { AuthUser } from '../../common/auth/auth-user';
+import {
+  companyMemberIds,
+  employeeCanSeeEvent,
+  inCompanyAttendees,
+} from './calendar-visibility';
 
 @Injectable()
 export class CalendarService {
@@ -16,15 +21,6 @@ export class CalendarService {
           ? {
               ...(from ? { endsAt: { gte: new Date(from) } } : {}),
               ...(to ? { startsAt: { lte: new Date(to) } } : {}),
-            }
-          : {}),
-        ...(user.role === 'EMPLOYEE'
-          ? {
-              OR: [
-                { creatorId: user.id },
-                { attendees: { some: { userId: user.id } } },
-                { attendees: { none: {} } },
-              ],
             }
           : {}),
       },
@@ -43,21 +39,25 @@ export class CalendarService {
       where: { id: companyId },
       select: { adminId: true, memberships: { select: { userId: true } } },
     });
-    const inCompany = new Set<string>([
-      ...(company?.adminId ? [company.adminId] : []),
-      ...(company?.memberships.map((row) => row.userId) ?? []),
-    ]);
+    const inCompany = companyMemberIds({
+      adminId: company?.adminId ?? null,
+      memberships: company?.memberships ?? [],
+    });
     const scoped = events.map((event) => ({
       ...event,
-      attendees: event.attendees.filter((row) => inCompany.has(row.userId)),
+      attendees: inCompanyAttendees(event.attendees, inCompany),
     }));
+    const visible =
+      user.role === 'EMPLOYEE'
+        ? scoped.filter((event) => employeeCanSeeEvent(event, user.id))
+        : scoped;
     // #region agent log
-    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AP',location:'calendar.service.ts:listEvents',message:'calendar overlap query',data:{role:user.role,from:from??null,to:to??null,raw:events.length,visible:scoped.length,openMeetings:scoped.filter((row)=>row.attendees.length===0).length},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'CT',location:'calendar.service.ts:listEvents',message:'calendar overlap query',data:{role:user.role,from:from??null,to:to??null,raw:events.length,visible:visible.length,openMeetings:visible.filter((row)=>row.attendees.length===0).length,foreignOnlyOpen:scoped.filter((event)=>{const raw=events.find((row)=>row.id===event.id);return event.attendees.length===0&&(raw?.attendees.length??0)>0;}).length},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
 
-    if (!scoped.length) return scoped;
+    if (!visible.length) return visible;
     if (user.role !== 'ADMIN') {
-      return scoped.map((event) => ({
+      return visible.map((event) => ({
         ...event,
         conflicts: [] as Array<{ leaveId: string; userId: string; userName: string }>,
       }));
@@ -65,15 +65,15 @@ export class CalendarService {
 
     const rangeFrom = from
       ? new Date(from)
-      : scoped.reduce(
+      : visible.reduce(
           (min, e) => (e.startsAt < min ? e.startsAt : min),
-          scoped[0].startsAt,
+          visible[0].startsAt,
         );
     const rangeTo = to
       ? new Date(to)
-      : scoped.reduce(
+      : visible.reduce(
           (max, e) => (e.endsAt > max ? e.endsAt : max),
-          scoped[0].endsAt,
+          visible[0].endsAt,
         );
 
     const conflicts = await this.detectConflicts(
@@ -82,10 +82,10 @@ export class CalendarService {
       rangeTo.toISOString(),
     );
     // #region agent log
-    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AN',location:'calendar.service.ts:listEvents',message:'conflicts attached for admin only',data:{role:user.role,events:scoped.length,conflicts:conflicts.length},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AN',location:'calendar.service.ts:listEvents',message:'conflicts attached for admin only',data:{role:user.role,events:visible.length,conflicts:conflicts.length},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
 
-    return scoped.map((event) => ({
+    return visible.map((event) => ({
       ...event,
       conflicts: conflicts
         .filter((c) => c.eventId === event.id)

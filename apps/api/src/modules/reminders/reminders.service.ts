@@ -1,6 +1,11 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import type { CreateReminderInput, ExtendReminderInput } from '@teamora/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import {
+  companyMemberIds,
+  employeeCanSeeEvent,
+  inCompanyAttendees,
+} from '../calendar/calendar-visibility';
 import type { AuthUser } from '../../common/auth/auth-user';
 
 const DUE_STATUSES = ['ACTIVE', 'SNOOZED'] as const;
@@ -86,7 +91,7 @@ export class RemindersService {
       return rows.map((row) => this.map(row));
     }
 
-    const [tasks, notes, attending, openMeetings] = await Promise.all([
+    const [tasks, notes, events, company] = await Promise.all([
       this.prisma.task.findMany({
         where: {
           companyId: user.companyId!,
@@ -98,21 +103,30 @@ export class RemindersService {
         where: { companyId: user.companyId! },
         select: { id: true },
       }),
-      this.prisma.calendarAttendee.findMany({
-        where: { userId: user.id, event: { companyId: user.companyId! } },
-        select: { eventId: true },
-      }),
       this.prisma.calendarEvent.findMany({
-        where: { companyId: user.companyId!, attendees: { none: {} } },
-        select: { id: true },
+        where: { companyId: user.companyId! },
+        select: {
+          id: true,
+          creatorId: true,
+          attendees: { select: { userId: true } },
+        },
+      }),
+      this.prisma.company.findUnique({
+        where: { id: user.companyId! },
+        select: { adminId: true, memberships: { select: { userId: true } } },
       }),
     ]);
-    const meetingIds = [
-      ...new Set([
-        ...attending.map((row) => row.eventId),
-        ...openMeetings.map((row) => row.id),
-      ]),
-    ];
+    const inCompany = companyMemberIds({
+      adminId: company?.adminId ?? null,
+      memberships: company?.memberships ?? [],
+    });
+    const meetingIds = events
+      .map((event) => ({
+        ...event,
+        attendees: inCompanyAttendees(event.attendees, inCompany),
+      }))
+      .filter((event) => employeeCanSeeEvent(event, user.id))
+      .map((event) => event.id);
 
     const rows = await this.prisma.reminder.findMany({
       where: {
@@ -138,7 +152,7 @@ export class RemindersService {
       orderBy: { fireAt: 'asc' },
     });
     // #region agent log
-    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AH',location:'reminders.service.ts:due',message:'employee due notes tasks meetings',data:{role:user.role,meetingIds:meetingIds.length,taskIds:tasks.length,noteIds:notes.length,due:rows.length,dueNoteKinds:rows.filter((row)=>row.targetKind==='NOTE').length},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AH',location:'reminders.service.ts:due',message:'employee due notes tasks meetings',data:{role:user.role,companyEvents:events.length,meetingIds:meetingIds.length,taskIds:tasks.length,noteIds:notes.length,due:rows.length,dueNoteKinds:rows.filter((row)=>row.targetKind==='NOTE').length},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
     return rows.map((row) => this.map(row));
   }
@@ -167,14 +181,30 @@ export class RemindersService {
       if (note) return reminder;
     }
     if (reminder.targetKind === 'MEETING' && reminder.targetId) {
-      const seat = await this.prisma.calendarAttendee.findFirst({
-        where: { eventId: reminder.targetId, userId: user.id },
-      });
-      if (seat) return reminder;
-      const open = await this.prisma.calendarEvent.findFirst({
-        where: { id: reminder.targetId, companyId: user.companyId!, attendees: { none: {} } },
-      });
-      if (open) return reminder;
+      const [event, company] = await Promise.all([
+        this.prisma.calendarEvent.findFirst({
+          where: { id: reminder.targetId, companyId: user.companyId! },
+          select: {
+            creatorId: true,
+            attendees: { select: { userId: true } },
+          },
+        }),
+        this.prisma.company.findUnique({
+          where: { id: user.companyId! },
+          select: { adminId: true, memberships: { select: { userId: true } } },
+        }),
+      ]);
+      if (event) {
+        const inCompany = companyMemberIds({
+          adminId: company?.adminId ?? null,
+          memberships: company?.memberships ?? [],
+        });
+        const visible = {
+          ...event,
+          attendees: inCompanyAttendees(event.attendees, inCompany),
+        };
+        if (employeeCanSeeEvent(visible, user.id)) return reminder;
+      }
     }
     throw new ForbiddenException('Insufficient role');
   }
