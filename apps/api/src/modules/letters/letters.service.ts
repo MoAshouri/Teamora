@@ -14,11 +14,11 @@ export class LettersService {
     const membership = await this.prisma.companyMembership.findFirst({
       where: { companyId, userId: input.recipientId },
     });
-    const company = await this.prisma.company.findFirst({
-      where: { id: companyId, adminId: input.recipientId },
-    });
-    if (!membership && !company) {
-      throw new ForbiddenException('Recipient not in company');
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'L1',location:'letters.service.ts:create',message:'letter recipient must be employee',data:{hasMembership:Boolean(membership),selfSend:input.recipientId===authorId},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    if (!membership) {
+      throw new ForbiddenException('Recipient must be an employee');
     }
 
     return this.prisma.letter.create({
