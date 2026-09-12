@@ -45,7 +45,7 @@ export class LeavesService {
       // #region agent log
       fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'RH',location:'leaves.service.ts:create:annualGate',message:'unified annual hour gate',data:{kind,requestedHours,pendingHours,remainingHours:pool.remainingHours,available:pool.remainingHours-pendingHours},timestamp:Date.now()})}).catch(()=>{});
       // #endregion
-      if (requestedHours > pool.remainingHours - pendingHours) {
+      if (requestedHours > pool.remainingHours) {
         throw new BadRequestException(
           kind === 'HOURLY' ? 'Insufficient leave hours' : 'Insufficient leave days',
         );
@@ -173,7 +173,7 @@ export class LeavesService {
 
   async balance(companyId: string, userId: string) {
     const annualAllowanceDays = 12;
-    const [approved, grants, policy] = await Promise.all([
+    const [approved, grants, policy, pending] = await Promise.all([
       this.prisma.leaveRequest.findMany({
         where: {
           companyId,
@@ -186,6 +186,15 @@ export class LeavesService {
         where: { companyId, userId },
       }),
       this.prisma.workPolicy.findUnique({ where: { companyId } }),
+      this.prisma.leaveRequest.findMany({
+        where: {
+          companyId,
+          userId,
+          status: 'PENDING',
+          type: 'ANNUAL',
+          source: 'REQUEST',
+        },
+      }),
     ]);
     const dayHours = (policy?.dailyMinutes ?? 480) / 60;
 
@@ -205,9 +214,20 @@ export class LeavesService {
     const bonusHours = grants
       .filter((row) => row.kind === 'HOURLY')
       .reduce((sum, row) => sum + Number(row.amount), 0);
+    const pendingHours = pending.reduce(
+      (sum, row) => sum + this.leaveHours(row.kind, row.hours, row.startDate, row.endDate, dayHours),
+      0,
+    );
     const remainingHours =
-      (annualAllowanceDays + bonusDays) * dayHours + bonusHours - usedDays * dayHours - usedHours;
+      (annualAllowanceDays + bonusDays) * dayHours +
+      bonusHours -
+      usedDays * dayHours -
+      usedHours -
+      pendingHours;
     const remainingDays = dayHours > 0 ? remainingHours / dayHours : 0;
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'RP',location:'leaves.service.ts:balance:pending',message:'remaining pool nets pending annual',data:{dayHours,usedDays,usedHours,pendingHours,pendingCount:pending.length,remainingDays,remainingHours},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     // #region agent log
     fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'RH',location:'leaves.service.ts:balance',message:'unified remaining leave pool',data:{dayHours,usedDays,usedHours,bonusDays,bonusHours,remainingDays,remainingHours},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
