@@ -79,7 +79,7 @@ export function TaskModal({
     setRemindAt('');
     if (task) {
       setTitle(task.title);
-      setDueAt(task.dueAt ? isoToZonedDateTimeLocal(task.dueAt, timezone) : dayTimeLocal(dayIso, 12));
+      setDueAt(task.dueAt ? isoToZonedDateTimeLocal(task.dueAt, timezone) : '');
       setAssigneeId(task.assigneeId ?? task.assignee?.id ?? '');
       setStarred(!!task.starred);
     } else {
@@ -88,6 +88,9 @@ export function TaskModal({
       setAssigneeId('');
       setStarred(false);
     }
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'UD',location:'task-modal.tsx:open',message:'task due field from stored dueAt',data:{taskId:task?.id??null,storedDue:task?.dueAt??null,prefillEmpty:!task?.dueAt,newTask:!task,dayIso},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     api
       .get<{ user: Person }[]>('/users')
       .then((rows) => setPeople(rows.map((row) => row.user)))
@@ -96,9 +99,13 @@ export function TaskModal({
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    const payloadDue = dueAt ? zonedDateTimeLocalToIso(dueAt, timezone) : null;
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'UD',location:'task-modal.tsx:submit',message:'task due payload',data:{naiveDue:dueAt||null,payloadDue,keepsUndated:!dueAt},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     const body = {
       title: title.trim(),
-      dueAt: zonedDateTimeLocalToIso(dueAt, timezone),
+      dueAt: payloadDue,
       assigneeId: assigneeId || null,
       starred,
     };
@@ -144,7 +151,7 @@ export function TaskModal({
         </label>
         <label className="field">
           <span>{t('calendar.due')}</span>
-          <input type="datetime-local" value={dueAt} onChange={(event) => setDueAt(event.target.value)} required />
+          <input type="datetime-local" value={dueAt} onChange={(event) => setDueAt(event.target.value)} />
         </label>
         <label className="field">
           <span>{t('calendar.assignee')}</span>
