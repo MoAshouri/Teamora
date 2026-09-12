@@ -40,7 +40,21 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       throw new Error(textMessage);
     }
   if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
+  const raw = await res.text();
+  if (!raw) {
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'EJ',location:'api.ts:request',message:'empty ok body',data:{path,status:res.status,method:init?.method??'GET'},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    return null as T;
+  }
+  try {
+    return JSON.parse(raw) as T;
+  } catch (err) {
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'EJ',location:'api.ts:request:parse',message:'json parse failed',data:{path,status:res.status,preview:raw.slice(0,80)},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    throw err;
+  }
 }
 
 export const api = {

@@ -8,8 +8,10 @@
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { SubmitTimeEntrySchema } from '@teamora/shared';
 import { z } from 'zod';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -54,8 +56,9 @@ export class WorkTimeController {
 
   @Get('session/me')
   @Roles('EMPLOYEE')
-  mySession(@CurrentUser() user: AuthUser) {
-    return this.workTime.getMySession(user.id);
+  async mySession(@CurrentUser() user: AuthUser, @Res() res: Response) {
+    const session = await this.workTime.getMySession(user.id);
+    return res.status(200).json(session);
   }
 
   @Get('sessions/active')
