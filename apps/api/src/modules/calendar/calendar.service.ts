@@ -58,6 +58,12 @@ export class CalendarService {
     // #endregion
 
     if (!scoped.length) return scoped;
+    if (user.role !== 'ADMIN') {
+      return scoped.map((event) => ({
+        ...event,
+        conflicts: [] as Array<{ leaveId: string; userId: string; userName: string }>,
+      }));
+    }
 
     const rangeFrom = from
       ? new Date(from)
@@ -71,10 +77,6 @@ export class CalendarService {
           (max, e) => (e.endsAt > max ? e.endsAt : max),
           scoped[0].endsAt,
         );
-
-    if (user.role !== 'ADMIN') {
-      return scoped.map((event) => ({ ...event, conflicts: [] as Array<{ leaveId: string; userId: string; userName: string }> }));
-    }
 
     const conflicts = await this.detectConflicts(
       companyId,
