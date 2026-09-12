@@ -452,10 +452,25 @@ export class AuthService {
       console.log(`[OTP] ${to} => ${code}`);
       return;
     }
+    const hostname = process.env.SMTP_HOST;
+    const port = Number(process.env.SMTP_PORT ?? 587);
+    const secure =
+      process.env.SMTP_SECURE === 'true' ||
+      process.env.SMTP_SECURE === '1' ||
+      port === 465;
+
+    // Nodemailer resolves hosts via dns.resolve4(), which fails on some local DNS
+    // setups (queryA ETIMEOUT). Prefer OS lookup, then connect by IP.
+    const { lookup } = await import('dns/promises');
+    const { address } = await lookup(hostname, { family: 4 });
+
     const nodemailer = await import('nodemailer');
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT ?? 587),
+      host: address,
+      port,
+      secure,
+      requireTLS: !secure && port === 587,
+      tls: { servername: hostname },
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
