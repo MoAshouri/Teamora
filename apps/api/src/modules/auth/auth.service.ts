@@ -282,7 +282,10 @@ export class AuthService {
       data: { passwordHash },
       include: { ownedCompany: true, membership: true },
     });
-    return this.toUser(user);
+    return {
+      token: this.signToken(user.id),
+      user: this.toUser(user),
+    };
   }
 
   async changePassword(userId: string, raw: unknown) {
@@ -299,7 +302,10 @@ export class AuthService {
       data: { passwordHash },
       include: { ownedCompany: true, membership: true },
     });
-    return this.toUser(user);
+    return {
+      token: this.signToken(user.id),
+      user: this.toUser(user),
+    };
   }
 
   async loginOrLinkGoogle(profile: Profile) {

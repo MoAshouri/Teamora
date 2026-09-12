@@ -119,14 +119,30 @@ export class AuthController {
 
   @Post('password')
   @UseGuards(JwtAuthGuard)
-  setPassword(@CurrentUser() user: AuthUser, @Body() body: unknown) {
-    return this.auth.setPassword(user.id, body);
+  async setPassword(
+    @CurrentUser() user: AuthUser,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.auth.setPassword(user.id, body);
+    this.setCookie(res, result.token);
+    return result;
   }
 
   @Post('password/change')
   @UseGuards(JwtAuthGuard)
-  changePassword(@CurrentUser() user: AuthUser, @Body() body: unknown) {
-    return this.auth.changePassword(user.id, body);
+  async changePassword(
+    @CurrentUser() user: AuthUser,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.auth.changePassword(user.id, body);
+    this.setCookie(res, result.token);
+    const setCookie = res.getHeader('Set-Cookie');
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'PW',location:'auth.controller.ts:changePassword',message:'changePassword setCookie',data:{hasToken:Boolean(result.token),hasSetCookie:Boolean(setCookie),cookieName:String(setCookie??'').startsWith('access_token=')},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    return result;
   }
 
   @Post('logout')
