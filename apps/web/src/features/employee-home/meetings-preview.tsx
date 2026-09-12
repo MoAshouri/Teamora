@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
-import { formatPanelDate, overlapsZonedYmd, utcInstantRangeForYmd, dateKeyInZone, zonedDateTimeLocalToIso } from '@/lib/dates';
+import { formatPanelDate, formatTime, overlapsZonedYmd, utcInstantRangeForYmd, dateKeyInZone, zonedDateTimeLocalToIso } from '@/lib/dates';
 import type { Locale } from '@/lib/i18n/config';
 import { DayAgendaModal, type AgendaRow } from './day-agenda-modal';
 import './meetings-preview.css';
@@ -34,12 +34,7 @@ function shiftYmd(ymd: string, days: number) {
 }
 
 function clockInZone(iso: string, locale: Locale, timeZone: string) {
-  const tag = locale === 'fa' ? 'fa-IR' : locale === 'hy' ? 'hy-AM' : 'en-US';
-  return new Intl.DateTimeFormat(tag, {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone,
-  }).format(new Date(iso));
+  return formatTime(iso, locale, timeZone);
 }
 
 function clipStartIso(startIso: string, ymd: string, timeZone: string) {

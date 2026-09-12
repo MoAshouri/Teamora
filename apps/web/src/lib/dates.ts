@@ -4,6 +4,53 @@ function localeTag(locale: Locale) {
   return locale === 'fa' ? 'fa-IR' : locale === 'hy' ? 'hy-AM' : 'en-US';
 }
 
+const HY_WEEKDAY_LONG = ['կիրակի', 'երկուշաբթի', 'երեքշաբթի', 'չորեքշաբթի', 'հինգշաբթի', 'ուրբաթ', 'շաբաթ'] as const;
+const HY_WEEKDAY_SHORT = ['կիր', 'երկ', 'երք', 'չրք', 'հնգ', 'ուրբ', 'շբթ'] as const;
+const HY_MONTH_LONG = [
+  'հունվարի',
+  'փետրվարի',
+  'մարտի',
+  'ապրիլի',
+  'մայիսի',
+  'հունիսի',
+  'հուլիսի',
+  'օգոստոսի',
+  'սեպտեմբերի',
+  'հոկտեմբերի',
+  'նոյեմբերի',
+  'դեկտեմբերի',
+] as const;
+const HY_MONTH_TITLE = [
+  'հունվար',
+  'փետրվար',
+  'մարտ',
+  'ապրիլ',
+  'մայիս',
+  'հունիս',
+  'հուլիս',
+  'օգոստոս',
+  'սեպտեմբեր',
+  'հոկտեմբեր',
+  'նոյեմբեր',
+  'դեկտեմբեր',
+] as const;
+
+let hyDateIntl: boolean | null = null;
+
+function hyDateIntlAvailable() {
+  if (hyDateIntl != null) return hyDateIntl;
+  try {
+    hyDateIntl = new Intl.DateTimeFormat('hy-AM').resolvedOptions().locale.toLowerCase().startsWith('hy');
+  } catch {
+    hyDateIntl = false;
+  }
+  return hyDateIntl;
+}
+
+function needsHyDateFallback(locale: Locale) {
+  return locale === 'hy' && !hyDateIntlAvailable();
+}
+
 function calendarFor(locale: Locale): 'persian' | 'gregory' {
   return locale === 'fa' ? 'persian' : 'gregory';
 }
@@ -16,6 +63,25 @@ function resolveTimeZone(locale: Locale, timeZone?: string) {
   return timeZone || timeZoneFor(locale);
 }
 
+function displayWeekdayIndex(value: Date, locale: Locale, timeZone?: string) {
+  const zone = resolveTimeZone(locale, timeZone);
+  if (zone) return jsWeekdayInZone(zone, value);
+  return value.getUTCDay();
+}
+
+function displayYmd(value: Date, locale: Locale, timeZone?: string) {
+  const zone = resolveTimeZone(locale, timeZone);
+  if (zone) {
+    const [year, month, day] = todayKeyInZone(zone, value).split('-').map(Number);
+    return { year, month, day };
+  }
+  return {
+    year: value.getUTCFullYear(),
+    month: value.getUTCMonth() + 1,
+    day: value.getUTCDate(),
+  };
+}
+
 /** Format an ISO/UTC date for display. Storage remains UTC; UI chooses calendar. */
 export function formatDate(
   value: string | Date,
@@ -24,6 +90,9 @@ export function formatDate(
   timeZone?: string,
 ) {
   const date = typeof value === 'string' ? new Date(value) : value;
+  if (needsHyDateFallback(locale) && calendar !== 'jalali') {
+    return formatPanelDate(date, locale, timeZone);
+  }
   return new Intl.DateTimeFormat(localeTag(locale), {
     calendar: calendar === 'jalali' ? 'persian' : 'gregory',
     dateStyle: 'medium',
@@ -33,14 +102,26 @@ export function formatDate(
 
 export function formatTime(value: string | Date, locale: Locale, timeZone?: string) {
   const date = typeof value === 'string' ? new Date(value) : value;
+  const zone = resolveTimeZone(locale, timeZone);
+  if (needsHyDateFallback(locale)) {
+    return new Intl.DateTimeFormat('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+      timeZone: zone,
+    }).format(date);
+  }
   return new Intl.DateTimeFormat(localeTag(locale), {
     hour: '2-digit',
     minute: '2-digit',
-    timeZone: resolveTimeZone(locale, timeZone),
+    timeZone: zone,
   }).format(date);
 }
 
 export function formatWeekday(value: Date, locale: Locale, timeZone?: string) {
+  if (needsHyDateFallback(locale)) {
+    return HY_WEEKDAY_LONG[displayWeekdayIndex(value, locale, timeZone)];
+  }
   return new Intl.DateTimeFormat(localeTag(locale), {
     weekday: 'long',
     calendar: calendarFor(locale),
@@ -49,6 +130,9 @@ export function formatWeekday(value: Date, locale: Locale, timeZone?: string) {
 }
 
 export function formatWeekdayShort(value: Date, locale: Locale, timeZone?: string) {
+  if (needsHyDateFallback(locale)) {
+    return HY_WEEKDAY_SHORT[displayWeekdayIndex(value, locale, timeZone)];
+  }
   return new Intl.DateTimeFormat(localeTag(locale), {
     weekday: 'short',
     calendar: calendarFor(locale),
@@ -57,6 +141,10 @@ export function formatWeekdayShort(value: Date, locale: Locale, timeZone?: strin
 }
 
 export function formatPanelDate(value: Date, locale: Locale, timeZone?: string) {
+  if (needsHyDateFallback(locale)) {
+    const { year, month, day } = displayYmd(value, locale, timeZone);
+    return `${day} ${HY_MONTH_LONG[month - 1]} ${year}`;
+  }
   return new Intl.DateTimeFormat(localeTag(locale), {
     day: 'numeric',
     month: 'long',
@@ -67,6 +155,9 @@ export function formatPanelDate(value: Date, locale: Locale, timeZone?: string) 
 }
 
 export function formatDayNumber(value: Date, locale: Locale, timeZone?: string) {
+  if (needsHyDateFallback(locale)) {
+    return String(displayYmd(value, locale, timeZone).day);
+  }
   return new Intl.DateTimeFormat(localeTag(locale), {
     day: 'numeric',
     calendar: calendarFor(locale),
@@ -75,10 +166,14 @@ export function formatDayNumber(value: Date, locale: Locale, timeZone?: string) 
 }
 
 export function formatPanelDay(value: Date, locale: Locale, timeZone?: string) {
-  return {
-    weekday: formatWeekday(value, locale, timeZone),
-    date: formatPanelDate(value, locale, timeZone),
-  };
+  const weekday = formatWeekday(value, locale, timeZone);
+  const date = formatPanelDate(value, locale, timeZone);
+  // #region agent log
+  if (locale === 'hy') {
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'HY1',location:'dates.ts:formatPanelDay',message:'armenian date intl fallback',data:{requested:'hy-AM',resolved:new Intl.DateTimeFormat('hy-AM').resolvedOptions().locale,fallback:needsHyDateFallback(locale),weekday,date},timestamp:Date.now()})}).catch(()=>{});
+  }
+  // #endregion
+  return { weekday, date };
 }
 
 function toAsciiDigits(value: string) {
@@ -302,12 +397,17 @@ export function daysOfCalendarMonth(anchor: Date, locale: Locale) {
 }
 
 export function formatMonthTitle(anchor: Date, locale: Locale) {
+  const start = startOfCalendarMonth(anchor, locale);
+  if (needsHyDateFallback(locale)) {
+    const { year, month } = displayYmd(start, locale, 'UTC');
+    return `${HY_MONTH_TITLE[month - 1]} ${year}`;
+  }
   return new Intl.DateTimeFormat(localeTag(locale), {
     calendar: calendarFor(locale),
     timeZone: 'UTC',
     month: 'long',
     year: 'numeric',
-  }).format(startOfCalendarMonth(anchor, locale));
+  }).format(start);
 }
 
 export function monthQueryRange(anchor: Date, locale: Locale) {
