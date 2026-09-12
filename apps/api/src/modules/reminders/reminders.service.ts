@@ -121,11 +121,10 @@ export class RemindersService {
       memberships: company?.memberships ?? [],
     });
     const meetingIds = events
-      .map((event) => ({
-        ...event,
-        attendees: inCompanyAttendees(event.attendees, inCompany),
-      }))
-      .filter((event) => employeeCanSeeEvent(event, user.id))
+      .filter((event) => {
+        const local = inCompanyAttendees(event.attendees, inCompany);
+        return employeeCanSeeEvent({ ...event, attendees: local }, user.id, event.attendees.length);
+      })
       .map((event) => event.id);
 
     const rows = await this.prisma.reminder.findMany({
@@ -203,7 +202,7 @@ export class RemindersService {
           ...event,
           attendees: inCompanyAttendees(event.attendees, inCompany),
         };
-        if (employeeCanSeeEvent(visible, user.id)) return reminder;
+        if (employeeCanSeeEvent(visible, user.id, event.attendees.length)) return reminder;
       }
     }
     throw new ForbiddenException('Insufficient role');

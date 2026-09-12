@@ -50,7 +50,9 @@ export class CalendarService {
     }));
     const visible =
       user.role === 'EMPLOYEE'
-        ? scoped.filter((event) => employeeCanSeeEvent(event, user.id))
+        ? scoped.filter((event, index) =>
+            employeeCanSeeEvent(event, user.id, events[index]?.attendees.length ?? 0),
+          )
         : scoped;
     // #region agent log
     fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'CT',location:'calendar.service.ts:listEvents',message:'calendar overlap query',data:{role:user.role,from:from??null,to:to??null,raw:events.length,visible:visible.length,openMeetings:visible.filter((row)=>row.attendees.length===0).length,foreignOnlyOpen:scoped.filter((event)=>{const raw=events.find((row)=>row.id===event.id);return event.attendees.length===0&&(raw?.attendees.length??0)>0;}).length},timestamp:Date.now()})}).catch(()=>{});
@@ -251,8 +253,13 @@ export class CalendarService {
     let zonedHits = 0;
     for (const event of events) {
       const local = inCompanyAttendees(event.attendees, inCompany);
-      if (local.length === 0) openEvents += 1;
-      const people = local.length > 0 ? local.map((row) => row.userId) : everyone;
+      const people =
+        local.length > 0
+          ? local.map((row) => row.userId)
+          : event.attendees.length === 0
+            ? everyone
+            : [];
+      if (event.attendees.length === 0) openEvents += 1;
       for (const userId of people) {
         for (const leave of leaves) {
           if (leave.userId !== userId) continue;

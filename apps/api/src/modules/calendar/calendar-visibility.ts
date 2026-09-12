@@ -15,11 +15,16 @@ export function inCompanyAttendees<T extends { userId: string }>(
   return attendees.filter((row) => inCompany.has(row.userId));
 }
 
+export function isCompanyWideMeeting(localAttendeeCount: number, rawAttendeeCount: number) {
+  return localAttendeeCount === 0 && rawAttendeeCount === 0;
+}
+
 export function employeeCanSeeEvent(
   event: { creatorId: string; attendees: Array<{ userId: string }> },
   userId: string,
+  rawAttendeeCount = event.attendees.length,
 ): boolean {
-  if (event.attendees.length === 0) return true;
+  if (isCompanyWideMeeting(event.attendees.length, rawAttendeeCount)) return true;
   if (event.creatorId === userId) return true;
   return event.attendees.some((row) => row.userId === userId);
 }
