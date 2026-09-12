@@ -15,11 +15,12 @@ const VISIBLE = 3;
 type StarredTask = {
   id: string;
   title: string;
-  dueAt: string;
+  dueAt: string | null;
   assignee?: { fullName: string; avatarUrl: string | null };
 };
 
-function dueHasClock(iso: string, timeZone: string) {
+function dueHasClock(iso: string | null | undefined, timeZone: string) {
+  if (!iso) return false;
   try {
     const parts = new Intl.DateTimeFormat('en-GB', {
       timeZone,
@@ -55,7 +56,12 @@ export function AdminStarredWeek({
     // #endregion
     api
       .get<StarredTask[]>(`/tasks?starred=1&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
-      .then(setTasks)
+      .then((rows) => {
+        setTasks(rows);
+        // #region agent log
+        fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'UT',location:'starred-week.tsx:load',message:'undated starred skip epoch clock',data:{total:rows.length,undated:rows.filter((row)=>!row.dueAt).length,nullHasClock:dueHasClock(null, timezone)},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+      })
       .catch(console.error);
   }, [keys]);
 
@@ -90,7 +96,7 @@ export function AdminStarredWeek({
                   {visible.map((task) => (
                     <div className="star-chip" key={task.id} title={task.title}>
                       <span className="star-chip__title">{task.title}</span>
-                      {dueHasClock(task.dueAt, timezone) ? (
+                      {task.dueAt && dueHasClock(task.dueAt, timezone) ? (
                         <span className="star-chip__time">{formatTime(task.dueAt, locale, timezone)}</span>
                       ) : null}
                     </div>
