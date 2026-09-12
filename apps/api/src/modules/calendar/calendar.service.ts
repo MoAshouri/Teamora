@@ -7,6 +7,7 @@ import {
   employeeCanSeeEvent,
   inCompanyAttendees,
 } from './calendar-visibility';
+import { ymdUtc, zonedInclusiveDayRange } from '../../common/zoned-time';
 
 @Injectable()
 export class CalendarService {
@@ -199,7 +200,7 @@ export class CalendarService {
   async detectConflicts(companyId: string, from: string, to: string) {
     const starts = new Date(from);
     const ends = new Date(to);
-    const [events, leaves, company] = await Promise.all([
+    const [events, leaves, company, policy] = await Promise.all([
       this.prisma.calendarEvent.findMany({
         where: {
           companyId,
@@ -225,8 +226,13 @@ export class CalendarService {
         where: { id: companyId },
         select: { adminId: true, memberships: { select: { userId: true } } },
       }),
+      this.prisma.workPolicy.findUnique({
+        where: { companyId },
+        select: { timezone: true },
+      }),
     ]);
 
+    const timeZone = policy?.timezone || 'Asia/Tehran';
     const inCompany = companyMemberIds({
       adminId: company?.adminId ?? null,
       memberships: company?.memberships ?? [],
@@ -242,6 +248,7 @@ export class CalendarService {
     }> = [];
 
     let openEvents = 0;
+    let zonedHits = 0;
     for (const event of events) {
       const local = inCompanyAttendees(event.attendees, inCompany);
       if (local.length === 0) openEvents += 1;
@@ -249,10 +256,9 @@ export class CalendarService {
       for (const userId of people) {
         for (const leave of leaves) {
           if (leave.userId !== userId) continue;
-          const leaveStart = leave.startDate;
-          const leaveEnd = new Date(leave.endDate);
-          leaveEnd.setUTCHours(23, 59, 59, 999);
-          if (event.startsAt <= leaveEnd && event.endsAt >= leaveStart) {
+          const range = zonedInclusiveDayRange(ymdUtc(leave.startDate), ymdUtc(leave.endDate), timeZone);
+          if (event.startsAt < range.end && event.endsAt > range.start) {
+            zonedHits += 1;
             conflicts.push({
               eventId: event.id,
               eventTitle: event.title,
@@ -265,7 +271,7 @@ export class CalendarService {
       }
     }
     // #region agent log
-    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'OC',location:'calendar.service.ts:detectConflicts',message:'open meetings checked against company leave',data:{events:events.length,openEvents,conflicts:conflicts.length},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'LZ',location:'calendar.service.ts:detectConflicts',message:'leave overlap uses company timezone days',data:{timeZone,events:events.length,openEvents,conflicts:conflicts.length,zonedHits},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
 
     return conflicts;

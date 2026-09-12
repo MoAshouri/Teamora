@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { Modal } from '@/features/ui/modal';
-import { isoToZonedDateTimeLocal, zonedDateTimeLocalToIso } from '@/lib/dates';
+import { isoToZonedDateTimeLocal, zonedDateTimeLocalToIso, addUtcDaysYmd, dateKeyInZone, utcInstantRangeForYmd } from '@/lib/dates';
 import { RemindAtField, saveReminder } from './remind-at';
 import './meeting-modal.css';
 
@@ -40,12 +40,12 @@ function dayTimeLocal(isoDay: string, hour: number) {
   return `${isoDay}T${String(hour).padStart(2, '0')}:00`;
 }
 
-function overlappingLeave(leave: LeaveRow, startIso: string, endIso: string) {
-  const start = new Date(startIso);
-  const end = new Date(endIso);
-  const leaveStart = new Date(`${leave.startDate.slice(0, 10)}T00:00:00.000Z`);
-  const leaveEnd = new Date(`${leave.endDate.slice(0, 10)}T23:59:59.999Z`);
-  return leave.status === 'APPROVED' && start <= leaveEnd && end >= leaveStart;
+function overlappingLeave(leave: LeaveRow, startIso: string, endIso: string, timeZone: string) {
+  const fromYmd = leave.startDate.slice(0, 10);
+  const toYmd = leave.endDate.slice(0, 10);
+  const from = zonedDateTimeLocalToIso(`${fromYmd}T00:00`, timeZone);
+  const to = zonedDateTimeLocalToIso(`${addUtcDaysYmd(toYmd, 1)}T00:00`, timeZone);
+  return leave.status === 'APPROVED' && Date.parse(startIso) < Date.parse(to) && Date.parse(endIso) > Date.parse(from);
 }
 
 export function MeetingModal({
@@ -114,13 +114,14 @@ export function MeetingModal({
     }
     const startIso = zonedDateTimeLocalToIso(startsAt, timezone);
     const endIso = zonedDateTimeLocalToIso(endsAt, timezone);
-    const from = startIso.slice(0, 10);
-    const to = endIso.slice(0, 10);
+    const fromYmd = dateKeyInZone(startIso, timezone);
+    const toYmd = dateKeyInZone(endIso, timezone);
+    const range = utcInstantRangeForYmd(fromYmd, toYmd);
     api
-      .get<LeaveRow[]>(`/leaves?from=${from}&to=${to}`)
+      .get<LeaveRow[]>(`/leaves?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`)
       .then((rows) => {
         const hit = rows.find(
-          (row) => attendeeIds.includes(row.user.id) && overlappingLeave(row, startIso, endIso),
+          (row) => attendeeIds.includes(row.user.id) && overlappingLeave(row, startIso, endIso, timezone),
         );
         setConflict(hit ? t('calendar.leaveConflict', { name: hit.user.fullName }) : meetingConflictLabel(t, meeting?.conflicts));
       })
