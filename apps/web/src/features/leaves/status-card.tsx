@@ -26,6 +26,24 @@ type LeaveBalance = {
   remaining: number;
 };
 
+function remainingDaysStat(
+  t: (key: 'leave.remainingDaysSplit', values: { days: number; hours: number }) => string,
+  balance: LeaveBalance | null,
+) {
+  if (!balance) return '—';
+  const daysRaw = Number(balance.remainingDays ?? balance.remaining);
+  const hoursRaw = Number(balance.remainingHours);
+  if (!Number.isFinite(daysRaw)) return '—';
+  if (!Number.isFinite(hoursRaw) || hoursRaw < 0 || daysRaw <= 0) {
+    return Number.isInteger(daysRaw) ? String(daysRaw) : String(Math.round(daysRaw * 100) / 100);
+  }
+  const dayHours = hoursRaw / daysRaw;
+  const whole = Math.floor((hoursRaw + 1e-9) / dayHours);
+  const leftover = Math.round((hoursRaw - whole * dayHours) * 100) / 100;
+  if (leftover === 0) return String(whole);
+  return t('leave.remainingDaysSplit', { days: whole, hours: leftover });
+}
+
 function leaveIso(value: string) {
   return value.slice(0, 10);
 }
@@ -51,6 +69,9 @@ export function LeaveStatusCard({ variant = 'page' }: { variant?: 'page' | 'home
     ]);
     setItems(list);
     setBalance(nextBalance);
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'RD',location:'status-card.tsx:load',message:'remaining days split from hour pool',data:{remainingDays:nextBalance?.remainingDays??null,remainingHours:nextBalance?.remainingHours??null,displayed:remainingDaysStat(t,nextBalance)},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
   }
 
   useEffect(() => {
@@ -100,7 +121,7 @@ export function LeaveStatusCard({ variant = 'page' }: { variant?: 'page' | 'home
         <div className="leave-status__balance">
           <div>
             <p className="muted">{t('leave.remainingDays')}</p>
-            <p className="leave-status__stat">{balance?.remainingDays ?? balance?.remaining ?? '—'}</p>
+            <p className="leave-status__stat">{remainingDaysStat(t, balance)}</p>
           </div>
           <div>
             <p className="muted">{t('leave.remainingHours')}</p>

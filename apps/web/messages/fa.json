@@ -275,6 +275,7 @@
       "reasonLabel": "دلیل",
       "nonePending": "هیچ مرخصی در انتظار نیست",
       "remainingDays": "روزهای مانده",
+      "remainingDaysSplit": "{days} روز و {hours} ساعت",
       "remainingHours": "ساعات مانده",
       "statusPending": "در انتظار",
       "statusApproved": "تأیید شده",

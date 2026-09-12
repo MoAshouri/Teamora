@@ -275,6 +275,7 @@
       "reasonLabel": "Պատճառ",
       "nonePending": "Սպասող արձակուրդ չկա",
       "remainingDays": "Մնացած օրեր",
+      "remainingDaysSplit": "{days} օր {hours} ժ",
       "remainingHours": "Մնացած ժամեր",
       "statusPending": "Սպասում",
       "statusApproved": "Հաստատված",

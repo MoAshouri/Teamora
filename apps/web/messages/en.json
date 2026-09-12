@@ -275,6 +275,7 @@
       "reasonLabel": "Reason",
       "nonePending": "None pending",
       "remainingDays": "Remaining days",
+      "remainingDaysSplit": "{days}d {hours}h",
       "remainingHours": "Remaining hours",
       "statusPending": "Pending",
       "statusApproved": "Approved",
