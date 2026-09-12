@@ -108,7 +108,12 @@ export function MeetingModal({
   }, [open, dayIso, meeting, timezone, t]);
 
   useEffect(() => {
-    if (!open || !startsAt || !endsAt || attendeeIds.length === 0) {
+    if (!open || !startsAt || !endsAt) {
+      if (!(open && meeting?.conflicts?.length)) setConflict('');
+      return;
+    }
+    const ids = attendeeIds.length > 0 ? attendeeIds : people.map((row) => row.id);
+    if (ids.length === 0) {
       if (!(open && meeting?.conflicts?.length)) setConflict('');
       return;
     }
@@ -121,14 +126,17 @@ export function MeetingModal({
       .get<LeaveRow[]>(`/leaves?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`)
       .then((rows) => {
         const hit = rows.find(
-          (row) => attendeeIds.includes(row.user.id) && overlappingLeave(row, startIso, endIso, timezone),
+          (row) => ids.includes(row.user.id) && overlappingLeave(row, startIso, endIso, timezone),
         );
         setConflict(hit ? t('calendar.leaveConflict', { name: hit.user.fullName }) : meetingConflictLabel(t, meeting?.conflicts));
+        // #region agent log
+        fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'OM',location:'meeting-modal.tsx:conflicts',message:'compose leave check includes open meetings',data:{attendeeCount:attendeeIds.length,checked:ids.length,hit:hit?.user.fullName??null},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
       })
       .catch(() => {
         if (!meeting?.conflicts?.length) setConflict('');
       });
-  }, [open, startsAt, endsAt, attendeeIds, t, timezone, meeting]);
+  }, [open, startsAt, endsAt, attendeeIds, people, t, timezone, meeting]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
