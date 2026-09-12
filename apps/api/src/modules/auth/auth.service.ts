@@ -87,9 +87,9 @@ export class AuthService {
     return candidate;
   }
 
-  signToken(userId: string): string {
+  signToken(userId: string, passwordHash?: string | null) {
     return this.jwt.sign(
-      { sub: userId },
+      { sub: userId, pv: passwordHash ? passwordHash.slice(-12) : 'nopw' },
       {
         secret: process.env.JWT_SECRET ?? 'dev-secret',
         expiresIn: (process.env.JWT_EXPIRES_IN ?? '7d') as `${number}d`,
@@ -142,7 +142,7 @@ export class AuthService {
     try { require('fs').appendFileSync('c:/Users/MEDIA MARK/Desktop/Mohammad Codes/HR Management System/debug-a506d6.log', JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'F',location:'auth.service.ts:registerAdmin',message:'register transaction completed',data:{hasCompany:Boolean(user.ownedCompany?.id)},timestamp:Date.now()})+'\n'); } catch {}
     // #endregion
 
-    const token = this.signToken(user.id);
+    const token = this.signToken(user.id, user.passwordHash);
     await this.sendEmailVerificationCode(user.id, user.email);
     return { token, user: this.toUser(user) };
   }
@@ -170,7 +170,7 @@ export class AuthService {
     if (!ok) throw new UnauthorizedException('Invalid credentials');
 
     return {
-      token: this.signToken(account.id),
+      token: this.signToken(account.id, account.passwordHash),
       user: this.toUser(account),
     };
   }
@@ -210,7 +210,7 @@ export class AuthService {
     await this.assertOtp(`otp:${email}`, input.code);
 
     return {
-      token: this.signToken(account.id),
+      token: this.signToken(account.id, account.passwordHash),
       user: this.toUser(account),
     };
   }
@@ -264,7 +264,7 @@ export class AuthService {
     });
 
     return {
-      token: this.signToken(user.id),
+      token: this.signToken(user.id, user.passwordHash),
       user: this.toUser(user),
     };
   }
@@ -283,7 +283,7 @@ export class AuthService {
       include: { ownedCompany: true, membership: true },
     });
     return {
-      token: this.signToken(user.id),
+      token: this.signToken(user.id, user.passwordHash),
       user: this.toUser(user),
     };
   }
@@ -303,7 +303,7 @@ export class AuthService {
       include: { ownedCompany: true, membership: true },
     });
     return {
-      token: this.signToken(user.id),
+      token: this.signToken(user.id, user.passwordHash),
       user: this.toUser(user),
     };
   }
@@ -340,7 +340,7 @@ export class AuthService {
     }
 
     return {
-      token: this.signToken(user.id),
+      token: this.signToken(user.id, user.passwordHash),
       user: this.toUser(user),
     };
   }

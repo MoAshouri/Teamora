@@ -5,7 +5,7 @@ import { Request } from 'express';
 import { PrismaService } from '../../prisma/prisma.service';
 import { verificationFlags, type AuthUser } from '../../common/auth/auth-user';
 
-type JwtPayload = { sub: string };
+type JwtPayload = { sub: string; pv?: string };
 
 function cookieExtractor(req: Request): string | null {
   if (req?.cookies?.access_token) return req.cookies.access_token as string;
@@ -38,6 +38,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'U',location:'jwt.strategy.ts:validate',message:'missing user jwt',data:{hasSub:Boolean(payload.sub)},timestamp:Date.now()})}).catch(()=>{});
       // #endregion
       throw new UnauthorizedException('User not found');
+    }
+
+    const expected = user.passwordHash ? user.passwordHash.slice(-12) : 'nopw';
+    if (payload.pv !== expected) {
+      // #region agent log
+      fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'PV',location:'jwt.strategy.ts:validate',message:'password stamp mismatch',data:{hasPv:Boolean(payload.pv),match:false},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+      throw new UnauthorizedException('Session expired');
     }
 
     const companyId =
