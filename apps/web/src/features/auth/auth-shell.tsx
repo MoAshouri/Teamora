@@ -52,7 +52,6 @@ function AuthLangs({ locale }: { locale: string }) {
         <Link
           key={l}
           href={`/${l}${rest}${query ? `?${query}` : ''}`}
-          hrefLang={l}
           lang={l}
           aria-current={l === locale ? 'page' : undefined}
         >

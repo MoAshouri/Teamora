@@ -139,6 +139,12 @@ export function todayKeyInZone(timeZone = 'UTC', now = new Date()) {
   return dateKeyInZone(now.toISOString(), timeZone);
 }
 
+/** JS weekday (0 = Sunday … 6 = Saturday) for an instant in a named timezone. */
+export function jsWeekdayInZone(timeZone: string, now = new Date()) {
+  const ymd = todayKeyInZone(timeZone, now);
+  return new Date(`${ymd}T12:00:00.000Z`).getUTCDay();
+}
+
 export function overlapsZonedYmd(startIso: string, endIso: string, ymd: string, timeZone: string) {
   const start = dateKeyInZone(startIso, timeZone);
   const end = dateKeyInZone(endIso, timeZone);

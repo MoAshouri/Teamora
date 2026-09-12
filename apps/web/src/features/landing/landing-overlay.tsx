@@ -32,9 +32,9 @@ function LanguageNav({ locale }: { locale: string }) {
   return (
     <nav className="landing-langs" aria-label="Language">
       {(['en', 'fa', 'hy'] as const).map((l) => (
-        <Link key={l} href={`/${l}`} hrefLang={l} lang={l} aria-current={l === locale ? 'page' : undefined}>
+        <a key={l} href={`/${l}`} lang={l} aria-current={l === locale ? 'page' : undefined}>
           {LOCALE_LABEL[l]}
-        </Link>
+        </a>
       ))}
     </nav>
   );
@@ -72,6 +72,11 @@ export function LandingOverlay({
     const panels = Array.from(el.querySelectorAll<HTMLElement>('.landing-panel'));
     const dots = Array.from(el.querySelectorAll<HTMLElement>('.landing-dots button'));
     const hint = el.querySelector<HTMLElement>('.landing-hint');
+
+    // #region agent log
+    const langSample = el.querySelector('.landing-langs a');
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'LH',location:'landing-overlay.tsx:mount',message:'language switcher markup after hydrate',data:{langHtml:langSample?.outerHTML??null,overlayReady:el.getAttribute('data-ready'),mood:el.getAttribute('data-mood')},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
 
     return progressStore.subscribe((p) => {
       panels.forEach((panel) => {
