@@ -15,7 +15,18 @@ export type CalendarMeeting = {
   startsAt: string;
   endsAt: string;
   attendees?: Array<{ userId?: string; user: { id: string; fullName: string } }>;
+  conflicts?: Array<{ leaveId: string; userId: string; userName: string }>;
 };
+
+export function meetingConflictLabel(
+  t: (key: 'calendar.leaveConflict', values: { name: string }) => string,
+  conflicts?: CalendarMeeting['conflicts'],
+) {
+  if (!conflicts?.length) return '';
+  return t('calendar.leaveConflict', {
+    name: [...new Set(conflicts.map((row) => row.userName))].join(', '),
+  });
+}
 
 type Person = { id: string; fullName: string };
 type LeaveRow = {
@@ -79,6 +90,10 @@ export function MeetingModal({
       setAttendeeIds(
         meeting.attendees?.map((row) => row.user?.id ?? row.userId).filter(Boolean) as string[],
       );
+      setConflict(meetingConflictLabel(t, meeting.conflicts));
+      // #region agent log
+      fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'CF',location:'meeting-modal.tsx:open',message:'existing meeting attached conflicts',data:{id:meeting.id,conflictCount:meeting.conflicts?.length??0},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
     } else {
       setTitle('');
       setLocation('');
@@ -90,11 +105,11 @@ export function MeetingModal({
       .get<{ user: Person }[]>('/users')
       .then((rows) => setPeople(rows.map((row) => row.user)))
       .catch(console.error);
-  }, [open, dayIso, meeting, timezone]);
+  }, [open, dayIso, meeting, timezone, t]);
 
   useEffect(() => {
     if (!open || !startsAt || !endsAt || attendeeIds.length === 0) {
-      setConflict('');
+      if (!(open && meeting?.conflicts?.length)) setConflict('');
       return;
     }
     const startIso = zonedDateTimeLocalToIso(startsAt, timezone);
@@ -107,10 +122,12 @@ export function MeetingModal({
         const hit = rows.find(
           (row) => attendeeIds.includes(row.user.id) && overlappingLeave(row, startIso, endIso),
         );
-        setConflict(hit ? t('calendar.leaveConflict', { name: hit.user.fullName }) : '');
+        setConflict(hit ? t('calendar.leaveConflict', { name: hit.user.fullName }) : meetingConflictLabel(t, meeting?.conflicts));
       })
-      .catch(() => setConflict(''));
-  }, [open, startsAt, endsAt, attendeeIds, t, timezone]);
+      .catch(() => {
+        if (!meeting?.conflicts?.length) setConflict('');
+      });
+  }, [open, startsAt, endsAt, attendeeIds, t, timezone, meeting]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();

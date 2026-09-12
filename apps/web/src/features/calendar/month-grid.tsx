@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { GunbadDay } from '@/features/ui/gunbad-day';
 import { Modal } from '@/features/ui/modal';
-import { MeetingModal, type CalendarMeeting } from './meeting-modal';
+import { MeetingModal, meetingConflictLabel, type CalendarMeeting } from './meeting-modal';
 import { TaskModal, type CalendarTask } from './task-modal';
 import { NoteModal, type CalendarNote } from './note-modal';
 import { LeavePreview, overlayLeaves, leaveOnDay, type CalendarLeave } from './leave-chip';
@@ -124,6 +124,9 @@ export function CalendarMonthGrid() {
     if (policy?.workDays?.length) setWorkDays(policy.workDays);
     if (policy?.timezone) setTimezone(policy.timezone);
     // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'CF',location:'month-grid.tsx:load:conflicts',message:'month events carrying leave conflicts',data:{total:monthEvents.length,withConflicts:monthEvents.filter((row)=>Boolean(row.conflicts?.length)).length,titles:monthEvents.filter((row)=>row.conflicts?.length).map((row)=>row.title)},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    // #region agent log
     const sample = monthEvents[0]?.startsAt ?? monthTasks[0]?.dueAt ?? null;
     fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'AI',location:'month-grid.tsx:load',message:'calendar fetch range padded',data:{timezone:policy?.timezone??'Asia/Tehran',fromYmd:dayFrom,toYmd:dayTo,from:range?.from,to:range?.to,sample,zoned:sample?dateKeyInZone(sample,policy?.timezone??'Asia/Tehran'):null},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
@@ -200,19 +203,25 @@ export function CalendarMonthGrid() {
                       : ''}
                   </button>
                 ))}
-                {dayEvents.map((item) => (
-                  <button
-                    className="cal-month__chip cal-month__chip--meeting"
-                    type="button"
-                    key={item.id}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setDraft({ dayIso: iso, meeting: item });
-                    }}
-                  >
-                    {item.title}
-                  </button>
-                ))}
+                {dayEvents.map((item) => {
+                  const clash = meetingConflictLabel(t, item.conflicts);
+                  return (
+                    <button
+                      className="cal-month__chip cal-month__chip--meeting"
+                      data-conflict={Boolean(clash)}
+                      type="button"
+                      key={item.id}
+                      title={clash || undefined}
+                      aria-label={clash ? `${item.title}. ${clash}` : item.title}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setDraft({ dayIso: iso, meeting: item });
+                      }}
+                    >
+                      {item.title}
+                    </button>
+                  );
+                })}
                 {dayTasks.map((item) => (
                   <button
                     className="cal-month__chip cal-month__chip--task"

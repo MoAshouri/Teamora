@@ -91,6 +91,12 @@
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
+.cal-month__chip--meeting[data-conflict='true'] {
+  color: color-mix(in srgb, var(--ink) 55%, var(--accent));
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 72%, transparent);
+}
+
 .cal-month__chip--task {
   color: var(--muted);
 }
