@@ -57,7 +57,7 @@ function dateFromIso(iso: string) {
 function brickCount(hours: number, yMax: number) {
   if (hours <= 0) return 0;
   const cap = Math.min(12, Math.max(1, Math.round(yMax)));
-  return Math.min(cap, Math.max(1, Math.round(hours)));
+  return Math.min(cap, Math.max(0, Math.round(hours)));
 }
 
 export function BrickWeekChart({
@@ -117,6 +117,11 @@ export function BrickWeekChart({
         const hoursLabel = t('hours.hoursShort', { n: hours.toFixed(1) });
         const label = rest ? `${weekday} · ${t('hours.restDay')}` : `${weekday} ${hoursLabel}`;
         const count = rest ? 0 : brickCount(hours, yMax);
+        // #region agent log
+        if (!rest && hours > 0 && hours < 0.5) {
+          fetch('http://127.0.0.1:7869/ingest/c694b7eb-dcc2-4100-9c19-d4aca06d483e',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a506d6'},body:JSON.stringify({sessionId:'a506d6',runId:'post-fix',hypothesisId:'BC',location:'brick-week-chart.tsx:brickCount',message:'fractional hours do not force a brick',data:{iso,hours,count,yMax},timestamp:Date.now()})}).catch(()=>{});
+        }
+        // #endregion
 
         return (
           <div key={iso} className="brick-week__col" title={label} aria-label={label}>
